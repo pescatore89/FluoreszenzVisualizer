@@ -3,7 +3,7 @@
   <Header>
     <Name>FluoreszenzVisualizer</Name>
     <SavedBy>Erich Styger Local</SavedBy>
-    <ModificationStamp>112</ModificationStamp>
+    <ModificationStamp>113</ModificationStamp>
     <Date>2018-09-30</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -29982,7 +29982,7 @@
     <UserFolderName>LCD</UserFolderName>
     <Comment lines_count="0" />
     <Template />
-    <BeanVersion>01.043</BeanVersion>
+    <BeanVersion>01.054</BeanVersion>
     <LightErrorsIgnored>false</LightErrorsIgnored>
     <Properties>
       <ItemState>
@@ -30084,6 +30084,44 @@
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
         <Index>1</Index>
         <Value>false</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>SettingsGroup</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Expanded>true</Expanded>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>ContrastA</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>112</Value>
+        <Base>HEX</Base>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>ContrastB</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>112</Value>
+        <Base>HEX</Base>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>ContrastC</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>112</Value>
+        <Base>HEX</Base>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>ContrastMaster</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>15</Value>
+        <Base>HEX</Base>
       </ItemState>
       <ItemState>
         <ItemSymbol>HardwareGroup</ItemSymbol>
@@ -31986,44 +32024,6 @@
         <Value>MCUC1</Value>
       </ItemState>
       <ItemState>
-        <ItemSymbol>SettingsGroup</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>true</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ContrastA</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>112</Value>
-        <Base>HEX</Base>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ContrastB</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>112</Value>
-        <Base>HEX</Base>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ContrastC</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>112</Value>
-        <Base>HEX</Base>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ContrastMaster</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>15</Value>
-        <Base>HEX</Base>
-      </ItemState>
-      <ItemState>
         <ItemSymbol>ShellGroup</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
@@ -32299,17 +32299,6 @@
         <UsrMethodName>GetPixel</UsrMethodName>
       </ItemState>
       <ItemState>
-        <ItemSymbol>Init</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <Value>true</Value>
-        <LastSelection>true</LastSelection>
-        <LastUserSel>yes</LastUserSel>
-        <UsrMethodName>Init</UsrMethodName>
-      </ItemState>
-      <ItemState>
         <ItemSymbol>DisplayOnOff</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
@@ -32363,6 +32352,17 @@
         <LastSelection>true</LastSelection>
         <LastUserSel>yes</LastUserSel>
         <UsrMethodName>Deinit</UsrMethodName>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>Init</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Index>0</Index>
+        <Value>true</Value>
+        <LastSelection>true</LastSelection>
+        <LastUserSel>yes</LastUserSel>
+        <UsrMethodName>Init</UsrMethodName>
       </ItemState>
     </Methods>
     <Events>

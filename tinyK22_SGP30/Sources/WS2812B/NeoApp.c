@@ -757,6 +757,8 @@ static void NeoTask(void* pvParameters) {
 #if PL_CONFIG_HAS_MMA8451
 	int16_t xmg, ymg, zmg;
 #endif
+
+	NEO_SetAllPixelColor(0xff0000);
 	// do something on the LED Matrix
 	for (;;) {
 		vTaskDelay(pdMS_TO_TICKS(100));

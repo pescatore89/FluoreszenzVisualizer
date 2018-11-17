@@ -313,6 +313,7 @@ uint8_t NEO_SetAllPixelColor(uint32_t rgb) {
 }
 
 uint8_t NEO_TransferPixels(void) {
+	int m = 13;
   return PIXDMA_Transfer((uint32_t)&transmitBuf[0], sizeof(transmitBuf));
 }
 

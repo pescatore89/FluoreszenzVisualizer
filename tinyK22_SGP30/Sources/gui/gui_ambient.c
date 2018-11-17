@@ -13,6 +13,7 @@
 #include "XF1.h"
 #include "gui.h"
 
+
 static lv_obj_t *win;
 static lv_obj_t *chart_label;
 static lv_obj_t *chart;

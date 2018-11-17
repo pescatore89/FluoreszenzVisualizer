@@ -45,6 +45,9 @@
 #if PL_CONFIG_HAS_SSD1351
   #include "LCD1.h"
 #endif
+#if PL_CONFIG_HAS_NEO_PIXEL
+  #include "WS2812B\NeoApp.h"
+#endif
 
 static const CLS1_ParseCommandCallback CmdParserTable[] =
 {
@@ -77,7 +80,10 @@ static const CLS1_ParseCommandCallback CmdParserTable[] =
   SGP30_ParseCommand,
 #endif
 #if PL_CONFIG_HAS_SSD1351
- // LCD1_ParseCommand,
+  LCD1_ParseCommand,
+#endif
+#if PL_CONFIG_HAS_NEO_PIXEL && NEOA_CONFIG_PARSE_COMMAND_ENABLED
+  NEOA_ParseCommand,
 #endif
   NULL /* sentinel */
 };

@@ -69,6 +69,8 @@ uint8_t NEO_DimmPercentPixel(NEO_PixelIdxT lane, NEO_PixelIdxT pos, uint8_t perc
 
 uint8_t NEO_TransferPixels(void);
 
+uint8_t NEO_DislpayHolo(uint8_t polle);
+
 uint8_t NEO_GammaCorrect8(uint8_t color);
 
 uint32_t NEO_GammaCorrect24(uint32_t rgb);

@@ -67,6 +67,7 @@ void APP_Run(void) {
   NEOA_Init();
 #endif
   SENSOR_Init();
+  int ups = 19;
   if (xTaskCreate(
         AppTask,  /* pointer to the task */
         "App", /* task name for kernel awareness debugging */

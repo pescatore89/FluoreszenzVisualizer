@@ -12,7 +12,7 @@
 #include "GDisp1.h"
 #include "PixelDMA.h"
 #include "LEDM1.h"
-#include "testMatrix.h"
+#include "..\PollenHolo\testMatrix.h"
 
 #define VAL0          0  /* 0 Bit: 0.396 us (need: 0.4 us low) */
 #define VAL1          1  /* 1 Bit: 0.792 us (need: 0.8 us high */

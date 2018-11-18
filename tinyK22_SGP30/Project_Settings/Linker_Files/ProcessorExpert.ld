@@ -4,13 +4,13 @@
 /*##                                   */
 /*##     Filename  : ProcessorExpert.ld */
 /*##                                   */
-/*##     Project   : FluoreszenzVisualizer */
+/*##     Project   : tinyK22_SGP30     */
 /*##                                   */
 /*##     Processor : MK22FN512VLH12    */
 /*##                                   */
 /*##     Compiler  : GNU C Compiler    */
 /*##                                   */
-/*##     Date/Time : 2018-11-15, 21:52, # CodeGen: 0 */
+/*##     Date/Time : 2018-11-18, 02:03, # CodeGen: 10 */
 /*##                                   */
 /*##     Abstract  :                   */
 /*##                                   */

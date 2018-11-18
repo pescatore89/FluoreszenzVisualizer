@@ -10,7 +10,7 @@
 **         This is user's event module.
 **         Put your event handler code here.
 **     Contents    :
-**         Cpu_OnNMI - void Cpu_OnNMI(void);
+**         Inhr2_OnNMI - void Inhr2_OnNMI(void);
 **
 ** ###################################################################*/
 /*!
@@ -46,9 +46,9 @@ extern "C" {
 
 /*
 ** ===================================================================
-**     Event       :  Cpu_OnNMI (module Events)
+**     Event       :  Inhr2_OnNMI (module Events)
 **
-**     Component   :  Cpu [MK22FN512DC12]
+**     Component   :  Inhr2 [MK22FN512DC12]
 */
 /*!
 **     @brief
@@ -57,7 +57,7 @@ extern "C" {
 **         interrupt] property is set to 'Enabled'.
 */
 /* ===================================================================*/
-void Cpu_OnNMI(void)
+void Inhr2_OnNMI(void)
 {
   /* Write your code here ... */
 }
@@ -397,6 +397,24 @@ void LCD1_OnGiveBus(void)
 #if PL_CONFIG_HAS_SPI
   SPI_OnSPIDeactivate(SPI_BAUD_INDEX_SSD1351);
 #endif
+}
+
+/*
+** ===================================================================
+**     Event       :  Cpu_OnNMI (module Events)
+**
+**     Component   :  Cpu [MK22FN512LH12]
+*/
+/*!
+**     @brief
+**         This event is called when the Non maskable interrupt had
+**         occurred. This event is automatically enabled when the [NMI
+**         interrupt] property is set to 'Enabled'.
+*/
+/* ===================================================================*/
+void Cpu_OnNMI(void)
+{
+  /* Write your code here ... */
 }
 
 /* END Events */

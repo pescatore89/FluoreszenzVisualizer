@@ -11,5 +11,5 @@
 
 
 void GUI_Config_Create(void);
-
+void GUI_MenuCreate(void);
 #endif /* SOURCES_GUI_GUI_CONFIG_H_ */

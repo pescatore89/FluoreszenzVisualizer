@@ -164,6 +164,7 @@ void GUI_MainMenuCreate(void) {
 #endif
 #if PL_CONFIG_HAS_NEO_PIXEL
   obj = lv_list_add(list1, SYMBOL_CLOSE, "NeoPixel", Btn_NeoPixel_click_action);
+  lv_group_focus_freeze(GUI_GetGroup(), false);
   GUI_AddObjToGroup(obj);
 #endif
 }

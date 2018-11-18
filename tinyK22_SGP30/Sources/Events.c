@@ -179,17 +179,16 @@ void KEY1_OnKeyPressed(uint8_t keys) {
 		buttonInfo = LV_BUTTON_SW1 | LV_MASK_PRESSED;
 		RNG1_Put(buttonInfo);
 	}
-
 	else if (keys & 4) {
-		buttonInfo = LV_BUTTON_SW1 | LV_MASK_PRESSED;
+		buttonInfo = LV_BUTTON_SW2 | LV_MASK_PRESSED;
 		RNG1_Put(buttonInfo);
 	}
 	else if (keys & 8) {
-		buttonInfo = LV_BUTTON_SW1 | LV_MASK_PRESSED;
+		buttonInfo = LV_BUTTON_SW3 | LV_MASK_PRESSED;
 		RNG1_Put(buttonInfo);
 	}
 	else if (keys & 16) {
-		buttonInfo = LV_BUTTON_SW1 | LV_MASK_PRESSED;
+		buttonInfo = LV_BUTTON_SW4 | LV_MASK_PRESSED;
 		RNG1_Put(buttonInfo);
 	}
 }

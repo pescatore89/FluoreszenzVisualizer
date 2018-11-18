@@ -19,6 +19,10 @@
 
 #define LV_BUTTON_SW0  (1)
 #define LV_BUTTON_SW1  (2)
+#define LV_BUTTON_SW2  (3)
+#define LV_BUTTON_SW3  (4)
+#define LV_BUTTON_SW4  (5)
+
 
 
 lv_indev_t * LV_GetInputDevice(void);

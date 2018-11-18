@@ -357,6 +357,20 @@ uint8_t NEO_DislpayHolo(uint8_t polle) {
 			}
 		}
 		break;
+
+	case 3:
+		for (int i = 0; i < NEOC_NOF_LEDS_IN_LANE; i++) {
+			temp1 = ((p3[i] >> 16) & 0xff);
+			temp2 = ((p3[i] >> 8) & 0xff);
+			temp3 = (p3[i]);
+			uint32_t colorValue = (temp1 << 16) + (temp2 << 8) + (temp3);
+			res = NEO_SetPixelColor(lane, i, colorValue);
+			if (res != ERR_OK) {
+				return res;
+			}
+		}
+		break;
+
 	}
 	return ERR_OK;
 

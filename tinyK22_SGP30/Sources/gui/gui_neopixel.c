@@ -49,21 +49,21 @@ static lv_res_t Btn_play(struct _lv_obj_t *obj) {
 #if N_OF_POLLS_HOLO >= 1
 	else if (co.y1 == OFFSET_DISTANCE_BUTTON_ZERO + DISTANCE_BTW_BUTTON) {// Button Nr2
 		NEO_ClearAllPixel();
-		NEO_DislpayHolo(1);
+		NEO_DislpayHolo(SWITZERLAND);
 		NEO_TransferPixels();
 	}
 #endif
 #if N_OF_POLLS_HOLO >= 2
 	else if (co.y1 == OFFSET_DISTANCE_BUTTON_ZERO+ (DISTANCE_BTW_BUTTON *2)) {// Button Nr3
 		NEO_ClearAllPixel();
-		NEO_DislpayHolo(2);
+		NEO_DislpayHolo(CIRCLE);
 		NEO_TransferPixels();
 	}
 #endif
 #if N_OF_POLLS_HOLO >= 3
 	else if (co.y1 == OFFSET_DISTANCE_BUTTON_ZERO+ (DISTANCE_BTW_BUTTON *3)) {// Button Nr4
 		NEO_ClearAllPixel();
-		NEO_DislpayHolo(3);
+		NEO_DislpayHolo(SMILEY);
 		NEO_TransferPixels();
 	}
 #endif
@@ -80,9 +80,9 @@ static lv_res_t Btn_play(struct _lv_obj_t *obj) {
 
 void GUI_NEO_Create(void) {
 	lv_obj_t *closeBtn;
-
+	/* create window */
 	win = lv_win_create(lv_scr_act(), NULL);
-	lv_win_set_title(win, "HOLO");
+	lv_win_set_title(win, "Have some fun--NOT");
 	closeBtn = lv_win_add_btn(win, SYMBOL_CLOSE, win_close_action);
 	GUI_AddObjToGroup(closeBtn);
 	lv_group_focus_obj(closeBtn);
@@ -90,29 +90,21 @@ void GUI_NEO_Create(void) {
 	/* Make the window content responsive */
 	lv_win_set_layout(win, LV_LAYOUT_PRETTY);
 
-	lv_obj_t *gui_win;
-
-	/* create window */
-	gui_win = lv_win_create(lv_scr_act(), NULL);
-	lv_win_set_title(gui_win, "Play Hologram");
-
-	/* Make the window content responsive */
-	lv_win_set_layout(gui_win, LV_LAYOUT_PRETTY); /* this will arrange the buttons */
 
 	/* create list of objects */
 	lv_obj_t *list1;
 	lv_obj_t *obj;
 
-	list1 = lv_list_create(gui_win, NULL);
+	list1 = lv_list_create(win, NULL);
 	/*Add list elements*/
 
 	obj = lv_list_add(list1, SYMBOL_CLOSE, "clear", Btn_play);
 	GUI_AddObjToGroup(obj);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "Buche", Btn_play);
+	obj = lv_list_add(list1, SYMBOL_CLOSE, "SWITZERLAND", Btn_play);
 	GUI_AddObjToGroup(obj);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "Erle", Btn_play);
+	obj = lv_list_add(list1, SYMBOL_CLOSE, "CIRCLE", Btn_play);
 	GUI_AddObjToGroup(obj);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "PolleXy", Btn_play);
+	obj = lv_list_add(list1, SYMBOL_CLOSE, "SMILEY", Btn_play);
 	GUI_AddObjToGroup(obj);
 
 

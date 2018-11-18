@@ -29,7 +29,7 @@ static lv_res_t slider_action(lv_obj_t * slider) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t win_close_action(lv_obj_t *btn) {
-	// lv_group_focus_freeze(GUI_GetGroup(), false);
+	//lv_group_focus_freeze(GUI_GetGroup(), false);
 	lv_obj_del(win);
 	win = NULL;
 	return LV_RES_INV;

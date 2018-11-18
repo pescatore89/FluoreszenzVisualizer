@@ -24,6 +24,7 @@
 #define PL_CONFIG_HAS_SD_CARD     (1 && PL_CONFIG_HAS_SPI)
 #define PL_CONFIG_HAS_NEO_PIXEL   (1) /* WS2812B */
 #define PL_CONFIG_HAS_AMG8833     (0) /* thermal sensor */
+#define PL_CONFIG_HAS_CONFIG_MENU (1) /* Einstellungsmenu */
 
 /* NEO Applications, only one can be active! */
 #define PL_CONFIG_HAS_NEO_SHADOW_BOX    (0 & PL_CONFIG_HAS_NEO_PIXEL)

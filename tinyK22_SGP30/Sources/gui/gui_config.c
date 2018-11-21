@@ -18,8 +18,6 @@
 static lv_obj_t *win;
 static bool TSL1_Flag = TRUE;
 
-
-
 /* Called when a new value id set on the slider */
 static lv_res_t slider_action(lv_obj_t * slider) {
 //    printf("New slider value: %d\n", lv_slider_get_value(slider));
@@ -46,48 +44,23 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
  */
 static lv_res_t Btn_Ambient_click_enable_action(struct _lv_obj_t *obj) {
 
-	uint8_t buf[32];
-	uint32_t lux;
-
-	uint16_t broadband, ir;
-
-	if (TSL1_ReadRawDataFull(&broadband) == ERR_OK) {
-
-		if (broadband != 0x00) {
-			TSL1_Disable();
-			lv_btn_set_state(obj, LV_BTN_STATE_REL);
-			NEO_ClearAllPixel();
-			NEO_SetPixelColor(0, 16, 0x200000);
-			NEO_TransferPixels();
-		} else {
-			TSL1_Enable();
-			NEO_ClearAllPixel();
-			lv_btn_set_state(obj, LV_BTN_STATE_PR);
-			NEO_SetPixelColor(0, 16, 0x002000);
-			NEO_TransferPixels();
-		}
-
-		return LV_RES_OK;
-
+	if (TSL1_Flag) {
+		TSL1_Disable();
+		NEO_ClearAllPixel();
+		NEO_SetPixelColor(0, 16, 0x200000);
+		NEO_TransferPixels();
+		TSL1_Flag = FALSE;
 	} else {
-		broadband = 0;
-		UTIL1_strcpy(buf, sizeof(buf), (unsigned char*) "ERROR\r\n");
-		return LV_RES_INV;
-	}
 
+		TSL1_Enable();
+		NEO_ClearAllPixel();
+		NEO_SetPixelColor(0, 16, 0x002000);
+		NEO_TransferPixels();
+		TSL1_Flag = TRUE;
+	}
+	return LV_RES_OK;
 }
 #endif
-
-
-
-static lv_res_t cb_release_action(lv_obj_t * cb)
-{
-    /*A check box is clicked*/
-   uint8_t blub = 13;
-
-    return LV_RES_OK;
-}
-
 
 static lv_res_t btn_click_action(lv_obj_t * btn) {
 	uint8_t id = lv_obj_get_free_num(btn);
@@ -96,6 +69,7 @@ static lv_res_t btn_click_action(lv_obj_t * btn) {
 
 	lv_obj_del(win);
 	win = NULL;
+	return LV_RES_INV;
 
 	return LV_RES_OK; /*Return OK if the button is not deleted*/
 }
@@ -124,42 +98,11 @@ void GUI_Config_Create(void) {
 	obj = lv_list_add(list1, SYMBOL_CLOSE, "Ambient ON/OFF",
 			Btn_Ambient_click_enable_action);
 	GUI_AddObjToGroup(obj);
-	uint16_t broadband, ir;
-	if (TSL1_ReadRawDataFull(&broadband) == ERR_OK) {			// Check if light sensor is enabled
-		if (broadband != 0x00) {
-			lv_btn_set_state(obj, LV_BTN_STATE_PR);
-			NEO_ClearAllPixel();
-			NEO_SetPixelColor(0, 16, 0x002000);
-			NEO_TransferPixels();
-		}
-		else {
-			lv_btn_set_state(obj, LV_BTN_STATE_REL);
-			NEO_ClearAllPixel();
-			NEO_SetPixelColor(0, 16, 0x200000);
-			NEO_TransferPixels();
-		}
-	}
 #endif
 
-
-
-
-
-
-
-
-
-/*
-    LV_BTN_STATE_REL,
-    LV_BTN_STATE_PR,
-    LV_BTN_STATE_TGL_REL,
-    LV_BTN_STATE_TGL_PR,
-    LV_BTN_STATE_INA,
-    LV_BTN_STATE_NUM,
-
-    */
-
-
+	NEO_ClearAllPixel();
+	NEO_SetPixelColor(0, 16, 0x002000);
+	NEO_TransferPixels();
 
 }
 #endif /* PL_CONFIG_HAS_NEO_PIXEL */

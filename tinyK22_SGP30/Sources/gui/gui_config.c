@@ -133,7 +133,7 @@ void GUI_Config_Create(void) {
 			NEO_TransferPixels();
 		}
 		else {
-			lv_btn_set_state(obj, LV_BTN_STATE_REL);
+			lv_btn_set_state(obj, LV_BTN_STATE_REL);			// light sensor not enabled
 			NEO_ClearAllPixel();
 			NEO_SetPixelColor(0, 16, 0x200000);
 			NEO_TransferPixels();

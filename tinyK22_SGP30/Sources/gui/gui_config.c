@@ -14,6 +14,7 @@
 #include "gui_mainmenu.h"
 #include "gui.h"
 #include "TSL1.h"
+#include "..\WS2812B\NeoConfig.h"
 
 static lv_obj_t *win;
 static bool TSL1_Flag = TRUE;
@@ -80,6 +81,40 @@ static lv_res_t Btn_Ambient_click_enable_action(struct _lv_obj_t *obj) {
 
 
 
+/**
+ * Called when the Ambient button is clicked
+ * @param btn pointer to the close button
+ * @return LV_ACTION_RES_INV because the window is deleted in the function
+ */
+static lv_res_t Btn_Power_click_enable_action(struct _lv_obj_t *obj) {
+
+
+
+#if PL_CONFIG_POWER_ENABLED == 1
+
+	NEO_ClearAllPixel();
+	NEO_SetPixelColor(0, 0, 0x002000);
+	NEO_TransferPixels();
+
+#elif PL_CONFIG_POWER_ENABLED == 2
+
+	NEO_ClearAllPixel();
+	NEO_SetPixelColor(0, 0, 0x002000);
+	NEO_SetPixelColor(0, 1, 0x002000);
+	NEO_TransferPixels();
+
+#elif PL_CONFIG_POWER_ENABLED == 3
+
+	NEO_ClearAllPixel();
+	NEO_SetPixelColor(0, 0, 0x002000);
+	NEO_SetPixelColor(0, 1, 0x002000);
+	NEO_SetPixelColor(0, 2, 0x002000);
+	NEO_TransferPixels();
+
+#endif
+}
+
+
 static lv_res_t cb_release_action(lv_obj_t * cb)
 {
     /*A check box is clicked*/
@@ -141,11 +176,9 @@ void GUI_Config_Create(void) {
 	}
 #endif
 
-
-
-
-
-
+	obj = lv_list_add(list1, SYMBOL_POWER, "POWER",
+			Btn_Power_click_enable_action);
+	GUI_AddObjToGroup(obj);
 
 
 

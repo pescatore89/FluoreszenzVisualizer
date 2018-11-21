@@ -1,24 +1,22 @@
 /*
- * gui_config.c
+ * gui_Modus.c
  *
- *  Created on: 18.11.2018
+ *  Created on: 19.11.2018
  *      Author: Pescatore
  */
 
 #include "Platform.h"
 #if PL_CONFIG_HAS_CONFIG_MENU
-#include "gui_config.h"
+#include "gui_Modus.h"
 #include "lvgl/lvgl.h"
 #include "gui.h"
 #include "..\WS2812B\NeoPixel.h"
 #include "gui_mainmenu.h"
 #include "gui.h"
-#include "TSL1.h"
+#include "gui_single.h"
 
 static lv_obj_t *win;
 static bool TSL1_Flag = TRUE;
-
-
 
 /* Called when a new value id set on the slider */
 static lv_res_t slider_action(lv_obj_t * slider) {
@@ -44,50 +42,28 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
  * @param btn pointer to the close button
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
-static lv_res_t Btn_Ambient_click_enable_action(struct _lv_obj_t *obj) {
+static lv_res_t Btn_Single_click_enable_action(struct _lv_obj_t *obj) {
 
-	uint8_t buf[32];
-	uint32_t lux;
 
-	uint16_t broadband, ir;
+	GUI_SINGLE_Create();
 
-	if (TSL1_ReadRawDataFull(&broadband) == ERR_OK) {
-
-		if (broadband != 0x00) {
-			TSL1_Disable();
-			lv_btn_set_state(obj, LV_BTN_STATE_REL);
-			NEO_ClearAllPixel();
-			NEO_SetPixelColor(0, 16, 0x200000);
-			NEO_TransferPixels();
-		} else {
-			TSL1_Enable();
-			NEO_ClearAllPixel();
-			lv_btn_set_state(obj, LV_BTN_STATE_PR);
-			NEO_SetPixelColor(0, 16, 0x002000);
-			NEO_TransferPixels();
-		}
-
-		return LV_RES_OK;
-
-	} else {
-		broadband = 0;
-		UTIL1_strcpy(buf, sizeof(buf), (unsigned char*) "ERROR\r\n");
-		return LV_RES_INV;
-	}
+	return LV_RES_OK;
 
 }
 #endif
 
+static lv_res_t Btn_All_click_enable_action(struct _lv_obj_t *obj) {
 
+	return LV_RES_OK;
 
-static lv_res_t cb_release_action(lv_obj_t * cb)
-{
-    /*A check box is clicked*/
-   uint8_t blub = 13;
-
-    return LV_RES_OK;
 }
 
+static lv_res_t cb_release_action(lv_obj_t * cb) {
+	/*A check box is clicked*/
+	uint8_t blub = 13;
+
+	return LV_RES_OK;
+}
 
 static lv_res_t btn_click_action(lv_obj_t * btn) {
 	uint8_t id = lv_obj_get_free_num(btn);
@@ -100,12 +76,12 @@ static lv_res_t btn_click_action(lv_obj_t * btn) {
 	return LV_RES_OK; /*Return OK if the button is not deleted*/
 }
 
-void GUI_Config_Create(void) {
-
+void GUI_MODUS_Create(void) {
+	lv_group_focus_freeze(GUI_GetGroup(), false);
 	lv_obj_t *closeBtn;
 	/* create window */
 	win = lv_win_create(lv_scr_act(), NULL);
-	lv_win_set_title(win, "Einstellungen");
+	lv_win_set_title(win, "Play Mode");
 	closeBtn = lv_win_add_btn(win, SYMBOL_CLOSE, win_close_action);
 	GUI_AddObjToGroup(closeBtn);
 	lv_group_focus_obj(closeBtn);
@@ -120,46 +96,16 @@ void GUI_Config_Create(void) {
 
 	list1 = lv_list_create(win, NULL);
 	/*Add list elements*/
-#if PL_CONFIG_HAS_TSL2561
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "Ambient ON/OFF",
-			Btn_Ambient_click_enable_action);
+
+	obj = lv_list_add(list1, SYMBOL_PLAY, "Einzeln",
+			Btn_Single_click_enable_action);
 	GUI_AddObjToGroup(obj);
-	uint16_t broadband, ir;
-	if (TSL1_ReadRawDataFull(&broadband) == ERR_OK) {			// Check if light sensor is enabled
-		if (broadband != 0x00) {
-			lv_btn_set_state(obj, LV_BTN_STATE_PR);
-			NEO_ClearAllPixel();
-			NEO_SetPixelColor(0, 16, 0x002000);
-			NEO_TransferPixels();
-		}
-		else {
-			lv_btn_set_state(obj, LV_BTN_STATE_REL);
-			NEO_ClearAllPixel();
-			NEO_SetPixelColor(0, 16, 0x200000);
-			NEO_TransferPixels();
-		}
-	}
-#endif
 
+	obj = lv_list_add(list1, SYMBOL_PLAY, "Alle", Btn_All_click_enable_action);
+	GUI_AddObjToGroup(obj);
 
-
-
-
-
-
-
-
-/*
-    LV_BTN_STATE_REL,
-    LV_BTN_STATE_PR,
-    LV_BTN_STATE_TGL_REL,
-    LV_BTN_STATE_TGL_PR,
-    LV_BTN_STATE_INA,
-    LV_BTN_STATE_NUM,
-
-    */
-
-
+	NEO_ClearAllPixel();
+	NEO_TransferPixels();
 
 }
 #endif /* PL_CONFIG_HAS_NEO_PIXEL */

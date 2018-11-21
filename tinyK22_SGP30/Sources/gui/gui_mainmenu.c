@@ -11,26 +11,28 @@
 #include "lvgl/lvgl.h" /* interface to GUI library */
 #include "lv.h"
 #if PL_CONFIG_HAS_MMA8451
-  #include "gui_accel.h"
+#include "gui_accel.h"
 #endif
 #if PL_CONFIG_HAS_SGP30
-  #include "gui_air.h"
+#include "gui_air.h"
 #endif
 #if PL_CONFIG_HAS_TSL2561
-  #include "gui_ambient.h"
+#include "gui_ambient.h"
 #endif
 #if PL_CONFIG_HAS_RTC_DS3231
-  #include "gui_clock.h"
+#include "gui_clock.h"
 #endif
 #if PL_CONFIG_HAS_SHT31
-  #include "gui_tempHum.h"
+#include "gui_tempHum.h"
 #endif
 #if PL_CONFIG_HAS_NEO_PIXEL
-  #include "gui_neopixel.h"
+#include "gui_neopixel.h"
 #endif
 #if PL_CONFIG_HAS_CONFIG_MENU
-  #include "gui_config.h"
+#include "gui_config.h"
 #endif
+
+#include "gui_Modus.h"
 
 #if PL_CONFIG_HAS_MMA8451
 /**
@@ -51,8 +53,8 @@ static lv_res_t Btn_Accel_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_Air_click_action(struct _lv_obj_t *obj) {
-  GUI_AIR_Create();
-  return LV_RES_OK;
+	GUI_AIR_Create();
+	return LV_RES_OK;
 }
 #endif
 
@@ -63,10 +65,22 @@ static lv_res_t Btn_Air_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_Ambient_click_action(struct _lv_obj_t *obj) {
-  GUI_AMBIENT_Create();
-  return LV_RES_OK;
+
+	GUI_AMBIENT_Create();
+	return LV_RES_OK;
 }
 #endif
+/**
+ * Called when the Modus button is clicked
+ * @param btn pointer to the close button
+ * @return LV_ACTION_RES_INV because the window is deleted in the function
+ */
+
+static lv_res_t Btn_Modus_click_action(struct _lv_obj_t *obj) {
+	lv_group_focus_freeze(GUI_GetGroup(), true);
+	GUI_MODUS_Create();
+	return LV_RES_OK;
+}
 
 #if PL_CONFIG_HAS_RTC_DS3231
 /**
@@ -75,8 +89,8 @@ static lv_res_t Btn_Ambient_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_Clock_click_action(struct _lv_obj_t *obj) {
-  GUI_CLOCK_Create();
-  return LV_RES_OK;
+	GUI_CLOCK_Create();
+	return LV_RES_OK;
 }
 #endif
 
@@ -87,8 +101,8 @@ static lv_res_t Btn_Clock_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_TempHum_click_action(struct _lv_obj_t *obj) {
-  GUI_TEMPHUM_Create();
-  return LV_RES_OK;
+	GUI_TEMPHUM_Create();
+	return LV_RES_OK;
 }
 #endif
 
@@ -99,14 +113,12 @@ static lv_res_t Btn_TempHum_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_NeoPixel_click_action(struct _lv_obj_t *obj) {
-  GUI_NEO_Create();
-  return LV_RES_OK;
+
+	GUI_NEO_Create();
+	return LV_RES_OK;
 }
 
 #endif
-
-
-
 
 #if PL_CONFIG_HAS_CONFIG_MENU
 /**
@@ -115,57 +127,58 @@ static lv_res_t Btn_NeoPixel_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_Config_click_action(struct _lv_obj_t *obj) {
-  GUI_Config_Create();
-  return LV_RES_OK;
+	GUI_Config_Create();
+	return LV_RES_OK;
 }
 
 #endif
 
 void GUI_MainMenuCreate(void) {
-  lv_obj_t *gui_win;
+	lv_obj_t *gui_win;
 
-  /* create window */
-  gui_win = lv_win_create(lv_scr_act(), NULL);
-  lv_win_set_title(gui_win, "Main Menu");
+	/* create window */
+	gui_win = lv_win_create(lv_scr_act(), NULL);
+	lv_win_set_title(gui_win, "Main Menu");
 
-  /* Make the window content responsive */
-  lv_win_set_layout(gui_win, LV_LAYOUT_PRETTY); /* this will arrange the buttons */
+	/* Make the window content responsive */
+	lv_win_set_layout(gui_win, LV_LAYOUT_PRETTY); /* this will arrange the buttons */
 
-  /* create list of objects */
-  lv_obj_t *list1;
-  lv_obj_t *obj;
-
-  list1 = lv_list_create(gui_win, NULL);
-  /*Add list elements*/
+	/* create list of objects */
+	lv_obj_t *list1;
+	lv_obj_t *obj;
+	list1 = lv_list_create(gui_win, NULL);
+	/*Add list elements*/
 #if PL_CONFIG_HAS_MMA8451
-  obj = lv_list_add(list1, SYMBOL_FILE, "Accel", Btn_Accel_click_action);
-  GUI_AddObjToGroup(obj);
+	obj = lv_list_add(list1, SYMBOL_FILE, "Accel", Btn_Accel_click_action);
+	GUI_AddObjToGroup(obj);
 #endif
 #if PL_CONFIG_HAS_SGP30
-  obj = lv_list_add(list1, SYMBOL_DIRECTORY, "Air", Btn_Air_click_action);
-  GUI_AddObjToGroup(obj);
-#endif
-#if PL_CONFIG_HAS_TSL2561
-  obj = lv_list_add(list1, SYMBOL_CLOSE, "Ambient", Btn_Ambient_click_action);
-  GUI_AddObjToGroup(obj);
-#endif
-#if PL_CONFIG_HAS_CONFIG_MENU
-  obj = lv_list_add(list1, SYMBOL_CLOSE, "Einstellungen", Btn_Config_click_action);
-  GUI_AddObjToGroup(obj);
+	obj = lv_list_add(list1, SYMBOL_DIRECTORY, "Air", Btn_Air_click_action);
+	GUI_AddObjToGroup(obj);
 #endif
 
+#if PL_CONFIG_HAS_CONFIG_MENU
+	obj = lv_list_add(list1, SYMBOL_SETTINGS, "Einstellungen",
+			Btn_Config_click_action);
+	GUI_AddObjToGroup(obj);
+#endif
+
+	obj = lv_list_add(list1, SYMBOL_LIST, "Modus", Btn_Modus_click_action);
+	GUI_AddObjToGroup(obj);
+
 #if PL_CONFIG_HAS_RTC_DS3231
-  obj = lv_list_add(list1, SYMBOL_CLOSE, "Clock", Btn_Clock_click_action);
-  GUI_AddObjToGroup(obj);
+	obj = lv_list_add(list1, SYMBOL_CLOSE, "Clock", Btn_Clock_click_action);
+	GUI_AddObjToGroup(obj);
 #endif
 #if PL_CONFIG_HAS_SHT31
-  obj = lv_list_add(list1, SYMBOL_CLOSE, "Temp/Hum", Btn_TempHum_click_action);
-  GUI_AddObjToGroup(obj);
+	obj = lv_list_add(list1, SYMBOL_CLOSE, "Temp/Hum", Btn_TempHum_click_action);
+	GUI_AddObjToGroup(obj);
 #endif
 #if PL_CONFIG_HAS_NEO_PIXEL
-  obj = lv_list_add(list1, SYMBOL_CLOSE, "NeoPixel", Btn_NeoPixel_click_action);
-  lv_group_focus_freeze(GUI_GetGroup(), false);
-  GUI_AddObjToGroup(obj);
+	obj = lv_list_add(list1, SYMBOL_PLAY, "NeoPixel",
+			Btn_NeoPixel_click_action);
+	lv_group_focus_freeze(GUI_GetGroup(), false);
+	GUI_AddObjToGroup(obj);
 #endif
 }
 

@@ -100,11 +100,11 @@ void GUI_NEO_Create(void) {
 
 	obj = lv_list_add(list1, SYMBOL_CLOSE, "clear", Btn_play);
 	GUI_AddObjToGroup(obj);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "SWITZERLAND", Btn_play);
+	obj = lv_list_add(list1, SYMBOL_PLAY, "SWITZERLAND", Btn_play);
 	GUI_AddObjToGroup(obj);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "CIRCLE", Btn_play);
+	obj = lv_list_add(list1, SYMBOL_PLAY, "CIRCLE", Btn_play);
 	GUI_AddObjToGroup(obj);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "SMILEY", Btn_play);
+	obj = lv_list_add(list1, SYMBOL_PLAY, "SMILEY", Btn_play);
 	GUI_AddObjToGroup(obj);
 
 

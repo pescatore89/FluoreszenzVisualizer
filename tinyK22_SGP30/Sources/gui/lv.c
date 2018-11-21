@@ -166,10 +166,10 @@ static bool keyboard_read(lv_indev_data_t *data) {
 
 		/* Switch 3 (UP) */
 	} else if (keyData == (LV_BUTTON_SW2 | LV_MASK_PRESSED)) {
-		data->key = LV_GROUP_KEY_NEXT;
+		data->key = LV_GROUP_KEY_ESC ;
 		data->state = LV_INDEV_STATE_PR;
 	} else if (keyData == (LV_BUTTON_SW2 | LV_MASK_RELEASED)) {
-		data->key = LV_GROUP_KEY_NEXT;
+		data->key = LV_GROUP_KEY_ESC ;
 		data->state = LV_INDEV_STATE_REL;
 
 		/* Switch 4 (LH)*/

@@ -153,11 +153,14 @@ void GUI_Config_Create(void) {
 	lv_obj_t *list1;
 	lv_obj_t *obj;
 
+
 	list1 = lv_list_create(win, NULL);
 	/*Add list elements*/
 #if PL_CONFIG_HAS_TSL2561
 	obj = lv_list_add(list1, SYMBOL_CLOSE, "Ambient ON/OFF",
 			Btn_Ambient_click_enable_action);
+	lv_obj_set_width(list1,90);									// Breite der Liste
+	//lv_btn_set_fit(obj, true, true);
 	GUI_AddObjToGroup(obj);
 	uint16_t broadband, ir;
 	if (TSL1_ReadRawDataFull(&broadband) == ERR_OK) {			// Check if light sensor is enabled
@@ -178,6 +181,7 @@ void GUI_Config_Create(void) {
 
 	obj = lv_list_add(list1, SYMBOL_POWER, "POWER",
 			Btn_Power_click_enable_action);
+	//lv_btn_set_fit(obj, true, true);
 	GUI_AddObjToGroup(obj);
 
 

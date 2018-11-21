@@ -145,8 +145,10 @@ void GUI_MainMenuCreate(void) {
 
 	/* create list of objects */
 	lv_obj_t *list1;
+
 	lv_obj_t *obj;
 	list1 = lv_list_create(gui_win, NULL);
+	lv_obj_set_width(list1,90);									// Breite der Liste
 	/*Add list elements*/
 #if PL_CONFIG_HAS_MMA8451
 	obj = lv_list_add(list1, SYMBOL_FILE, "Accel", Btn_Accel_click_action);

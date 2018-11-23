@@ -9,7 +9,7 @@
 #include <stdio.h>      // Header file for standard file i/o.
 #include <stdlib.h>     // Header file for malloc/free.
 #include "readBMP.h"
-
+#include "FAT1.h"
 
 #define INI_FILE_NAME			"Config.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
@@ -73,15 +73,14 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 
 #endif
 
-
 #if 0
 	uint8_t res = ERR_OK;
 	FAT1_DEF_NAMEBUF(fileName);
 
 	FAT1_INIT_NAMEBUF(fileName);
 	if (UTIL1_ReadEscapedName(cmd + sizeof("readBMP"),
-			FAT1_PTR_NAMEBUF(fileName), FAT1_SIZE_NAMEBUF(fileName), NULL, NULL,
-			NULL) == ERR_OK) {
+					FAT1_PTR_NAMEBUF(fileName), FAT1_SIZE_NAMEBUF(fileName), NULL, NULL,
+					NULL) == ERR_OK) {
 		res = FAT1_readBMP(FAT1_PTR_NAMEBUF(fileName), io);
 		// res = FAT1_PrintFile(FAT1_PTR_NAMEBUF(fileName), io);
 	} else {
@@ -103,11 +102,9 @@ uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 		img->data = malloc(NUMBER_OF_LEDS * sizeof(char));
 		if (img->data != NULL) {
 			CLS1_SendStr((unsigned char*) "reading Bitmap file:  ", io->stdOut);
+			CLS1_SendStr((unsigned char*) fileName, io->stdOut);
 
 			result = BMPImageLoad((char *) fileName, img);
-
-			CLS1_SendStr((unsigned char*) FAT1_PTR_NAMEBUF(fileName),
-					io->stdOut);
 
 			CLS1_SendStr((unsigned char*) "\r\n", io->stdOut);
 
@@ -133,7 +130,7 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 	} else if (UTIL1_strncmp((char*) cmd, "BMP readBMP ",
 			sizeof("BMP readBMP ") - 1) == 0) {
 		*handled = TRUE;
-		return ReadBMPCmd(cmd + sizeof("BMP readBMP"), io);
+		return Read_readBMP(cmd + sizeof("BMP readBMP"), io);
 	}
 	return ERR_OK;
 }
@@ -168,42 +165,102 @@ unsigned short int endianReadShort(FILE* file) {
 
 // quick and dirty bitmap loader...for 24 bit bitmaps with 1 plane only.  
 // See http://www.dcs.ed.ac.uk/~mxr/gfx/2d/BMP.txt for more info.
+
+static FIL bmpFile;
+
 int BMPImageLoad(char* filename, BMPImage* image) {
-	FILE *file;
+	FILE *filee;
 	unsigned long size;                 // size of the image in bytes.
 	unsigned long i;                    // standard counter.
 	unsigned short int planes;     // number of planes in image (must be 1)
 	unsigned short int bpp;         // number of bits per pixel (must be 24)
 	char temp;            // temporary color storage for bgr-rgb conversion.
+	FIL* file = NULL;
+	FRESULT res = FR_OK;
 
-	// make sure the file is there.
-	if ((file = fopen(filename, "rb")) == NULL) {
+	file = &bmpFile;
+
+#if 0
+	if (UTIL1_strcmp(filename,SAVEFILE) == 0) {
+		file = &dsaveFileDesc;
+	} else if (UTIL1_strcmp(filename,TEXTFILE) == 0) {
+		file = &dtextcFileDesc;
+	}
+	else {
+		file = NULL;
+	}
+
+#endif
+
+	res = FAT1_open(file, filename, FA_READ);
+	if (res != FR_OK) {
+		//error occured
+		CLS1_SendStr((unsigned char*) "Error reading BMP file ",
+				CLS1_GetStdio()->stdOut);
+	} else {
+		CLS1_SendStr((unsigned char*) "File opened ", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+		UINT size;
+		UINT nof = 0;
+		UINT bfOffBits = 0;
+
+		UINT br; /* Pointer to number of bytes read */
+
+		uint8_t buf[330];
+
+		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
+		if (res != FR_OK) {
+			CLS1_SendStr((unsigned char*) "Error reading BMP file ",
+					CLS1_GetStdio()->stdOut);
+
+			//error occured
+		} else {
+			buf[nof] = '\0'; /* terminate buffer */
+			uint8_t width = buf[18];
+			uint8_t height = buf[22];
+			bfOffBits = buf[10];
+			CLS1_SendStr((unsigned char*) "Breite des Bitmap files:  ",
+					CLS1_GetStdio()->stdOut);
+			CLS1_SendCh(width, CLS1_GetStdio()->stdOut);
+
+			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+			CLS1_SendStr((unsigned char*) "Höhe des Bitmap files:  ",
+					CLS1_GetStdio()->stdOut);
+			CLS1_SendCh(height, CLS1_GetStdio()->stdOut);
+
+
+		}
+
+	}
+
+// make sure the file is there.
+	if ((filee = fopen(filename, "rb")) == NULL) {
 		printf("File Not Found : %s\n", filename);
 		return 0;
 	}
 
-	// seek through the bmp header, up to the width/height:
-	fseek(file, 18, SEEK_CUR);
+// seek through the bmp header, up to the width/height:
+	fseek(filee, 18, SEEK_CUR);
 
-	// read the width
-	if (!(image->sizeX = endianReadInt(file))) {
+// read the width
+	if (!(image->sizeX = endianReadInt(filee))) {
 		printf("Error reading width from %s.\n", filename);
 		return 0;
 	}
 	printf("Width of %s: %lu\n", filename, image->sizeX);
 
-	// read the height
-	if (!(image->sizeY = endianReadInt(file))) {
+// read the height
+	if (!(image->sizeY = endianReadInt(filee))) {
 		printf("Error reading height from %s.\n", filename);
 		return 0;
 	}
 	printf("Height of %s: %lu\n", filename, image->sizeY);
 
-	// calculate the size (assuming 24 bits or 3 bytes per pixel).
+// calculate the size (assuming 24 bits or 3 bytes per pixel).
 	size = image->sizeX * image->sizeY * 3;
 
-	// read the planes
-	if (!(planes = endianReadShort(file))) {
+// read the planes
+	if (!(planes = endianReadShort(filee))) {
 		printf("Error reading planes from %s.\n", filename);
 		return 0;
 	}
@@ -212,7 +269,7 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 		return 0;
 	}
 
-	// read the bits per pixel
+// read the bits per pixel
 	if (!(bpp = endianReadShort(file))) {
 		printf("Error reading bpp from %s.\n", filename);
 		return 0;
@@ -222,10 +279,10 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 		return 0;
 	}
 
-	// seek past the rest of the bitmap header.
+// seek past the rest of the bitmap header.
 	fseek(file, 24, SEEK_CUR);
 
-	// read the data.
+// read the data.
 	image->data = (char *) malloc(size);
 	if (image->data == NULL) {
 		printf("Error allocating memory for color-corrected image data");
@@ -243,7 +300,7 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 		image->data[i + 2] = temp;
 	}
 
-	// we're done.
+// we're done.
 	return 1;
 }
 

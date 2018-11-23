@@ -177,7 +177,7 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 	char temp;            // temporary color storage for bgr-rgb conversion.
 	FIL* file = NULL;
 	FRESULT res = FR_OK;
-
+	BMPImage img;
 	file = &bmpFile;
 
 #if 0
@@ -216,17 +216,19 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 			//error occured
 		} else {
 			buf[nof] = '\0'; /* terminate buffer */
+			img.sizeX = buf[18];
+			img.sizeY = buf[22];
 			uint8_t width = buf[18];
 			uint8_t height = buf[22];
-			bfOffBits = buf[10];
+			bfOffBits = buf[10];											// number of Offsetbits until first Colorvalue
 			CLS1_SendStr((unsigned char*) "Breite des Bitmap files:  ",
 					CLS1_GetStdio()->stdOut);
-			CLS1_SendCh(width, CLS1_GetStdio()->stdOut);
+			CLS1_SendCh(img.sizeX, CLS1_GetStdio()->stdOut);
 
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "Höhe des Bitmap files:  ",
 					CLS1_GetStdio()->stdOut);
-			CLS1_SendCh(height, CLS1_GetStdio()->stdOut);
+			CLS1_SendCh(img.sizeY, CLS1_GetStdio()->stdOut);
 
 
 		}

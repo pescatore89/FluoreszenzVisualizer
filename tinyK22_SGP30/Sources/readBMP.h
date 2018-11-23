@@ -13,8 +13,8 @@
 #include "CLS1.h"
 /* Image type - contains height, width, and data */
 struct BMPImage {
-    unsigned long sizeX;
-    unsigned long sizeY;
+    uint8_t sizeX;
+    uint8_t sizeY;
     char *data;
 };
 typedef struct BMPImage BMPImage;

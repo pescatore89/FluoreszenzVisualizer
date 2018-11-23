@@ -20,14 +20,24 @@
 #define INI_SECTION_NAME_LED	"LED"
 //#endif
 
-
+static uint8_t PrintHelp(const CLS1_StdIOType *io) {
+	CLS1_SendHelpStr((unsigned char*) "CONFIG",
+			(unsigned char*) "Configurations on the SD-Card\r\n", io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  printConfig",
+			(unsigned char*) "Prints the specific config File\r\n",
+			io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  help",
+			(unsigned char*) "Print help or status information\r\n",
+			io->stdOut);
+	return ERR_OK;
+}
 
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io) {
 	if (UTIL1_strcmp((char*) cmd, CLS1_CMD_HELP) == 0
 			|| UTIL1_strcmp((char*) cmd, "BMP help") == 0) {
 		*handled = TRUE;
-		//return PrintHelp(io);
+		return PrintHelp(io);
 
 	} else if (UTIL1_strncmp((char*) cmd, "CONFIG printConfig",
 			sizeof("CONFIG printConfig ") - 1) == 0) { //reads the Config file on the SD-Card

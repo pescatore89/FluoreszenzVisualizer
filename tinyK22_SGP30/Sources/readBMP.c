@@ -121,12 +121,46 @@ uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 	return res;
 }
 
+
+static uint8_t PrintHelp(const CLS1_StdIOType *io) {
+	CLS1_SendHelpStr((unsigned char*) "BMP",
+			(unsigned char*) "Group of Bitmap commands\r\n", io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  readBMP <filename>",
+			(unsigned char*) "Returns the width and height of the specific Bitmap file\r\n",
+			io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  Display <filenam>",
+			(unsigned char*) "Displays the specific BMP file\r\n", io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  help|status",
+			(unsigned char*) "Print help or status information\r\n",
+			io->stdOut);
+	return ERR_OK;
+}
+
+#if 0
+static uint8_t PrintStatus(const CLS1_StdIOType *io) {
+	uint8_t buf[32];
+	uint8_t res;
+
+	CLS1_SendStatusStr((unsigned char*) "BMP", (unsigned char*) "\r\n",
+			io->stdOut);
+	UTIL1_Num8uToStr(buf, sizeof(buf), NEOA_LightLevel);
+	UTIL1_strcat(buf, sizeof(buf),
+			NEOA_isAutoLightLevel ? " (auto)\r\n" : " (fix)\r\n");
+	CLS1_SendStatusStr("  lightlevel", buf, io->stdOut);
+	UTIL1_strcpy(buf, sizeof(buf),
+			NEOA_useGammaCorrection ? "on\r\n" : "off\r\n");
+	CLS1_SendStatusStr("  gamma", buf, io->stdOut);
+	return ERR_OK;
+}
+#endif
+
+
 uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io) {
 	if (UTIL1_strcmp((char*) cmd, CLS1_CMD_HELP) == 0
 			|| UTIL1_strcmp((char*) cmd, "BMP help") == 0) {
 		*handled = TRUE;
-		//return PrintHelp(io);
+		return PrintHelp(io);
 	} else if (UTIL1_strncmp((char*) cmd, "BMP readBMP ",
 			sizeof("BMP readBMP ") - 1) == 0) {
 		*handled = TRUE;

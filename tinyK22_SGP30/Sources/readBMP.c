@@ -16,7 +16,7 @@
 #define INI_SECTION_NAME_POWER	"POWER"
 #define INI_SECTION_NAME_LED	"LED"
 #define NUMBER_OF_LEDS					(576)
-BMPImage* image = NULL;
+static BMPImage* image = NULL;
 /* Simple BMP reading code, should be adaptable to many
  systems. Originally from Windows, ported to Linux, now works on my Mac
  OS system.

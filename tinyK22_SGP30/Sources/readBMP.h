@@ -11,6 +11,7 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 #include "CLS1.h"
+#include "ff.h"
 /* Image type - contains height, width, and data */
 struct BMPImage {
 
@@ -36,8 +37,8 @@ typedef struct BMPImage BMPImage;
 
 /* Function that reads in the image; first param is filename, second is image struct */
 /* As side effect, sets w and h */
-int BMPImageLoad(char* filename, BMPImage* image);
-uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io);
-uint8_t Display_BMP(const uint8_t *fileName, const CLS1_StdIOType *io);
+uint8_t BMPImageLoad(const TCHAR *filename, BMPImage* image);
+uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io);
+uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);

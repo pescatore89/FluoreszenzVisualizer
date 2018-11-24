@@ -35,67 +35,9 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 		const CLS1_ConstStdIOType *io) {
 	/* precondition: cmd starts with "delete" */
 
-#if 0
-
-	uint8_t res = ERR_OK;
-	int result = 0;
-	FAT1_DEF_NAMEBUF(fileName);
-	FAT1_INIT_NAMEBUF(fileName);
-	BMPImage* img = NULL;
-	img = (BMPImage*) malloc(sizeof(BMPImage));
-	if (img != NULL) {
-		img->data = malloc(NUMBER_OF_LEDS * sizeof(char));
-		if (img->data != NULL) {
-			if (UTIL1_ReadEscapedName(cmd + sizeof("delete"),
-							FAT1_PTR_NAMEBUF(fileName), FAT1_SIZE_NAMEBUF(fileName),
-							NULL,
-							NULL,
-							NULL) == ERR_OK) {
-				CLS1_SendStr((unsigned char*) "reading Bitmap file:  ",
-						io->stdOut);
-
-				result = ImageLoad(FAT1_PTR_NAMEBUF(fileName), img);
-
-				CLS1_SendStr((unsigned char*) FAT1_PTR_NAMEBUF(fileName),
-						io->stdOut);
-
-				CLS1_SendStr((unsigned char*) "\r\n", io->stdOut);
-
-				/* ok, have now directory name */
-			} else {
-				CLS1_SendStr((unsigned char*) "reading Bitmap name failed!\r\n",
-						io->stdErr);
-				res = ERR_FAILED;
-			}
-		}
-	}
-
-	//FAT1_FREE_NAMEBUF(fileName);
-	return res;
-
-#endif
-
-#if 0
-	uint8_t res = ERR_OK;
-	FAT1_DEF_NAMEBUF(fileName);
-
-	FAT1_INIT_NAMEBUF(fileName);
-	if (UTIL1_ReadEscapedName(cmd + sizeof("readBMP"),
-					FAT1_PTR_NAMEBUF(fileName), FAT1_SIZE_NAMEBUF(fileName), NULL, NULL,
-					NULL) == ERR_OK) {
-		res = FAT1_readBMP(FAT1_PTR_NAMEBUF(fileName), io);
-		// res = FAT1_PrintFile(FAT1_PTR_NAMEBUF(fileName), io);
-	} else {
-		CmdUsageError(cmd, (unsigned char*) "print fileName", io);
-		res = ERR_FAILED;
-	}
-	FAT1_FREE_NAMEBUF(fileName);
-	return res;
-#endif
 }
 
-
-uint8_t Display_BMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
+uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
 	uint32_t position = 0;
 	uint8_t red = 0;
@@ -104,16 +46,20 @@ uint8_t Display_BMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 	uint32_t colorValue = 0;
 	uint8_t lane = 0;
 	uint32_t color;
-	uint8_t res;
+	FRESULT res = FR_OK;
 	uint32_t cnt = 0;
 	unsigned long size;
-	if(Read_readBMP(fileName,io)==FR_OK){
+	res = Read_readBMP(fileName, io);
+	if (res != FR_OK) {
+		return res;
+
+	} else {
 		NEO_ClearAllPixel();
 		size = ((image->biWidth) * (image->biHeight));
-		for (int i = 0; i < size ; i++) {
+		for (int i = 0; i < size; i++) {
 			red = (image->data[cnt]);
-			green = (image->data[cnt+1]);
-			blue = (image->data[cnt+2]);
+			green = (image->data[cnt + 1]);
+			blue = (image->data[cnt + 2]);
 			colorValue = (red << 16) + (green << 8) + (blue);
 			res = NEO_SetPixelColor(lane, i, colorValue);
 
@@ -127,16 +73,13 @@ uint8_t Display_BMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 		NEO_TransferPixels();
 
 	}
-	else {
-		return FR_DISK_ERR;
-	}
+	return res;
 
 }
 
-uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
+uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
-	uint8_t res = ERR_OK;
-	int result = 0;
+	FRESULT res = ERR_OK;
 
 	image = malloc(sizeof(BMPImage));
 	if (image != NULL) {
@@ -144,8 +87,8 @@ uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 		CLS1_SendStr((unsigned char*) "reading Bitmap file:  ", io->stdOut);
 		CLS1_SendStr((unsigned char*) fileName, io->stdOut);
 
-		result = BMPImageLoad((char *) fileName, image);
-		if (result != FR_OK) {
+		res = BMPImageLoad((char *) fileName, image);
+		if (res != FR_OK) {
 			CLS1_SendStr((unsigned char*) "ERROR reading File  ",
 					CLS1_GetStdio()->stdOut);
 		} else {
@@ -224,40 +167,9 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 	return ERR_OK;
 }
 
-/* Reads a long 32 bit integer; comment out one or the other shifting line below, 
- whichever makes your system work right. */
-unsigned int endianReadInt(FILE* file) {
-	unsigned char b[4];
-	unsigned int i;
-
-	if (fread(b, 1, 4, file) < 4)
-		return 0;
-	/* LITTLE VS BIG ENDIAN LINES - comment out one or the other */
-	i = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0]; // big endian
-//i = (b[0]<<24) | (b[1]<<16) | (b[2]<<8) | b[3]; // little endian
-	return i;
-}
-
-/* Reads a 16 bit integer; comment out one or the other shifting line below, 
- whichever makes your system work right. */
-unsigned short int endianReadShort(FILE* file) {
-	unsigned char b[2];
-	unsigned short s;
-
-	if (fread(b, 1, 2, file) < 2)
-		return 0;
-	/* LITTLE VS BIG ENDIAN LINES - comment out one or the other */
-	s = (b[1] << 8) | b[0]; // big endian
-//s = (b[0]<<8) | b[1]; // little endian
-	return s;
-}
-
-// quick and dirty bitmap loader...for 24 bit bitmaps with 1 plane only.  
-// See http://www.dcs.ed.ac.uk/~mxr/gfx/2d/BMP.txt for more info.
-
 static FIL bmpFile;
 
-int BMPImageLoad(char* filename, BMPImage* image) {
+uint8_t BMPImageLoad(const TCHAR *filename, BMPImage* image) {
 	FILE *filee;
 	unsigned long size;                 // size of the image in bytes.
 	unsigned long i;                    // standard counter.

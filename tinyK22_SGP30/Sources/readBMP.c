@@ -49,29 +49,45 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	FRESULT res = FR_OK;
 	uint32_t cnt = 0;
 	unsigned long size;
-	res = Read_readBMP(fileName, io);
-	if (res != FR_OK) {
-		return res;
 
-	} else {
-		NEO_ClearAllPixel();
-		size = ((image->biWidth) * (image->biHeight));
-		for (int i = 0; i < size; i++) {
-			red = (image->data[cnt]);
-			green = (image->data[cnt + 1]);
-			blue = (image->data[cnt + 2]);
-			colorValue = (red << 16) + (green << 8) + (blue);
-			res = NEO_SetPixelColor(lane, i, colorValue);
+	image = malloc(sizeof(BMPImage));
+	if (image != NULL) {
+		res = BMPImageLoadData((char *) fileName, image);
+		if (res != FR_OK) {
+			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
+					CLS1_GetStdio()->stdOut);
+		} else {
+			if (image->biBitCount != 0x20) {
+				CLS1_SendStr(
+						(unsigned char*) "Nur 32 Bit Farbwert darstellbar!\r\n ",
+						CLS1_GetStdio()->stdOut);
+				CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
 
-			cnt = cnt + 4;		// skip 0xff
+			} else {
 
-			if (res != ERR_OK) {
-				return res;
+				NEO_ClearAllPixel();
+				size = ((image->biWidth) * (image->biHeight));
+				for (int i = 0; i < size; i++) {
+					red = (image->data[cnt]);
+					green = (image->data[cnt + 1]);
+					blue = (image->data[cnt + 2]);
+					colorValue = (red << 16) + (green << 8) + (blue);
+					res = NEO_SetPixelColor(lane, i, colorValue);
+
+					cnt = cnt + 4;		// skip 0xff
+
+					if (res != ERR_OK) {
+						return res;
+					}
+				}
+				NEO_TransferPixels();
 			}
-
 		}
-		NEO_TransferPixels();
-
+		free(image->data);
+		free(image);
+	} else {
+		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
+		return FR_NOT_ENOUGH_CORE;
 	}
 	return res;
 
@@ -80,14 +96,14 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
 	FRESULT res = ERR_OK;
-
+	unsigned char* biCount = NULL;
 	image = malloc(sizeof(BMPImage));
 	if (image != NULL) {
 
 		CLS1_SendStr((unsigned char*) "reading Bitmap file:  ", io->stdOut);
 		CLS1_SendStr((unsigned char*) fileName, io->stdOut);
 
-		res = BMPImageLoad((char *) fileName, image);
+		res = BMPImageLoadHeader((char *) fileName, image);
 		if (res != FR_OK) {
 			CLS1_SendStr((unsigned char*) "ERROR reading File  ",
 					CLS1_GetStdio()->stdOut);
@@ -101,13 +117,21 @@ uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 					CLS1_GetStdio()->stdOut);
 			CLS1_SendCh(image->biHeight, CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
-			CLS1_SendStr(
-					(unsigned char*) "Farbtiefe in bits per pixel (Hex):  ",
-					CLS1_GetStdio()->stdOut);
-			CLS1_SendCh(image->biBitCount, CLS1_GetStdio()->stdOut);
+			if (image->biBitCount == 0x18) {
+				biCount = "24 Bit Farbtiefe nicht anzeigbar";
+			} else if (image->biBitCount == 0x20) {
+				biCount = "Farbtiefe beträgt 32 Bit";
+			} else if ((image->biBitCount == 0x01)
+					|| (image->biBitCount == 0x04)
+					|| (image->biBitCount == 0x08)
+					|| (image->biBitCount == 0x10)) {
+				biCount = "Nur 32 Bit Farbwert anzeigbar";
+			}
+			CLS1_SendStr(biCount, CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
 		}
 
+		free(image);
 		/* ok, have now directory name */
 	} else {
 		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
@@ -169,28 +193,16 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 
 static FIL bmpFile;
 
-uint8_t BMPImageLoad(const TCHAR *filename, BMPImage* image) {
+uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 	FILE *filee;
 	unsigned long size;                 // size of the image in bytes.
 	unsigned long i;                    // standard counter.
-	unsigned short int planes;     		// number of planes in image (must be 1)
-	unsigned short int bpp;         	// number of bits per pixel (must be 24)
-	char temp;            	// temporary color storage for bgr-rgb conversion.
+	unsigned short int planes;     	// number of planes in image (must be 1)
+	unsigned short int bpp;         // number of bits per pixel (must be 24)
+	char temp;            // temporary color storage for bgr-rgb conversion.
 	FIL* file = NULL;
 	FRESULT res = FR_OK;
 	file = &bmpFile;
-
-#if 0
-	if (UTIL1_strcmp(filename,SAVEFILE) == 0) {
-		file = &dsaveFileDesc;
-	} else if (UTIL1_strcmp(filename,TEXTFILE) == 0) {
-		file = &dtextcFileDesc;
-	}
-	else {
-		file = NULL;
-	}
-
-#endif
 
 	res = FAT1_open(file, filename, FA_READ);
 	if (res != FR_OK) {
@@ -221,11 +233,11 @@ uint8_t BMPImageLoad(const TCHAR *filename, BMPImage* image) {
 			image->biCompression = buf[30];
 		}
 		image->data = malloc(
-				image->biWidth * image->biHeight * sizeof(char) * 4); // FREE nicht vergessen !!!!!!!!!!!!!!!!!
+				image->biWidth * image->biHeight * sizeof(char) * 4);
 		if (image->data != NULL) {
 			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 			if (res == FR_OK) {
-				res = FAT1_read(file, image->data, sizeof(buf) - 1, &nof);	//
+				res = FAT1_read(file, image->data, sizeof(buf) - 1, &nof); //
 				if (res == FR_OK) {
 					res = FAT1_close(file);
 				} else {
@@ -252,3 +264,51 @@ uint8_t BMPImageLoad(const TCHAR *filename, BMPImage* image) {
 	return res;
 }
 
+uint8_t BMPImageLoadHeader(const TCHAR *filename, BMPImage* image) {
+	FILE *filee;
+	unsigned long size;                 // size of the image in bytes.
+	unsigned long i;                    // standard counter.
+	unsigned short int planes;     	// number of planes in image (must be 1)
+	unsigned short int bpp;         // number of bits per pixel (must be 24)
+	char temp;            // temporary color storage for bgr-rgb conversion.
+	FIL* file = NULL;
+	FRESULT res = FR_OK;
+	file = &bmpFile;
+
+	res = FAT1_open(file, filename, FA_READ);
+	if (res != FR_OK) {
+		//error occured
+		CLS1_SendStr((unsigned char*) "Error reading BMP file Header ",
+				CLS1_GetStdio()->stdOut);
+	} else {
+		CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "File opened ", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+		UINT nof = 0;
+		UINT bfOffBits = 0;
+		UINT br; /* Pointer to number of bytes read */
+		uint8_t buf[50];
+
+		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
+		if (res != FR_OK) {
+			CLS1_SendStr((unsigned char*) "Error reading BMP file ",
+					CLS1_GetStdio()->stdOut);
+			return res;
+		} else {
+			CLS1_SendStr((unsigned char*) "Reading BMP file ",
+					CLS1_GetStdio()->stdOut);
+			buf[nof] = '\0'; /* terminate buffer */
+			image->biWidth = buf[18];
+			image->biHeight = buf[22];
+			image->bfOffBits = buf[10];
+			image->biBitCount = buf[28];
+			image->biSizeImage = buf[34];
+			image->biCompression = buf[30];
+		}
+
+		res = FAT1_close(file);
+
+	}
+
+	return res;
+}

@@ -37,7 +37,8 @@ typedef struct BMPImage BMPImage;
 
 /* Function that reads in the image; first param is filename, second is image struct */
 /* As side effect, sets w and h */
-uint8_t BMPImageLoad(const TCHAR *filename, BMPImage* image);
+uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image);
+uint8_t BMPImageLoadHeader(const TCHAR *filename, BMPImage* image);
 uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,

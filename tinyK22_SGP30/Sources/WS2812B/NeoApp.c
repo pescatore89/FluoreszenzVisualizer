@@ -52,7 +52,7 @@ static void SetPixel(int x, int y, uint32_t color) {
 
 #if MATRIX_RES == 24
 
-uint32_t lookUpMatrix[8][24] = {
+uint32_t lookUpMatrix[8][24] = {																							/*Look up Matrix für die Lanes*/
 		{ 0, 1, 2, 3, 4, 5, 6, 7, 64, 65, 66, 67, 68, 69, 70, 71, 128, 129, 130, 131, 132, 133, 134, 135 },					/*Reihe 1*/
 		{ 8, 9, 10, 11,	12, 13, 14, 15, 72, 73, 74, 75, 76, 77, 78, 79, 136, 137, 138, 139, 140, 141, 142, 143 }, 			/*Reihe 2*/
 		{ 16, 17, 18, 19, 20, 21, 22, 23, 80, 81, 82, 83, 84, 85, 86, 87, 144, 145, 146, 147, 148, 149, 150, 151 }, 		/*Reihe 3*/
@@ -760,6 +760,12 @@ uint8_t NEOA_Lauflicht(void) {
 
 	}
 	return res;
+
+}
+
+
+uint8_t NEOA_Display_Image(){
+
 
 }
 

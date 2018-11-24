@@ -57,37 +57,33 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
 					CLS1_GetStdio()->stdOut);
 		} else {
-			if (image->biBitCount != 0x20) {
-				CLS1_SendStr(
-						(unsigned char*) "Nur 32 Bit Farbwert darstellbar!\r\n ",
-						CLS1_GetStdio()->stdOut);
-				CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
 
-			} else {
-
-				NEO_ClearAllPixel();
-				size = ((image->biWidth) * (image->biHeight));
-				for (int i = 0; i < size; i++) {
-					if(i>=((NEOC_NOF_LEDS_IN_LANE)*(lane+1))){
-						lane = lane +1;
-						position = 0;								// Reset Position, da neue lane
-					}
-
-					red = (image->data[cnt]);
-					green = (image->data[cnt + 1]);
-					blue = (image->data[cnt + 2]);
-					colorValue = (red << 16) + (green << 8) + (blue);
-					res = NEO_SetPixelColor(lane, position, colorValue);
-					NEO_TransferPixels();
-					cnt = cnt + 4;		// skip 0xff
-
-					if (res != ERR_OK) {
-						return res;
-					}
-					position += 1;
+			NEO_ClearAllPixel();
+			size = ((image->biWidth) * (image->biHeight));
+			for (int i = 0; i < size; i++) {
+				if (i >= ((NEOC_NOF_LEDS_IN_LANE) * (lane + 1))) {
+					lane = lane + 1;
+					position = 0;			// Reset Position, da neue lane
 				}
+				red = (image->data[cnt]);
+				green = (image->data[cnt + 1]);
+				blue = (image->data[cnt + 2]);
+				colorValue = (red << 16) + (green << 8) + (blue);
+				res = NEO_SetPixelColor(lane, position, colorValue);
+
+				if((image->biBitCount) == 0x18){
+					cnt = cnt + 3;
+				}
+				else if ((image->biBitCount) == 0x20){
+					cnt = cnt + 4;		// skip 0xff
+				}
+				if (res != ERR_OK) {
+					return res;
+				}
+				position += 1;
 
 			}
+			NEO_TransferPixels();
 		}
 		free(image->data);
 		free(image);
@@ -124,14 +120,14 @@ uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 			CLS1_SendCh(image->biHeight, CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
 			if (image->biBitCount == 0x18) {
-				biCount = "24 Bit Farbtiefe nicht anzeigbar";
+				biCount = "24 Bit Farbtiefe ";
 			} else if (image->biBitCount == 0x20) {
 				biCount = "Farbtiefe beträgt 32 Bit";
 			} else if ((image->biBitCount == 0x01)
 					|| (image->biBitCount == 0x04)
 					|| (image->biBitCount == 0x08)
 					|| (image->biBitCount == 0x10)) {
-				biCount = "Nur 32 Bit Farbwert anzeigbar";
+				biCount = "Falsche Farbtiefe";
 			}
 			CLS1_SendStr(biCount, CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
@@ -259,12 +255,23 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			return res;
 		}
 	}
-	size = ((image->biWidth) * (image->biHeight) * 4);
-	for (i = 0; i < size; i += 4) { // reverse all of the colors. (bgr -> rgb)
-		temp = image->data[i];
-		image->data[i] = image->data[i + 2];
-		image->data[i + 2] = temp;
 
+	if ((image->biBitCount) == 0x18) { /*24 Bit Farbtiefe*/
+		size = ((image->biWidth) * (image->biHeight) * 3);
+		for (i = 0; i < size; i += 3) { // reverse all of the colors. (bgr -> rgb)
+			temp = image->data[i];
+			image->data[i] = image->data[i + 2];
+			image->data[i + 2] = temp;
+
+		}
+	} else if ((image->biBitCount) == 0x20) { /*32 Bit Farbtiefe*/
+		size = ((image->biWidth) * (image->biHeight) * 4);
+		for (i = 0; i < size; i += 4) { // reverse all of the colors. (bgr -> rgb)
+			temp = image->data[i];
+			image->data[i] = image->data[i + 2];
+			image->data[i + 2] = temp;
+
+		}
 	}
 
 	return res;

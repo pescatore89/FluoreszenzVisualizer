@@ -20,14 +20,5 @@
 #define MATRIX_RES		(24)										/* 24 * 24 Auflösung */
 #define SINGLE_MATRIX_SIDE_LENGTH 	(8)
 
-#if (NEO_IS_MATRIX)
-
-	#if MATRIX_RES == 16
-	/* Define LookUpMatrix for 16 *16 Matrix*/
-	#endif
-
-
-
-	#endif
 
 #endif /* NEOCONFIG_H_ */

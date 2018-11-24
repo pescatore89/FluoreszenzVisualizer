@@ -10,11 +10,13 @@
 #include <stdlib.h>     // Header file for malloc/free.
 #include "readBMP.h"
 #include "FAT1.h"
+#include "WS2812B\NeoPixel.h"
 
 #define INI_FILE_NAME			"Config.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
 #define INI_SECTION_NAME_LED	"LED"
 #define NUMBER_OF_LEDS					(576)
+BMPImage* image = NULL;
 /* Simple BMP reading code, should be adaptable to many
  systems. Originally from Windows, ported to Linux, now works on my Mac
  OS system.
@@ -92,11 +94,50 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 #endif
 }
 
+
+uint8_t Display_BMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
+
+	uint32_t position = 0;
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	uint32_t colorValue = 0;
+	uint8_t lane = 0;
+	uint32_t color;
+	uint8_t res;
+	uint32_t cnt = 0;
+	unsigned long size;
+	if(Read_readBMP(fileName,io)==FR_OK){
+		NEO_ClearAllPixel();
+		size = ((image->biWidth) * (image->biHeight));
+		for (int i = 0; i < size ; i++) {
+			red = (image->data[cnt]);
+			green = (image->data[cnt+1]);
+			blue = (image->data[cnt+2]);
+			colorValue = (red << 16) + (green << 8) + (blue);
+			res = NEO_SetPixelColor(lane, i, colorValue);
+
+			cnt = cnt + 4;		// skip 0xff
+
+			if (res != ERR_OK) {
+				return res;
+			}
+
+		}
+		NEO_TransferPixels();
+
+	}
+	else {
+		return FR_DISK_ERR;
+	}
+
+}
+
 uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 
 	uint8_t res = ERR_OK;
 	int result = 0;
-	BMPImage* image = NULL;
+
 	image = malloc(sizeof(BMPImage));
 	if (image != NULL) {
 
@@ -117,7 +158,8 @@ uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 					CLS1_GetStdio()->stdOut);
 			CLS1_SendCh(image->biHeight, CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
-			CLS1_SendStr((unsigned char*) "Farbtiefe in bits per pixel (Hex):  ",
+			CLS1_SendStr(
+					(unsigned char*) "Farbtiefe in bits per pixel (Hex):  ",
 					CLS1_GetStdio()->stdOut);
 			CLS1_SendCh(image->biBitCount, CLS1_GetStdio()->stdOut);
 			CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
@@ -125,8 +167,7 @@ uint8_t Read_readBMP(const uint8_t *fileName, const CLS1_StdIOType *io) {
 
 		/* ok, have now directory name */
 	} else {
-		CLS1_SendStr((unsigned char*) "malloc failed!\r\n",
-				io->stdErr);
+		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 		res = ERR_FAILED;
 	}
 
@@ -175,6 +216,10 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 			sizeof("BMP readBMP ") - 1) == 0) {
 		*handled = TRUE;
 		return Read_readBMP(cmd + sizeof("BMP readBMP"), io);
+	} else if (UTIL1_strncmp((char*) cmd, "BMP Display ",
+			sizeof("BMP Display ") - 1) == 0) {
+		*handled = TRUE;
+		return Display_BMP(cmd + sizeof("BMP Display"), io);
 	}
 	return ERR_OK;
 }
@@ -246,16 +291,14 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 		UINT size;
 		UINT nof = 0;
 		UINT bfOffBits = 0;
-
 		UINT br; /* Pointer to number of bytes read */
-
-		uint8_t buf[50];
+		uint8_t buf[500];
 
 		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
 		if (res != FR_OK) {
 			CLS1_SendStr((unsigned char*) "Error reading BMP file ",
 					CLS1_GetStdio()->stdOut);
-			//error occured
+			return res;
 		} else {
 			buf[nof] = '\0'; /* terminate buffer */
 			image->biWidth = buf[18];
@@ -263,11 +306,10 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 			image->bfOffBits = buf[10];
 			image->biBitCount = buf[28];
 			image->biSizeImage = buf[34];
-
+			image->biCompression = buf[30];
 		}
-
 		image->data = malloc(
-				image->biWidth * image->biHeight * sizeof(char) * 3); // FREE nicht vergessen !!!!!!!!!!!!!!!!!
+				image->biWidth * image->biHeight * sizeof(char) * 4); // FREE nicht vergessen !!!!!!!!!!!!!!!!!
 		if (image->data != NULL) {
 			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 			if (res == FR_OK) {
@@ -287,11 +329,12 @@ int BMPImageLoad(char* filename, BMPImage* image) {
 			return res;
 		}
 	}
-	size = ((image->biWidth) * (image->biHeight) * 3);
-	for (i = 0; i < size; i += 3) { // reverse all of the colors. (bgr -> rgb)
+	size = ((image->biWidth) * (image->biHeight) * 4);
+	for (i = 0; i < size; i += 4) { // reverse all of the colors. (bgr -> rgb)
 		temp = image->data[i];
 		image->data[i] = image->data[i + 2];
 		image->data[i + 2] = temp;
+
 	}
 
 	return res;

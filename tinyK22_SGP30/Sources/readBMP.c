@@ -68,19 +68,25 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 				NEO_ClearAllPixel();
 				size = ((image->biWidth) * (image->biHeight));
 				for (int i = 0; i < size; i++) {
+					if(i>=((NEOC_NOF_LEDS_IN_LANE)*(lane+1))){
+						lane = lane +1;
+						position = 0;								// Reset Position, da neue lane
+					}
+
 					red = (image->data[cnt]);
 					green = (image->data[cnt + 1]);
 					blue = (image->data[cnt + 2]);
 					colorValue = (red << 16) + (green << 8) + (blue);
-					res = NEO_SetPixelColor(lane, i, colorValue);
-
+					res = NEO_SetPixelColor(lane, position, colorValue);
+					NEO_TransferPixels();
 					cnt = cnt + 4;		// skip 0xff
 
 					if (res != ERR_OK) {
 						return res;
 					}
+					position += 1;
 				}
-				NEO_TransferPixels();
+
 			}
 		}
 		free(image->data);

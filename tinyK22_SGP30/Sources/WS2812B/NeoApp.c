@@ -48,6 +48,24 @@ static void SetPixel(int x, int y, uint32_t color) {
 	NEO_SetPixelColor(0, pos, color);
 }
 
+
+
+#if MATRIX_RES == 24
+
+uint32_t lookUpMatrix[8][24] = {
+		{ 0, 1, 2, 3, 4, 5, 6, 7, 64, 65, 66, 67, 68, 69, 70, 71, 128, 129, 130, 131, 132, 133, 134, 135 },					/*Reihe 1*/
+		{ 8, 9, 10, 11,	12, 13, 14, 15, 72, 73, 74, 75, 76, 77, 78, 79, 136, 137, 138, 139, 140, 141, 142, 143 }, 			/*Reihe 2*/
+		{ 16, 17, 18, 19, 20, 21, 22, 23, 80, 81, 82, 83, 84, 85, 86, 87, 144, 145, 146, 147, 148, 149, 150, 151 }, 		/*Reihe 3*/
+		{ 24, 25, 26, 27, 28, 29, 30, 31, 88, 89, 90, 91, 92, 93, 94, 95, 152, 153, 154, 155, 156, 157, 158, 159 }, 		/*Reihe 4*/
+		{ 32,33,34,35,36,37,38,39,96,97,98,99,100,101,102,103,160,161,162,163,164,165,166,167 },							/*Reihe 5*/
+		{ 40,41,42,43,44,45,46,47,104,105,106,107,108,109,110,111,168,169,170,171,172,173,174,175},							/*Reihe 6*/
+		{48,49,50,51,52,53,54,55,112,113,114,115,116,117,118,119,176,177,178,179,180,181,182,183},							/*Reihe 7*/
+		{56,57,58,59,60,61,62,63,120,121,122,123,124,125,126,127,184,185,186,187,188,189,190,191},							/*Reihe 8*/
+	};
+
+#endif
+
+
 #if PL_CONFIG_HAS_NEO_SHADOW_BOX
 static void Layer(int layer, uint32_t color) {
 	int y, x;
@@ -714,6 +732,37 @@ static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 }
 #endif /* NEOA_CONFIG_PARSE_COMMAND_ENABLED */
 
+uint8_t NEOA_Lauflicht(void) {
+	uint32_t position;
+	int j = 0;
+	int k = 0;
+	int i = 0;
+	uint8_t res = ERR_OK;
+	NEO_ClearAllPixel();
+	NEO_TransferPixels();
+	for (j=0 ; j < NEOC_NOF_LANES; j++) {
+		for (k=0 ; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
+			for (i=0 ; i < MATRIX_RES; i++) {
+				position = lookUpMatrix[k][i];
+				res = NEO_SetPixelColor(j, position, 0x020200);
+				if (res != ERR_OK) {
+					break; /*Something went wrong*/
+
+				}
+
+				if (NEO_TransferPixels() != ERR_OK) {
+					break; /*Something went wrong*/
+				}
+				vTaskDelay(pdMS_TO_TICKS(100));
+
+			}
+		}
+
+	}
+	return res;
+
+}
+
 #if NEOA_CONFIG_PARSE_COMMAND_ENABLED
 uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 		const CLS1_StdIOType *io) {
@@ -728,6 +777,10 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 			|| (UTIL1_strcmp((char*)cmd, "neoa status") == 0)) {
 		*handled = TRUE;
 		res = PrintStatus(io);
+	} else if ((UTIL1_strcmp((char*)cmd, CLS1_CMD_STATUS) == 0)
+			|| (UTIL1_strcmp((char*)cmd, "neoa lauflicht") == 0)) {
+		*handled = TRUE;
+		res = NEOA_Lauflicht();
 	} else if (UTIL1_strcmp((char*)cmd, "neoa lightlevel auto") == 0) {
 		NEOA_isAutoLightLevel = TRUE;
 		*handled = TRUE;
@@ -759,7 +812,7 @@ static void NeoTask(void* pvParameters) {
 #endif
 
 	NEO_SetAllPixelColor(0xff0000);
-	// do something on the LED Matrix
+// do something on the LED Matrix
 	for (;;) {
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}

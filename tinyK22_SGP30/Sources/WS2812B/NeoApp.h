@@ -16,5 +16,5 @@
 #endif
 
 void NEOA_Init(void);
-
+uint8_t NEOA_Lauflicht(void);
 #endif /* SOURCES_WS2812B_NEO_APP_C_ */

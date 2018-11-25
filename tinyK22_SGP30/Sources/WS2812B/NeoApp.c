@@ -888,6 +888,8 @@ static void NeoTask(void* pvParameters) {
 						CLS1_GetStdio()->stdOut);
 				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
 				value = 0;
+				NEOA_Lauflicht();
+
 				break;
 			case MODE1:
 				/*Display MODE 1*/
@@ -895,6 +897,7 @@ static void NeoTask(void* pvParameters) {
 						CLS1_GetStdio()->stdOut);
 				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
 				value = 1;
+
 				break;
 			case MODE2:
 				/*Display Mode 2*/

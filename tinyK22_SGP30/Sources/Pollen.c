@@ -9,7 +9,7 @@
 #include "Message.h"
 
 xQueueHandle queue_handler;
-char* string;
+
 
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "pollen",
@@ -29,7 +29,10 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 	pxMessage = &xMessage;
 
 	pxMessage->modus = mode;
+	uint8_t daten [] = {1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,4,5,6,5,1,2,3,4,5,6,5,4,5,6,5,4,5,6,5,4,5,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,4,5,6,5,1,2,3,4,5,6,5,4,5,6,5,4,5,6,5,4,5,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,4,5,6,5,1,2,3,4,5,6,5,4,5,6,5,4,5,6,5,4,5,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,4,5,6,5,1,2,3,4,5,6,5,4,5,6,5,4,5,6,5,4,5,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,4,5,6,5,1,2,3,4,5,6,5,4,5,6,5,4,5,6,5,4,5};
+	pxMessage->data = daten;
 
+	uint8_t val = 0;
 	res = AddMessageToQueue(queue_handler, pxMessage);
 	if (res != QUEUE_OK) {
 		return result = ERR_BUSY;

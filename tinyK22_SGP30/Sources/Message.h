@@ -41,9 +41,9 @@ typedef enum {
 } MODE;
 
   struct MESSAGE{
-	MODE 	 modus;
-	void* 	 data;
-	uint32_t color;
+	MODE 	 	 modus;
+	uint8_t* 	 data;
+	uint32_t 	 color;
 	uint32_t 	 fadeoutTime;			/*in ms*/
 	uint16_t 	 excitation;			/*Anregungsintensität*/
 

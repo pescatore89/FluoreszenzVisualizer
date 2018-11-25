@@ -14,7 +14,8 @@
   #include "CLS1.h"
   uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled, const CLS1_StdIOType *io);
 #endif
-
+#include "..\my_types.h"
 void NEOA_Init(void);
 uint8_t NEOA_Lauflicht(void);
+uint8_t NEOA_Display_Image(BMPImage* image);
 #endif /* SOURCES_WS2812B_NEO_APP_C_ */

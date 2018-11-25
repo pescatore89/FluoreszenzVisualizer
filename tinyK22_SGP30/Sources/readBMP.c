@@ -11,6 +11,7 @@
 #include "readBMP.h"
 #include "FAT1.h"
 #include "WS2812B\NeoPixel.h"
+#include "WS2812B\NeoApp.h"
 
 #define INI_FILE_NAME			"Config.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
@@ -58,33 +59,9 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 					CLS1_GetStdio()->stdOut);
 		} else {
 
-			NEO_ClearAllPixel();
-			size = ((image->biWidth) * (image->biHeight));
-			for (int i = 0; i < size; i++) {
-				if (i >= ((NEOC_NOF_LEDS_IN_LANE) * (lane + 1))) {
-					lane = lane + 1;
-					position = 0;			// Reset Position, da neue lane
-				}
-				red = (image->data[cnt]);
-				green = (image->data[cnt + 1]);
-				blue = (image->data[cnt + 2]);
-				colorValue = (red << 16) + (green << 8) + (blue);
-				res = NEO_SetPixelColor(lane, position, colorValue);
-
-				if((image->biBitCount) == 0x18){
-					cnt = cnt + 3;
-				}
-				else if ((image->biBitCount) == 0x20){
-					cnt = cnt + 4;		// skip 0xff
-				}
-				if (res != ERR_OK) {
-					return res;
-				}
-				position += 1;
-
-			}
-			NEO_TransferPixels();
+			res = NEOA_Display_Image(image);
 		}
+
 		free(image->data);
 		free(image);
 	} else {
@@ -218,7 +195,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 		UINT nof = 0;
 		UINT bfOffBits = 0;
 		UINT br; /* Pointer to number of bytes read */
-		uint8_t buf[500];
+		uint8_t buf[2400];
 
 		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
 		if (res != FR_OK) {
@@ -235,7 +212,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			image->biCompression = buf[30];
 		}
 		image->data = malloc(
-				image->biWidth * image->biHeight * sizeof(char) * 4);
+				image->biWidth * image->biHeight * sizeof(char) * ((image->biBitCount)/8));
 		if (image->data != NULL) {
 			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 			if (res == FR_OK) {

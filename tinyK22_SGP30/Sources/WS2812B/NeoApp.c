@@ -26,6 +26,8 @@
 #if PL_CONFIG_HAS_SSD1351
 #include "GDisp1.h"
 #include "LCD1.h"
+#include "ff.h"
+
 #endif
 
 #define WIDTH_PIXELS (3*8)  /* 3 8x8 tiles */
@@ -48,23 +50,28 @@ static void SetPixel(int x, int y, uint32_t color) {
 	NEO_SetPixelColor(0, pos, color);
 }
 
-
-
 #if MATRIX_RES == 24
 
-uint32_t lookUpMatrix[8][24] = {																							/*Look up Matrix für die Lanes*/
-		{ 0, 1, 2, 3, 4, 5, 6, 7, 64, 65, 66, 67, 68, 69, 70, 71, 128, 129, 130, 131, 132, 133, 134, 135 },					/*Reihe 1*/
-		{ 8, 9, 10, 11,	12, 13, 14, 15, 72, 73, 74, 75, 76, 77, 78, 79, 136, 137, 138, 139, 140, 141, 142, 143 }, 			/*Reihe 2*/
-		{ 16, 17, 18, 19, 20, 21, 22, 23, 80, 81, 82, 83, 84, 85, 86, 87, 144, 145, 146, 147, 148, 149, 150, 151 }, 		/*Reihe 3*/
-		{ 24, 25, 26, 27, 28, 29, 30, 31, 88, 89, 90, 91, 92, 93, 94, 95, 152, 153, 154, 155, 156, 157, 158, 159 }, 		/*Reihe 4*/
-		{ 32,33,34,35,36,37,38,39,96,97,98,99,100,101,102,103,160,161,162,163,164,165,166,167 },							/*Reihe 5*/
-		{ 40,41,42,43,44,45,46,47,104,105,106,107,108,109,110,111,168,169,170,171,172,173,174,175},							/*Reihe 6*/
-		{48,49,50,51,52,53,54,55,112,113,114,115,116,117,118,119,176,177,178,179,180,181,182,183},							/*Reihe 7*/
-		{56,57,58,59,60,61,62,63,120,121,122,123,124,125,126,127,184,185,186,187,188,189,190,191},							/*Reihe 8*/
-	};
+uint32_t lookUpMatrix[8][24] = { /*Look up Matrix für die Lanes*/
+{ 0, 1, 2, 3, 4, 5, 6, 7, 64, 65, 66, 67, 68, 69, 70, 71, 128, 129, 130, 131,
+		132, 133, 134, 135 }, /*Reihe 1*/
+{ 8, 9, 10, 11, 12, 13, 14, 15, 72, 73, 74, 75, 76, 77, 78, 79, 136, 137, 138,
+		139, 140, 141, 142, 143 }, /*Reihe 2*/
+{ 16, 17, 18, 19, 20, 21, 22, 23, 80, 81, 82, 83, 84, 85, 86, 87, 144, 145, 146,
+		147, 148, 149, 150, 151 }, /*Reihe 3*/
+{ 24, 25, 26, 27, 28, 29, 30, 31, 88, 89, 90, 91, 92, 93, 94, 95, 152, 153, 154,
+		155, 156, 157, 158, 159 }, /*Reihe 4*/
+{ 32, 33, 34, 35, 36, 37, 38, 39, 96, 97, 98, 99, 100, 101, 102, 103, 160, 161,
+		162, 163, 164, 165, 166, 167 }, /*Reihe 5*/
+{ 40, 41, 42, 43, 44, 45, 46, 47, 104, 105, 106, 107, 108, 109, 110, 111, 168,
+		169, 170, 171, 172, 173, 174, 175 }, /*Reihe 6*/
+{ 48, 49, 50, 51, 52, 53, 54, 55, 112, 113, 114, 115, 116, 117, 118, 119, 176,
+		177, 178, 179, 180, 181, 182, 183 }, /*Reihe 7*/
+{ 56, 57, 58, 59, 60, 61, 62, 63, 120, 121, 122, 123, 124, 125, 126, 127, 184,
+		185, 186, 187, 188, 189, 190, 191 }, /*Reihe 8*/
+};
 
 #endif
-
 
 #if PL_CONFIG_HAS_NEO_SHADOW_BOX
 static void Layer(int layer, uint32_t color) {
@@ -740,9 +747,9 @@ uint8_t NEOA_Lauflicht(void) {
 	uint8_t res = ERR_OK;
 	NEO_ClearAllPixel();
 	NEO_TransferPixels();
-	for (j=0 ; j < NEOC_NOF_LANES; j++) {
-		for (k=0 ; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
-			for (i=0 ; i < MATRIX_RES; i++) {
+	for (j = 0; j < NEOC_NOF_LANES; j++) {
+		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
+			for (i = 0; i < MATRIX_RES; i++) {
 				position = lookUpMatrix[k][i];
 				res = NEO_SetPixelColor(j, position, 0x020200);
 				if (res != ERR_OK) {
@@ -763,10 +770,56 @@ uint8_t NEOA_Lauflicht(void) {
 
 }
 
+uint8_t NEOA_Display_Image(BMPImage* image) {
 
-uint8_t NEOA_Display_Image(){
+	uint32_t size;
+	uint32_t position = 0;
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	uint32_t colorValue = 0;
+	uint8_t lane = 0;
+	uint32_t color;
+	FRESULT res = FR_OK;
+	uint32_t cnt = 0;
+	int j = 0;
+	int k = 0;
+	int i = 0;
+
+	NEO_ClearAllPixel();
+	NEO_TransferPixels();
+//	size = ((image->biWidth) * (image->biHeight));
+
+	for (j = 0; j < NEOC_NOF_LANES; j++) {
+		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
+			for (i = 0; i < MATRIX_RES; i++) {
+				position = lookUpMatrix[k][i];
+				red = (image->data[cnt]);
+				green = (image->data[cnt + 1]);
+				blue = (image->data[cnt + 2]);
+				colorValue = (red << 16) + (green << 8) + (blue);
+				res = NEO_SetPixelColor(j, position, colorValue);
+				if (res != ERR_OK) {
+					break; /*Something went wrong*/
+
+				}
+
+				if (NEO_TransferPixels() != ERR_OK) {
+					break; /*Something went wrong*/
+				}
+
+				cnt = cnt + ((image->biBitCount) / 8);
+
+				vTaskDelay(pdMS_TO_TICKS(100));
+
+			}
+		}
+
+	}
+//	NEO_TransferPixels();
 
 
+	return res;
 }
 
 #if NEOA_CONFIG_PARSE_COMMAND_ENABLED
@@ -829,7 +882,7 @@ void NEOA_Init(void) {
 	PIXDMA_Init();
 	if (xTaskCreate(NeoTask, /* pointer to the task */
 	"Neo", /* task name for kernel awareness debugging */
-	800 / sizeof(StackType_t), /* task stack size */
+	2000 / sizeof(StackType_t), /* task stack size */
 	(void*) NULL, /* optional task startup argument */
 	tskIDLE_PRIORITY + 1, /* initial priority */
 	(xTaskHandle*) NULL /* optional task handle to create */

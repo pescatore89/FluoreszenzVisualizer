@@ -810,7 +810,7 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 
 				cnt = cnt + ((image->biBitCount) / 8);
 
-				vTaskDelay(pdMS_TO_TICKS(100));
+				vTaskDelay(pdMS_TO_TICKS(50));
 
 			}
 		}

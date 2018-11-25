@@ -868,22 +868,53 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 static void NeoTask(void* pvParameters) {
 
 	queue_handler = pvParameters;
-	Message_t *pxMessage;
-	pxMessage = &xMessage;
-
+	int value = -1;
+	//Message_t *pxMessage;
+	//pxMessage = &xMessage;
 	QUEUE_RESULT res = QUEUE_OK;
-
-	pxMessage->color = 0x00ff00;
-	pxMessage->excitation = 355;
-	pxMessage->data = NULL;
-	pxMessage->modus = SINGLE;
-	pxMessage->fadeoutTime = 500;
-
-	res = AddMessageToQueue(queue_handler, pxMessage);
-
 	Message_t *pxRxedMessage;
 	pxRxedMessage = &xMessage;
-	res = TakeMessageFromQueue(queue_handler, pxRxedMessage);
+
+	for (;;) {
+		if (TakeMessageFromQueue(queue_handler, pxRxedMessage) == QUEUE_EMPTY) {
+			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
+		} else {
+			CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
+			switch (pxRxedMessage->modus) {
+
+			case SINGLE:
+				/*Display single Image*/
+				CLS1_SendStr((unsigned char*) "Playing Single Image  ",
+						CLS1_GetStdio()->stdOut);
+				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
+				value = 0;
+				break;
+			case MODE1:
+				/*Display MODE 1*/
+				CLS1_SendStr((unsigned char*) "Playing Mode 1  ",
+						CLS1_GetStdio()->stdOut);
+				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
+				value = 1;
+				break;
+			case MODE2:
+				/*Display Mode 2*/
+				CLS1_SendStr((unsigned char*) "Playing Mode 2  ",
+						CLS1_GetStdio()->stdOut);
+				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
+				value = 2;
+				break;
+			case MODE3:
+				/*Display Mode 3*/
+				CLS1_SendStr((unsigned char*) "Playing Mode 3  ",
+						CLS1_GetStdio()->stdOut);
+				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
+				value = 3;
+				break;
+			}
+
+		}
+
+	}
 
 #if PL_CONFIG_HAS_MMA8451
 	int16_t xmg, ymg, zmg;

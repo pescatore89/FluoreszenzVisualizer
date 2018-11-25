@@ -37,6 +37,7 @@
 #include "PORT_PDD.h"
 #include "MINI1.h"
 #include "readBMP.h"
+#include "Pollen.h"
 #include "config.h"
 #include "stdlib.h"
 #define INI_FILE_NAME			"Config.txt"
@@ -61,6 +62,7 @@ static const CLS1_ParseCommandCallback CmdParserTable[] = { CLS1_ParseCommand,
 #if PL_CONFIG_HAS_I2C_SPY
 		I2CSPY1_ParseCommand,
 #endif
+
 #if PL_CONFIG_HAS_TSL2561
 		TSL1_ParseCommand,
 #endif
@@ -78,6 +80,7 @@ static const CLS1_ParseCommandCallback CmdParserTable[] = { CLS1_ParseCommand,
 		FAT1_ParseCommand,
 		BMP_ParseCommand,
 		CONFIG_ParseCommand,
+		POLLEN_ParseCommand,
 #endif
 #if PL_CONFIG_HAS_SHT31
 		SHT31_ParseCommand,

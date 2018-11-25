@@ -8,8 +8,13 @@
 #ifndef SOURCES_POLLEN_H_
 #define SOURCES_POLLEN_H_
 
+#include "PE_Types.h"
+#include "CLS1.h"
 
+uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
+		const CLS1_StdIOType *io);
 
+uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io );
 
 
 #endif /* SOURCES_POLLEN_H_ */

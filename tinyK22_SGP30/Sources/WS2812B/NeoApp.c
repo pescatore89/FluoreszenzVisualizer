@@ -27,6 +27,7 @@
 #include "GDisp1.h"
 #include "LCD1.h"
 #include "ff.h"
+#include "..\Message.h"
 
 #endif
 
@@ -38,7 +39,7 @@
 static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
-
+xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
 	/* single lane, 3x64 modules from left to right */
@@ -818,7 +819,6 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 	}
 //	NEO_TransferPixels();
 
-
 	return res;
 }
 
@@ -866,6 +866,25 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 #endif /* NEOA_CONFIG_PARSE_COMMAND_ENABLED */
 
 static void NeoTask(void* pvParameters) {
+
+	queue_handler = pvParameters;
+	Message_t *pxMessage;
+	pxMessage = &xMessage;
+
+	QUEUE_RESULT res = QUEUE_OK;
+
+	pxMessage->color = 0x00ff00;
+	pxMessage->excitation = 355;
+	pxMessage->data = NULL;
+	pxMessage->modus = SINGLE;
+	pxMessage->fadeoutTime = 500;
+
+	res = AddMessageToQueue(queue_handler, pxMessage);
+
+	Message_t *pxRxedMessage;
+	pxRxedMessage = &xMessage;
+	res = TakeMessageFromQueue(queue_handler, pxRxedMessage);
+
 #if PL_CONFIG_HAS_MMA8451
 	int16_t xmg, ymg, zmg;
 #endif
@@ -877,13 +896,13 @@ static void NeoTask(void* pvParameters) {
 	}
 }
 
-void NEOA_Init(void) {
+void NEOA_Init(void* queue_handler) {
 	NEO_Init();
 	PIXDMA_Init();
 	if (xTaskCreate(NeoTask, /* pointer to the task */
 	"Neo", /* task name for kernel awareness debugging */
 	2000 / sizeof(StackType_t), /* task stack size */
-	(void*) NULL, /* optional task startup argument */
+	(void*) queue_handler, /* optional task startup argument */
 	tskIDLE_PRIORITY + 1, /* initial priority */
 	(xTaskHandle*) NULL /* optional task handle to create */
 	) != pdPASS) {

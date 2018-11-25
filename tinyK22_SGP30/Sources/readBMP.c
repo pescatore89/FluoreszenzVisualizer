@@ -211,6 +211,9 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			image->biSizeImage = buf[34];
 			image->biCompression = buf[30];
 		}
+
+
+
 		image->data = malloc(
 				image->biWidth * image->biHeight * sizeof(char) * ((image->biBitCount)/8));
 		if (image->data != NULL) {

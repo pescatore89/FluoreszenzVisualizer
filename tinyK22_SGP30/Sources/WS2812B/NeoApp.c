@@ -40,6 +40,7 @@ static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
+xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
 	/* single lane, 3x64 modules from left to right */
@@ -880,41 +881,57 @@ static void NeoTask(void* pvParameters) {
 			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 		} else {
 			CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-			switch (pxRxedMessage->modus) {
+			if (FRTOS1_xSemaphoreTake(mutex,pdMS_TO_TICKS(10)) != pdTRUE) {
+				/*Access to Mutex denied*/
+				CLS1_SendStr((unsigned char*) "Mutex nicht erhalten\r\n ",
+						CLS1_GetStdio()->stdOut);
 
-			case SINGLE:
-				/*Display single Image*/
-				CLS1_SendStr((unsigned char*) "Playing Single Image  ",
-						CLS1_GetStdio()->stdOut);
-				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-				value = 0;
-				NEOA_Lauflicht();
+			} else {
+				switch (pxRxedMessage->modus) {
 
-				break;
-			case MODE1:
-				/*Display MODE 1*/
-				CLS1_SendStr((unsigned char*) "Playing Mode 1  ",
-						CLS1_GetStdio()->stdOut);
-				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-				value = 1;
+				case SINGLE:
+					/*Display single Image*/
+					CLS1_SendStr((unsigned char*) "Playing Single Image  ",
+							CLS1_GetStdio()->stdOut);
+					CLS1_SendStr((unsigned char*) "\r\n ",
+							CLS1_GetStdio()->stdOut);
+					value = 0;
+					NEOA_Lauflicht();
 
-				break;
-			case MODE2:
-				/*Display Mode 2*/
-				CLS1_SendStr((unsigned char*) "Playing Mode 2  ",
-						CLS1_GetStdio()->stdOut);
-				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-				value = 2;
-				break;
-			case MODE3:
-				/*Display Mode 3*/
-				CLS1_SendStr((unsigned char*) "Playing Mode 3  ",
-						CLS1_GetStdio()->stdOut);
-				CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-				value = 3;
-				break;
+					break;
+				case MODE1:
+					/*Display MODE 1*/
+					CLS1_SendStr((unsigned char*) "Playing Mode 1  ",
+							CLS1_GetStdio()->stdOut);
+					CLS1_SendStr((unsigned char*) "\r\n ",
+							CLS1_GetStdio()->stdOut);
+					value = 1;
+
+					break;
+				case MODE2:
+					/*Display Mode 2*/
+					CLS1_SendStr((unsigned char*) "Playing Mode 2  ",
+							CLS1_GetStdio()->stdOut);
+					CLS1_SendStr((unsigned char*) "\r\n ",
+							CLS1_GetStdio()->stdOut);
+					value = 2;
+					break;
+				case MODE3:
+					/*Display Mode 3*/
+					CLS1_SendStr((unsigned char*) "Playing Mode 3  ",
+							CLS1_GetStdio()->stdOut);
+					CLS1_SendStr((unsigned char*) "\r\n ",
+							CLS1_GetStdio()->stdOut);
+					value = 3;
+					break;
+				}
+
 			}
-
+			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+				/*Couldnt return Mutex*/
+				for (;;) {		/*shouldnt go here*/
+				}
+			}
 		}
 
 	}

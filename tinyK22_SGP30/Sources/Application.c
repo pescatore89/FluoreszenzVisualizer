@@ -39,7 +39,7 @@
 #endif
 static xTimerHandle timerHndl;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
-
+xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message.h*/
 static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 #if PL_CONFIG_HAS_GUI
 	lv_tick_inc(APP_PERIODIC_TIMER_PERIOD_MS);
@@ -58,6 +58,11 @@ static void AppTask(void *pv) {
 }
 
 void APP_Run(void) {
+
+	mutex = FRTOS1_xSemaphoreCreateMutex();
+	if (mutex == NULL) {
+		/*Something went wrong*/
+	}
 	queue_handler = FRTOS1_xQueueCreate(QUEUE_LENGTH, sizeof(struct MESSAGE *));/*Queue erstellen*/
 	if (queue_handler == NULL) {
 		/*Something went wrong*/
@@ -65,6 +70,7 @@ void APP_Run(void) {
 
 	else {
 		vQueueAddToRegistry(queue_handler, "Message Queue");
+
 #if PL_CONFIG_HAS_NEO_PIXEL
 		NEOA_Init(queue_handler); /*Dem NeoTask den QueueHandler mitgeben*/
 #endif

@@ -17,7 +17,7 @@
 
 
 extern xQueueHandle queue_handler;
-
+extern xSemaphoreHandle mutex;
 
 
 
@@ -39,6 +39,17 @@ typedef enum {
 	MODE3					/* (4) Modus 3*/
 
 } MODE;
+
+
+typedef enum{
+	pause,
+	play,
+	stop,
+	skip_backward,
+	skip_forward
+
+}xNavigation;
+
 
   struct MESSAGE{
 	MODE 	 	 modus;

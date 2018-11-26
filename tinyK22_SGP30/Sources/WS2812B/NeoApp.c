@@ -40,6 +40,7 @@ static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
+xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
@@ -746,6 +747,10 @@ uint8_t NEOA_Lauflicht(void) {
 	int j = 0;
 	int k = 0;
 	int i = 0;
+
+	Navigation_t* rxNav;
+	rxNav = &xNavigation;
+
 	uint8_t res = ERR_OK;
 	NEO_ClearAllPixel();
 	NEO_TransferPixels();
@@ -762,13 +767,37 @@ uint8_t NEOA_Lauflicht(void) {
 				if (NEO_TransferPixels() != ERR_OK) {
 					break; /*Something went wrong*/
 				}
+				if (TakeNavigationFromQueue(queue_handler_Navigation, rxNav)
+						!= QUEUE_EMPTY) {
+					switch (rxNav->menu) {
+					case pause:
+						for (;;) {
+							if (TakeNavigationFromQueue(
+									queue_handler_Navigation, rxNav)
+									!= QUEUE_EMPTY) {
+								switch (rxNav->menu) {
+								case play:
+									break;
+								case stop:
+									NEO_ClearAllPixel();
+									NEO_TransferPixels();
+									goto finish;
+								}
+
+							} else {
+								vTaskDelay(pdMS_TO_TICKS(10));
+							}
+						}
+					}
+				}
 				vTaskDelay(pdMS_TO_TICKS(100));
 
 			}
 		}
 
 	}
-	return res;
+
+	finish: return res;
 
 }
 
@@ -929,7 +958,7 @@ static void NeoTask(void* pvParameters) {
 			}
 			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 				/*Couldnt return Mutex*/
-				for (;;) {		/*shouldnt go here*/
+				for (;;) { /*shouldnt go here*/
 				}
 			}
 		}

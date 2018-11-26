@@ -6,9 +6,9 @@
  */
 
 #include "Pollen.h"
-#include "Message.h"
 
 xQueueHandle queue_handler;
+xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex;
 
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
@@ -42,6 +42,25 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 
 	uint8_t val = 0;
 	res = AddMessageToQueue(queue_handler, pxMessage);
+	if (res != QUEUE_OK) {
+		return result = ERR_BUSY;
+	}
+
+	return result;
+
+}
+
+uint8_t SetNav(int32_t nav) {
+
+	Navigation_t * pxNav;
+	pxNav = &xNavigation;
+	pxNav->menu = nav;
+
+	uint8_t result = ERR_OK;
+	QUEUE_RESULT res = QUEUE_OK;
+
+	uint8_t val = 0;
+	res = AddNavigationToQueue(queue_handler_Navigation, pxNav);
 	if (res != QUEUE_OK) {
 		return result = ERR_BUSY;
 	}
@@ -85,21 +104,25 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 					res = ERR_FAULT;
 				}
 			}
-
 			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 				/*Mutex konnte nicht zurückgegeben werden*/
 			}
-
-		}
-
-		else {
+		} else {
 
 			CLS1_SendStr((unsigned char*) "Anwendung läuft bereits \r\n ",
 					CLS1_GetStdio()->stdOut);
-
 		}
-
+	} else if (UTIL1_strncmp((char*) cmd, "pollen pause",
+			sizeof("pollen pause") - 1) == 0) {
+		res = SetNav(pause);
+	} else if (UTIL1_strncmp((char*) cmd, "pollen play",
+			sizeof("pollen play") - 1) == 0) {
+		res = SetNav(play);
+	} else if (UTIL1_strncmp((char*) cmd, "pollen stop",
+			sizeof("pollen stop") - 1) == 0) {
+		res = SetNav(stop);
 	}
+
 	*handled = TRUE;
 	return res;
 }

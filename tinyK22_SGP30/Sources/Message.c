@@ -38,3 +38,36 @@ QUEUE_RESULT TakeMessageFromQueue(xQueueHandle handle,Message_t * msg){
 	return res;
 
 }
+
+
+
+QUEUE_RESULT AddNavigationToQueue(xQueueHandle handle,Navigation_t *msg){
+
+
+	QUEUE_RESULT res = QUEUE_OK;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	if(FRTOS1_xQueueSendToBack(handle,(void *)&msg,0)!=pdPASS){
+		res = QUEUE_IS_FULL;
+	}
+	CS1_ExitCritical();
+	return res;
+
+}
+
+
+QUEUE_RESULT TakeNavigationFromQueue(xQueueHandle handle,Navigation_t *msg){
+
+	QUEUE_RESULT res = QUEUE_OK;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	if(FRTOS1_xQueueReceive(handle,(void *)&msg,0 )!=pdPASS){
+		res = QUEUE_EMPTY;
+	}
+	else{
+		int z = 12;
+	}
+	CS1_ExitCritical();
+	return res;
+
+}

@@ -39,6 +39,7 @@
 #endif
 static xTimerHandle timerHndl;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
+xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message.h*/
 static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 #if PL_CONFIG_HAS_GUI
@@ -62,6 +63,13 @@ void APP_Run(void) {
 	mutex = FRTOS1_xSemaphoreCreateMutex();
 	if (mutex == NULL) {
 		/*Something went wrong*/
+	}
+	queue_handler_Navigation = FRTOS1_xQueueCreate(QUEUE_LENGTH,
+			sizeof(struct MENU *));
+	if (queue_handler_Navigation == NULL) {
+		/*Something went wrong*/
+	} else {
+		vQueueAddToRegistry(queue_handler_Navigation, "Navigation Queue");
 	}
 	queue_handler = FRTOS1_xQueueCreate(QUEUE_LENGTH, sizeof(struct MESSAGE *));/*Queue erstellen*/
 	if (queue_handler == NULL) {

@@ -37,7 +37,8 @@ typedef enum {
 	SINGLE = 1, /* (1) Einzelnes Bild darstellen */
 	MODE1, /* (2) Modus 1 */
 	MODE2, /* (3) Modus 2 */
-	MODE3 /* (4) Modus 3*/
+	MODE3, /* (4) Modus 3*/
+	CALIBRATION /*Calibration Mode*/
 
 } MODE;
 

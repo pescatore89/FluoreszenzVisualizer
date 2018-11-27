@@ -90,7 +90,7 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 		if (FRTOS1_xSemaphoreTake(mutex,0) == pdTRUE) {
 			p = cmd + sizeof("pollen Mode") - 1;
 			res = UTIL1_xatoi(&p, &mode); /* read Mode */
-			if (res == ERR_OK && mode >= 1 && mode <= 3) {
+			if (res == ERR_OK && mode >= 1 && mode <= 5) {
 				polle = FRTOS1_pvPortMalloc(sizeof(char*));
 				if (polle != NULL) {
 					strcpy(polle, p);
@@ -112,6 +112,10 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 			CLS1_SendStr((unsigned char*) "Anwendung läuft bereits \r\n ",
 					CLS1_GetStdio()->stdOut);
 		}
+
+	} else if (UTIL1_strncmp((char*) cmd, "pollen calibrating",
+			sizeof("pollen calibrating") - 1) == 0) {
+		res = SetMode(5,NULL,io);		/*Mode 5 is Calibration mode*/
 	} else if (UTIL1_strncmp((char*) cmd, "pollen pause",
 			sizeof("pollen pause") - 1) == 0) {
 		res = SetNav(pause);

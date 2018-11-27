@@ -76,6 +76,22 @@ uint32_t lookUpMatrix[8][24] = { /*Look up Matrix für die Lanes*/
 
 #endif
 
+uint8_t SetCoordinate(int x, int y, uint32_t color) {
+
+	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
+		return ERR_RANGE;
+	} else if ((y > 0) && (y < 9)) {
+		NEO_SetPixelColor(0, lookUpMatrix[y - 1][x - 1], color);
+	} else if ((y > 8) && (y < 17)) {
+		NEO_SetPixelColor(1, lookUpMatrix[(y - 9)][x - 1], color);
+	} else if (y > 16) {
+		NEO_SetPixelColor(2, lookUpMatrix[(y - 17)][x - 1], color);
+	}
+
+	return ERR_OK;
+
+}
+
 #if PL_CONFIG_HAS_NEO_SHADOW_BOX
 static void Layer(int layer, uint32_t color) {
 	int y, x;
@@ -943,6 +959,8 @@ static void NeoTask(void* pvParameters) {
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
+					SetCoordinate(23, 23, 0xff0000);
+					NEO_TransferPixels();
 					value = 2;
 					break;
 				case MODE3:
@@ -951,7 +969,47 @@ static void NeoTask(void* pvParameters) {
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
+					SetCoordinate(12, 12, 0xff0000);
+					NEO_TransferPixels();
 					value = 3;
+					break;
+
+				case CALIBRATION:
+					/*Calibration Mode*/
+					CLS1_SendStr((unsigned char*) "Start calibration...  ",
+							CLS1_GetStdio()->stdOut);
+					CLS1_SendStr((unsigned char*) "\r\n ",
+							CLS1_GetStdio()->stdOut);
+					SetCoordinate(1, 1, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(9, 1, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(17, 1, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(1, 9, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(9, 9, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(17, 9, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(1, 17, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(9, 17, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					SetCoordinate(17, 17, 0xff0000);
+					NEO_TransferPixels();
+					CLS1_SendStr((unsigned char*) "...calibration done",
+							CLS1_GetStdio()->stdOut);
+					CLS1_SendStr((unsigned char*) "\r\n ",
+							CLS1_GetStdio()->stdOut);
 					break;
 				}
 

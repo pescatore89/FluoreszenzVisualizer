@@ -74,6 +74,55 @@ uint32_t lookUpMatrix[8][24] = { /*Look up Matrix für die Lanes*/
 		185, 186, 187, 188, 189, 190, 191 }, /*Reihe 8*/
 };
 
+const static uint8_t ring_1[4] = { 91, 92, 99, 100 };
+const static uint8_t ring_2[12] = { 82, 83, 84, 85, 90, 93, 98, 101, 106, 107,
+		108, 109 };
+const static uint8_t ring_3[20] = { 73, 74, 75, 76, 77, 78, 81, 86, 89, 94, 97,
+		102, 105, 110, 113, 114, 115, 116, 117, 118 };
+const static uint8_t ring_4[28] = { 64, 65, 66, 67, 68, 69, 70, 71, 72, 79, 80,
+		87, 88, 95, 96, 103, 104, 111, 112, 119, 120, 121, 122, 123, 124, 125,
+		126, 127 };
+const static uint8_t ring_5[3][16] = { { 63, 71, 79, 87, 95, 103, 111, 119, 127,
+		135 }, { 56, 57, 58, 59, 60, 61, 62, 63, 128, 129, 130, 131, 132, 133,
+		134, 135 }, { 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 } };
+const static uint8_t ring_6[3][16] = { { 54, 55, 62, 70, 78, 86, 94, 102, 110,
+		118, 126, 134, 142, 143 }, { 48, 49, 50, 51, 52, 53, 54, 55, 136, 137,
+		138, 139, 140, 141, 142, 143 }, { 48, 49, 57, 65, 73, 81, 89, 97, 105,
+		113, 121, 129, 137, 136 } };
+const static uint8_t ring_7[3][18] = { { 47, 46, 45, 53, 61, 69, 77, 85, 93,
+		101, 109, 117, 125, 133, 141, 151, 150, 149 }, { 47, 46, 45, 44, 43, 42,
+		41, 40, 151, 150, 149, 148, 147, 146, 145, 144 }, { 42, 41, 40, 146,
+		145, 144, 50, 58, 66, 74, 82, 90, 98, 106, 114, 122, 130, 138 } };
+const static uint8_t ring_8[3][22] = { { 36, 44, 52, 60, 68, 76, 84, 92, 100,
+		108, 116, 124, 132, 140, 148, 156, 39, 38, 37, 159, 158, 157 }, { 39,
+		38, 37, 36, 35, 34, 33, 32, 159, 158, 157, 156, 155, 154, 153, 152 }, {
+		35, 43, 51, 59, 67, 75, 83, 91, 99, 107, 115, 123, 131, 139, 147, 155,
+		34, 33, 32, 154, 153, 152 } };
+const static uint8_t ring_9[3][26] = { { 27, 35, 43, 51, 59, 67, 75, 83, 91, 99,
+		107, 115, 123, 131, 139, 147, 155, 163, 31, 30, 29, 28, 167, 166, 165,
+		164 }, { 31, 30, 29, 28, 27, 26, 25, 24, 167, 166, 165, 164, 163, 162,
+		161, 160 }, { 28, 27, 26, 25, 24, 164, 163, 162, 161, 160, 36, 44, 52,
+		60, 68, 76, 84, 92, 100, 108, 116, 124, 132, 140, 148, 156 } };
+const static uint8_t ring_10[3][30] = { { 18, 26, 34, 42, 50, 58, 66, 74, 82,
+		90, 98, 106, 114, 122, 130, 138, 146, 154, 162, 170, 23, 22, 21, 20, 19,
+		175, 174, 173, 172, 171 }, { 23, 22, 21, 20, 19, 18, 17, 16, 175, 174,
+		173, 172, 171, 170, 169, 168 }, { 21, 20, 19, 18, 17, 16, 173, 172, 171,
+		170, 169, 168, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125,
+		133, 141, 149, 157, 165 } };
+const static uint8_t ring_11[3][34] = { { 15, 14, 13, 12, 11, 10, 9, 183, 182,
+		181, 180, 179, 178, 177, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97,
+		105, 113, 121, 129, 137, 145, 153, 161, 169 }, { 15, 14, 13, 12, 11, 10,
+		9, 8, 183, 182, 181, 180, 179, 178, 177, 176 }, { 14, 13, 12, 11, 10, 9,
+		8, 182, 181, 180, 179, 178, 177, 176, 22, 30, 38, 46, 54, 62, 70, 78,
+		86, 94, 102, 110, 118, 126, 134, 142, 150, 158, 166, 174 } };
+const static uint8_t ring_12[3][38] =
+		{ { 7, 6, 5, 4, 3, 2, 1, 0, 191, 190, 189, 188, 187, 186, 185, 184, 8,
+				16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128,
+				136, 144, 152, 160, 168, 176 }, { 7, 6, 5, 4, 3, 2, 1, 0, 191,
+				190, 189, 188, 187, 186, 185, 184 }, { 7, 6, 5, 4, 3, 2, 1, 0,
+				191, 190, 189, 188, 187, 186, 185, 184, 15, 23, 31, 39, 47, 55,
+				63, 71, 79, 87, 95, 103, 111, 119, 127, 135, 143, 151, 159, 167,
+				175, 183 } };
 #endif
 
 uint8_t SetCoordinate(int x, int y, uint32_t color) {
@@ -108,8 +157,178 @@ uint8_t ClearCoordinate(int x, int y) {
 
 }
 
-uint8_t DimmPercentPixel(int x, int y,
-		uint8_t percent) {
+uint8_t setRingData(uint8_t ring, uint32_t color) {
+
+	uint8_t lenght_lane_0 = 0;
+	uint8_t lenght_lane_1 = 0;
+	uint8_t lenght_lane_2 = 0;
+	uint8_t res = ERR_OK;
+	int i = 0;
+
+	if (ring < 1 || ring > 12) {
+		return ERR_FAILED; /*out of Range*/
+	}
+
+	switch (ring) {
+	case 1:
+		lenght_lane_1 = sizeof(ring_1) / sizeof(ring_1[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_1[i], color);
+		}
+		break;
+
+	case 2:
+		lenght_lane_1 = sizeof(ring_2) / sizeof(ring_2[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_2[i], color);
+		}
+		break;
+	case 3:
+		lenght_lane_1 = sizeof(ring_3) / sizeof(ring_3[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_3[i], color);
+		}
+		break;
+	case 4:
+		lenght_lane_1 = sizeof(ring_4) / sizeof(ring_4[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_4[i], color);
+		}
+		break;
+	case 5:
+		lenght_lane_0 = 10;
+		lenght_lane_1 = 16;
+		lenght_lane_2 = 10;
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_5[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_5[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_5[2][i], color);
+		}
+		break;
+
+	case 6:
+		lenght_lane_0 = sizeof(ring_6[0]) / sizeof(ring_6[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_6[2]) / sizeof(ring_6[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_6[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_6[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_6[2][i], color);
+		}
+		break;
+
+	case 7:
+		lenght_lane_0 = sizeof(ring_7[0]) / sizeof(ring_7[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_7[2]) / sizeof(ring_7[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_7[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_7[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_7[2][i], color);
+		}
+		break;
+
+	case 8:
+		lenght_lane_0 = sizeof(ring_8[0]) / sizeof(ring_8[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_8[2]) / sizeof(ring_8[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_8[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_8[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_8[2][i], color);
+		}
+		break;
+
+	case 9:
+		lenght_lane_0 = sizeof(ring_9[0]) / sizeof(ring_9[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_9[2]) / sizeof(ring_9[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_9[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_9[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_9[2][i], color);
+		}
+		break;
+
+	case 10:
+		lenght_lane_0 = sizeof(ring_10[0]) / sizeof(ring_10[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_10[2]) / sizeof(ring_10[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_10[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_10[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_10[2][i], color);
+		}
+		break;
+
+	case 11:
+		lenght_lane_0 = sizeof(ring_11[0]) / sizeof(ring_11[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_11[2]) / sizeof(ring_11[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_11[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_11[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_11[2][i], color);
+		}
+		break;
+
+	case 12:
+		lenght_lane_0 = sizeof(ring_12[0]) / sizeof(ring_12[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_12[2]) / sizeof(ring_12[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_SetPixelColor(0, ring_12[0][i], color);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_SetPixelColor(1, ring_12[1][i], color);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_SetPixelColor(2, ring_12[2][i], color);
+		}
+		break;
+	}
+
+	return res;
+
+}
+
+uint8_t DimmPercentPixel(int x, int y, uint8_t percent) {
 	uint8_t red, green, blue;
 	uint32_t dRed, dGreen, dBlue;
 
@@ -138,24 +357,18 @@ uint8_t DimmPercentPixel(int x, int y,
 
 	color = NEO_MAKE_COLOR_RGB(dRed, dGreen, dBlue);
 
-
 	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
-			return ERR_RANGE;
-		} else if ((y > 0) && (y < 9)) {
-			return NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), color);
-		} else if ((y > 8) && (y < 17)) {
-			return NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), color);
-		} else if (y > 16) {
-			return NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), color);
-		}
+		return ERR_RANGE;
+	} else if ((y > 0) && (y < 9)) {
+		return NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), color);
+	} else if ((y > 8) && (y < 17)) {
+		return NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), color);
+	} else if (y > 16) {
+		return NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), color);
+	}
 
 	return res;
 }
-
-
-
-
-
 
 #if PL_CONFIG_HAS_NEO_SHADOW_BOX
 static void Layer(int layer, uint32_t color) {
@@ -360,7 +573,7 @@ static void InitHourGlass(int nofGrains) {
  by 90 degrees in cw (clockwise) or anti-clockwise direction */
 static void rotateMatrixAntiClockWise(int mat[][N], bool cw) {
 	/* source: https://www.geeksforgeeks.org/inplace-rotate-square-matrix-by-90-degrees/ */
-	// Consider all squares one by one
+// Consider all squares one by one
 	for (int x = 0; x < N / 2; x++) { /* Consider elements in group of 4 in current square */
 		for (int y = x; y < N-x-1; y++) {
 			int temp = mat[x][y]; /* store current cell in temp variable */
@@ -980,8 +1193,8 @@ static void NeoTask(void* pvParameters) {
 
 	queue_handler = pvParameters;
 	int value = -1;
-	//Message_t *pxMessage;
-	//pxMessage = &xMessage;
+//Message_t *pxMessage;
+//pxMessage = &xMessage;
 	QUEUE_RESULT res = QUEUE_OK;
 	Message_t *pxRxedMessage;
 	pxRxedMessage = &xMessage;
@@ -1006,7 +1219,18 @@ static void NeoTask(void* pvParameters) {
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
 					value = 0;
-					NEOA_Lauflicht();
+					int blub[] = { 1, 2, 3, 6, 7 };
+					int kluk = sizeof(blub) / (sizeof(blub[0]));
+					//NEOA_Lauflicht();
+					for (;;) {
+						for (int z = 1; z < 13; z++) {
+							setRingData(z, 0x050005);
+							NEO_TransferPixels();
+							vTaskDelay(pdMS_TO_TICKS(10));
+							NEO_ClearAllPixel();
+							NEO_TransferPixels();
+						}
+					}
 
 					break;
 				case MODE1:
@@ -1145,8 +1369,8 @@ uint8_t SetTrail(uint32_t color, uint32_t end, uint32_t nofTail,
 		/* dim remaining tail pixel */
 		for (i = 0; i < nofTail; i++) {
 			if (pixel > i && pixel - (i + 1) <= end) {
-				DimmPercentPixel(pixel - (i + 1),12 , dimmPercent);
-				DimmPercentPixel(pixel - (i + 1),11 , dimmPercent);
+				DimmPercentPixel(pixel - (i + 1), 12, dimmPercent);
+				DimmPercentPixel(pixel - (i + 1), 11, dimmPercent);
 				//NEO_DimmPercentPixel(1,lookUpMatrix[12][pixel-(i+1)+1], dimmPercent);
 			}
 		}

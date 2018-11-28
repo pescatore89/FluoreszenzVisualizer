@@ -24,6 +24,24 @@ uint8_t SetTrail(uint32_t color,  uint32_t end, uint32_t nofTail, uint8_t dimmPe
 uint8_t ClearCoordinate(int x, int y);
 uint8_t DimmPercentPixel(int x, int y, uint8_t percent);
 
+struct CYRCLES {
+	uint8_t* C_1;
+	uint8_t* C_2;
+	uint8_t* C_3;
+	uint8_t* C_4;
+	uint8_t* C_5;
+	uint8_t* C_6;
+	uint8_t* C_7;
+	uint8_t* C_8;
+	uint8_t* C_9;
+	uint8_t* C_10;
+	uint8_t* C_11;
+	uint8_t* C_12;
+};
+typedef struct CYRCLES Cyrcles_t;
 
 
+
+
+uint8_t setRingData(uint8_t ring,uint32_t color);
 #endif /* SOURCES_WS2812B_NEO_APP_C_ */

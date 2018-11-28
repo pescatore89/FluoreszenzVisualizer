@@ -327,7 +327,175 @@ uint8_t setRingData(uint8_t ring, uint32_t color) {
 	return res;
 
 }
+uint8_t DimmPercentRing(uint8_t ring, uint32_t percent) {
 
+	uint8_t lenght_lane_0 = 0;
+	uint8_t lenght_lane_1 = 0;
+	uint8_t lenght_lane_2 = 0;
+	uint8_t res = ERR_OK;
+	int i = 0;
+
+	if (ring < 1 || ring > 12) {
+		return ERR_FAILED; /*out of Range*/
+	}
+
+	switch (ring) {
+	case 1:
+		lenght_lane_1 = sizeof(ring_1) / sizeof(ring_1[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_1[i], percent);
+		}
+		break;
+	case 2:
+		lenght_lane_1 = sizeof(ring_2) / sizeof(ring_2[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_2[i], percent);
+		}
+		break;
+	case 3:
+		lenght_lane_1 = sizeof(ring_3) / sizeof(ring_3[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_3[i], percent);
+		}
+		break;
+	case 4:
+		lenght_lane_1 = sizeof(ring_4) / sizeof(ring_4[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_4[i], percent);
+		}
+		break;
+	case 5:
+		lenght_lane_0 = 10;
+		lenght_lane_1 = 16;
+		lenght_lane_2 = 10;
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_5[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_5[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_5[2][i], percent);
+		}
+		break;
+
+	case 6:
+		lenght_lane_0 = sizeof(ring_6[0]) / sizeof(ring_6[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_6[2]) / sizeof(ring_6[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_6[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_6[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_6[2][i], percent);
+		}
+		break;
+
+	case 7:
+		lenght_lane_0 = sizeof(ring_7[0]) / sizeof(ring_7[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_7[2]) / sizeof(ring_7[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_7[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_7[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_7[2][i], percent);
+		}
+		break;
+
+	case 8:
+		lenght_lane_0 = sizeof(ring_8[0]) / sizeof(ring_8[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_8[2]) / sizeof(ring_8[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_8[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_8[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_8[2][i], percent);
+		}
+		break;
+
+	case 9:
+		lenght_lane_0 = sizeof(ring_9[0]) / sizeof(ring_9[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_9[2]) / sizeof(ring_9[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_9[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_9[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_9[2][i], percent);
+		}
+		break;
+
+	case 10:
+		lenght_lane_0 = sizeof(ring_10[0]) / sizeof(ring_10[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_10[2]) / sizeof(ring_10[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_10[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_10[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_10[2][i], percent);
+		}
+		break;
+
+	case 11:
+		lenght_lane_0 = sizeof(ring_11[0]) / sizeof(ring_11[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_11[2]) / sizeof(ring_11[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_11[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_11[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_11[2][i], percent);
+		}
+		break;
+
+	case 12:
+		lenght_lane_0 = sizeof(ring_12[0]) / sizeof(ring_12[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_12[2]) / sizeof(ring_12[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_DimmPercentPixel(0, ring_12[0][i], percent);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_DimmPercentPixel(1, ring_12[1][i], percent);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_DimmPercentPixel(2, ring_12[2][i], percent);
+		}
+		break;
+	}
+
+	return res;
+
+}
 uint8_t DimmPercentPixel(int x, int y, uint8_t percent) {
 	uint8_t red, green, blue;
 	uint32_t dRed, dGreen, dBlue;
@@ -1248,24 +1416,16 @@ static void NeoTask(void* pvParameters) {
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
-					SetCoordinate(1, 1, 0xff0000);
-					SetCoordinate(2, 1, 0xff0000);
-					SetCoordinate(3, 1, 0xff0000);
-					SetCoordinate(4, 1, 0xff0000);
-					SetCoordinate(5, 1, 0xff0000);
-					SetCoordinate(6, 1, 0xff0000);
-					SetCoordinate(7, 1, 0xff0000);
-					SetCoordinate(8, 1, 0xff0000);
-					SetCoordinate(9, 1, 0xff0000);
-					SetCoordinate(10, 1, 0xff0000);
-					SetCoordinate(11, 1, 0xff0000);
-
-					SetCoordinate(2, 2, 0xff0000);
-					SetCoordinate(2, 3, 0xff0000);
-					SetCoordinate(2, 4, 0xff0000);
-					SetCoordinate(2, 5, 0xff0000);
+					setRingData(2,0xff0000);
+					setRingData(3,0xff0000);
+					setRingData(4,0xff0000);
+					setRingData(5,0xff0000);
+					setRingData(6,0xff0000);
 					NEO_TransferPixels();
-					NEO_DimmPercentPixel(0, 7, 90);
+					DimmPercentRing(3,20);
+					DimmPercentRing(4,80);
+					DimmPercentRing(5,95);
+					DimmPercentRing(6,99);
 					NEO_TransferPixels();
 
 					break;

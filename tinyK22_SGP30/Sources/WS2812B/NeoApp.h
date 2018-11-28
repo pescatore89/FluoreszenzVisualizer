@@ -42,6 +42,6 @@ typedef struct CYRCLES Cyrcles_t;
 
 
 
-
+uint8_t DimmPercentRing(uint8_t ring, uint32_t percent);
 uint8_t setRingData(uint8_t ring,uint32_t color);
 #endif /* SOURCES_WS2812B_NEO_APP_C_ */

@@ -21,6 +21,7 @@ uint8_t NEOL_PixelTrail(NEO_Color color, NEO_PixelIdxT start, NEO_PixelIdxT end,
     /* clear tail pixel */
     if (pixel-start>nofTail && pixel-(nofTail+1)<=end) {
       NEO_ClearPixel(0, pixel-(nofTail+1));
+
     }
     /* dim remaining tail pixel */
     for(i=0;i<nofTail;i++) {

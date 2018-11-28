@@ -81,16 +81,81 @@ uint8_t SetCoordinate(int x, int y, uint32_t color) {
 	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
 		return ERR_RANGE;
 	} else if ((y > 0) && (y < 9)) {
-		NEO_SetPixelColor(0, lookUpMatrix[y - 1][x - 1], color);
+		NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), color);
 	} else if ((y > 8) && (y < 17)) {
-		NEO_SetPixelColor(1, lookUpMatrix[(y - 9)][x - 1], color);
+		NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), color);
 	} else if (y > 16) {
-		NEO_SetPixelColor(2, lookUpMatrix[(y - 17)][x - 1], color);
+		NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), color);
 	}
 
 	return ERR_OK;
 
 }
+
+uint8_t ClearCoordinate(int x, int y) {
+
+	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
+		return ERR_RANGE;
+	} else if ((y > 0) && (y < 9)) {
+		NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), 0x000000);
+	} else if ((y > 8) && (y < 17)) {
+		NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), 0x000000);
+	} else if (y > 16) {
+		NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), 0x000000);
+	}
+
+	return ERR_OK;
+
+}
+
+uint8_t DimmPercentPixel(int x, int y,
+		uint8_t percent) {
+	uint8_t red, green, blue;
+	uint32_t dRed, dGreen, dBlue;
+
+	uint8_t res;
+	NEO_Color color;
+
+	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
+		return ERR_RANGE;
+	} else if ((y > 0) && (y < 9)) {
+		res = NEO_GetPixelColor(0, ((x - 1) * 8 + (y - 1)), &color);
+	} else if ((y > 8) && (y < 17)) {
+		res = NEO_GetPixelColor(1, ((x - 1) * 8 + (y - 9)), &color);
+	} else if (y > 16) {
+		res = NEO_GetPixelColor(2, ((x - 1) * 8 + (y - 17)), &color);
+	}
+
+	if (res != ERR_OK) {
+		return res;
+	}
+	red = NEO_GET_COLOR_RED(color);
+	green = NEO_GET_COLOR_GREEN(color);
+	blue = NEO_GET_COLOR_BLUE(color);
+	dRed = ((uint32_t) red * (100 - percent)) / 100;
+	dGreen = ((uint32_t) green * (100 - percent)) / 100;
+	dBlue = ((uint32_t) blue * (100 - percent)) / 100;
+
+	color = NEO_MAKE_COLOR_RGB(dRed, dGreen, dBlue);
+
+
+	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
+			return ERR_RANGE;
+		} else if ((y > 0) && (y < 9)) {
+			return NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), color);
+		} else if ((y > 8) && (y < 17)) {
+			return NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), color);
+		} else if (y > 16) {
+			return NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), color);
+		}
+
+	return res;
+}
+
+
+
+
+
 
 #if PL_CONFIG_HAS_NEO_SHADOW_BOX
 static void Layer(int layer, uint32_t color) {
@@ -951,7 +1016,7 @@ static void NeoTask(void* pvParameters) {
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
 					value = 1;
-
+					SetTrail(0x200020, 16, 4, 60, 50);
 					break;
 				case MODE2:
 					/*Display Mode 2*/
@@ -959,9 +1024,26 @@ static void NeoTask(void* pvParameters) {
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
-					SetCoordinate(23, 23, 0xff0000);
+					SetCoordinate(1, 1, 0xff0000);
+					SetCoordinate(2, 1, 0xff0000);
+					SetCoordinate(3, 1, 0xff0000);
+					SetCoordinate(4, 1, 0xff0000);
+					SetCoordinate(5, 1, 0xff0000);
+					SetCoordinate(6, 1, 0xff0000);
+					SetCoordinate(7, 1, 0xff0000);
+					SetCoordinate(8, 1, 0xff0000);
+					SetCoordinate(9, 1, 0xff0000);
+					SetCoordinate(10, 1, 0xff0000);
+					SetCoordinate(11, 1, 0xff0000);
+
+					SetCoordinate(2, 2, 0xff0000);
+					SetCoordinate(2, 3, 0xff0000);
+					SetCoordinate(2, 4, 0xff0000);
+					SetCoordinate(2, 5, 0xff0000);
 					NEO_TransferPixels();
-					value = 2;
+					NEO_DimmPercentPixel(0, 7, 90);
+					NEO_TransferPixels();
+
 					break;
 				case MODE3:
 					/*Display Mode 3*/
@@ -969,7 +1051,17 @@ static void NeoTask(void* pvParameters) {
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
-					SetCoordinate(12, 12, 0xff0000);
+					SetCoordinate(2, 17, 0x0a295b);
+					SetCoordinate(3, 17, 0x0a295b);
+					SetCoordinate(2, 20, 0x0a295b);
+					SetCoordinate(3, 20, 0x0a295b);
+					SetCoordinate(2, 23, 0x0a295b);
+					SetCoordinate(3, 23, 0x0a295b);
+					SetCoordinate(4, 18, 0x0a295b);
+					SetCoordinate(4, 19, 0x0a295b);
+					SetCoordinate(4, 21, 0x0a295b);
+					SetCoordinate(4, 22, 0x0a295b);
+
 					NEO_TransferPixels();
 					value = 3;
 					break;
@@ -1032,6 +1124,36 @@ static void NeoTask(void* pvParameters) {
 	for (;;) {
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}
+}
+
+uint8_t SetTrail(uint32_t color, uint32_t end, uint32_t nofTail,
+		uint8_t dimmPercent, uint16_t delayMs) {
+	NEO_PixelIdxT pixel;
+	unsigned int i;
+
+	for (pixel = 1; pixel <= end + nofTail + 1; pixel++) {
+		/* move head */
+		if (pixel <= end) {
+			SetCoordinate(pixel, 12, color);
+			SetCoordinate(pixel, 11, color);
+		}
+		/* clear tail pixel */
+		if ((pixel > (nofTail + 1)) && pixel - (nofTail + 1) <= end) {
+			ClearCoordinate(pixel - (nofTail + 1), 12);
+			ClearCoordinate(pixel - (nofTail + 1), 11);
+		}
+		/* dim remaining tail pixel */
+		for (i = 0; i < nofTail; i++) {
+			if (pixel > i && pixel - (i + 1) <= end) {
+				DimmPercentPixel(pixel - (i + 1),12 , dimmPercent);
+				DimmPercentPixel(pixel - (i + 1),11 , dimmPercent);
+				//NEO_DimmPercentPixel(1,lookUpMatrix[12][pixel-(i+1)+1], dimmPercent);
+			}
+		}
+		NEO_TransferPixels();
+		vTaskDelay(pdMS_TO_TICKS(delayMs));
+	}
+	return ERR_OK;
 }
 
 void NEOA_Init(void* queue_handler) {

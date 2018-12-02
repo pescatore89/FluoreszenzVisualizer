@@ -1406,7 +1406,7 @@ static void NeoTask(void* pvParameters) {
 			} else {
 				switch (pxRxedMessage->modus) {
 
-				case SINGLE:
+				case ALL:
 					/*Display single Image*/
 					CLS1_SendStr((unsigned char*) "Playing Single Image  ",
 							CLS1_GetStdio()->stdOut);

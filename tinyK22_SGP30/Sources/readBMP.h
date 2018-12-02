@@ -21,3 +21,8 @@ uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
+
+void addSuffixBMP(char* filename);
+BMPImage* loadBMPData(TCHAR *filename,
+		const CLS1_StdIOType *io);
+

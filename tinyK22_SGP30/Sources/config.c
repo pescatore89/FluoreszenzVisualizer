@@ -102,7 +102,6 @@ uint8_t Config_Setup(void) {
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	powerEnabled = buf[0];
 
-
 	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
 	if (buf[0]) {
@@ -127,8 +126,6 @@ uint8_t Config_ReadPollen(void) {
 	char *key_p;
 	key_p = key;
 	int l = 1;
-	char string[] = { "andy" };
-	char string2[10][10];
 
 	CLS1_SendStr(
 			(unsigned char*) "Loading names from " INI_FILE_NAME_POLLEN "\r\n",
@@ -183,13 +180,15 @@ bool getSensorEnabled(void) {
 
 }
 
+void setSensorEnabled(bool enabled) {
 
-void setSensorEnabled(bool enabled){
-
-	CS1_CriticalVariable()	;
-	CS1_EnterCritical()	;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
 	lightSensor = enabled;
-	CS1_ExitCritical()	;
+	CS1_ExitCritical()
+	;
 }
 
 char** getNamelist(void) {

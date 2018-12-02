@@ -173,6 +173,57 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 
 static FIL bmpFile;
 
+void addSuffixTXT(char* filename) {
+
+	char * suffix = ".txt";
+	char * temp = filename;
+	strcat(temp, suffix);
+	filename = temp;
+
+}
+
+void addSuffixBMP(char* filename) {
+
+	char * suffix = ".bmp";
+	char * temp = filename;
+	strcat(temp, suffix);
+	filename = temp;
+
+}
+
+BMPImage* loadBMPData(TCHAR *filename, const CLS1_StdIOType *io) {
+
+	uint32_t position = 0;
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	uint32_t colorValue = 0;
+	uint8_t lane = 0;
+	uint32_t color;
+	FRESULT res = FR_OK;
+	uint32_t cnt = 0;
+	unsigned long size;
+
+	addSuffixBMP(filename);
+
+	image = malloc(sizeof(BMPImage));
+	if (image != NULL) {
+		res = BMPImageLoadData((char *) filename, image);
+		if (res != FR_OK) {
+			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
+					CLS1_GetStdio()->stdOut);
+		}
+
+		//	free(image->data);		needs to be done somewhere else !!!
+		//	free(image);			needs to be done somewhere else !!
+	} else {
+		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
+
+	}
+	return image;
+
+}
+
 uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 	FILE *filee;
 	unsigned long size;                 // size of the image in bytes.
@@ -183,6 +234,8 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 	FIL* file = NULL;
 	FRESULT res = FR_OK;
 	file = &bmpFile;
+
+	// falls in einem Unterordner muss zuerst darauf verwiesen werden !!!!!!!!!!!!!!!!!!!
 
 	res = FAT1_open(file, filename, FA_READ);
 	if (res != FR_OK) {
@@ -196,7 +249,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 		UINT nof = 0;
 		UINT bfOffBits = 0;
 		UINT br; /* Pointer to number of bytes read */
-		uint8_t buf[2400];
+		uint8_t buf[2500];
 
 		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
 		if (res != FR_OK) {
@@ -213,10 +266,9 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			image->biCompression = buf[30];
 		}
 
-
-
 		image->data = malloc(
-				image->biWidth * image->biHeight * sizeof(char) * ((image->biBitCount)/8));
+				image->biWidth * image->biHeight * sizeof(char)
+						* ((image->biBitCount) / 8));
 		if (image->data != NULL) {
 			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 			if (res == FR_OK) {

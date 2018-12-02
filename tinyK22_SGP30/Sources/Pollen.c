@@ -6,7 +6,9 @@
  */
 
 #include "Pollen.h"
-
+#include "FAT1.h"
+#include "MINI1.h"
+#include "readBMP.h"
 xQueueHandle queue_handler;
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex;
@@ -47,6 +49,34 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 	}
 
 	return result;
+
+}
+
+uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
+
+	QUEUE_RESULT res = QUEUE_OK;
+	BMPImage* image;
+	Message_t *pxMessage;
+	pxMessage = &xMessage;
+	uint8_t result = ERR_OK;
+	result= FAT1_ChangeDirectory(polle, io);
+	 if(result != ERR_OK){
+		 CLS1_SendStr((unsigned char*) "Polle nicht gefunden, Namen überprüfen \r\n ",
+		 					CLS1_GetStdio()->stdOut);
+	 }
+	 else{
+		 pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
+
+		 image = loadBMPData( polle,io);
+
+
+
+
+
+	 }
+
+	 return res;
+
 
 }
 
@@ -113,9 +143,36 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 					CLS1_GetStdio()->stdOut);
 		}
 
+	} else if (UTIL1_strncmp((char*) cmd, "play ",
+			sizeof("play ") - 1) == 0) {
+
+		if (FRTOS1_xSemaphoreTake(mutex,0) == pdTRUE) {
+			p = cmd + sizeof("play ") - 1;
+			polle = FRTOS1_pvPortMalloc(sizeof(char*));
+			if (polle != NULL) {
+				strcpy(polle, p);
+				if (polle != NULL) {
+					*handled = TRUE;
+					res = playPolle(polle,io);
+					FRTOS1_vPortFree(polle);
+				}
+			} else {
+				/*something went wrong*/
+				res = ERR_FAULT;
+			}
+
+			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+				/*Mutex konnte nicht zurückgegeben werden*/
+			}
+		} else {
+
+			CLS1_SendStr((unsigned char*) "Anwendung läuft bereits \r\n ",
+					CLS1_GetStdio()->stdOut);
+		}
+
 	} else if (UTIL1_strncmp((char*) cmd, "pollen calibrating",
 			sizeof("pollen calibrating") - 1) == 0) {
-		res = SetMode(5,NULL,io);		/*Mode 5 is Calibration mode*/
+		res = SetMode(5, NULL, io); /*Mode 5 is Calibration mode*/
 	} else if (UTIL1_strncmp((char*) cmd, "pollen pause",
 			sizeof("pollen pause") - 1) == 0) {
 		res = SetNav(pause);

@@ -56,6 +56,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 
 	QUEUE_RESULT res = QUEUE_OK;
 	BMPImage* image;
+	char * temp_filename;
 	Message_t *pxMessage;
 	pxMessage = &xMessage;
 	uint8_t result = ERR_OK;
@@ -70,7 +71,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 		pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
 		pxMessage->data = image->data;
 
-
+		res = readCharacteristicValues(polle,pxMessage);
 
 
 		res = AddMessageToQueue(queue_handler, pxMessage);

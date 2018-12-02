@@ -8,14 +8,19 @@
 
 #include <stdio.h>      // Header file for standard file i/o.
 #include <stdlib.h>     // Header file for malloc/free.
+#include <ctype.h>
 #include "readSD.h"
 #include "FAT1.h"
+#include "MINI1.h"
 #include "WS2812B\NeoPixel.h"
 #include "WS2812B\NeoApp.h"
 
 #define INI_FILE_NAME			"Config.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
 #define INI_SECTION_NAME_LED	"LED"
+#define SECTION_NAME_MODE_1		"MODUS1"
+#define SECTION_NAME_MODE_2		"MODUS2"
+#define SECTION_NAME_MODE_3		"MODUS3"
 #define NUMBER_OF_LEDS					(576)
 static BMPImage* image = NULL;
 
@@ -36,6 +41,156 @@ static BMPImage* image = NULL;
 static uint8_t ReadBMPCmd(const unsigned char *cmd,
 		const CLS1_ConstStdIOType *io) {
 	/* precondition: cmd starts with "delete" */
+
+}
+
+uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxMessage) {
+
+	addSuffixTXT(fileName);
+
+	int val;
+	int power = -1;
+	int lines = -1;
+	int nLEDsPerLine = -1;
+	uint32_t temp;
+	uint8_t buff8[50];
+
+	/*Read out all values beeing part of Modus 1*/
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color266", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxMessage->color_266 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxMessage->color_355 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxMessage->color_405 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxMessage->fadeout_266 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxMessage->fadeout_355 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout405", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxMessage->fadeout_405 = getRealValue(buff8);
+
+	/*Read out all values beeing part of Modus 2*/
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength400", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_266_400 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength500", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_266_500 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength600", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_266_700 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength700", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_266_700 = getRealValue(buff8);
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength400", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_355_400 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength500", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_355_500 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength600", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_355_700 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength700", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_355_700 = getRealValue(buff8);
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength400", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_405_400 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength500", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_405_500 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength600", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_405_700 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength700", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->amplitude_405_700 = getRealValue(buff8);
+
+	/*Read out all values beeing part of Modus 3*/
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength400", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_266_400 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength500", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_266_500 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength600", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_266_600 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength700", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_266_700 = getRealValue(buff8);
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength400", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_355_400 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength500", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_355_500 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength600", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_355_600 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength700", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_355_700 = getRealValue(buff8);
+
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength400", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_405_400 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength500", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_405_500 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength600", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_405_600 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength700", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxMessage->lifetime_405_700 = getRealValue(buff8);
+
+}
+
+int getRawInt(char c) {
+	if (isalpha(c)) {
+		return toupper(c) - 'A' + 10;
+	}
+	return c - '0';
+}
+
+uint32_t getRealValue(const char *value) {
+	uint32_t result = 0;
+	int dec = 0;
+	int power = 1;
+	uint8_t nDig = strlen(value);
+	uint8_t nDigits = nOfDigits(value);
+	for (int k = (nDig - 1); k >= 0; k--) {
+		dec += getRawInt(value[k]) * power;
+		power *= 16;
+	}
+	return dec;
+
+}
+
+uint8_t nOfDigits(const char* value) {
+	int i = 0;
+	uint8_t cnt = 0;
+
+	while (value[cnt] != '\0') {
+		cnt++;
+
+	}
+
+	return cnt;
 
 }
 
@@ -175,8 +330,26 @@ static FIL bmpFile;
 
 void addSuffixTXT(char* filename) {
 
+	uint8_t length = 0;
+	length = strlen(filename);
+	bool has_suffix = FALSE;
+	const char ch = '.';
+	char * ret;
+
+	for (int i = 0; i < length; i++) {
+		if (filename[i] == ch) {
+			has_suffix = TRUE;
+			break;
+		}
+	}
+
+	if (has_suffix) {
+		ret = strtok(filename, &ch);
+	} else {
+		ret = filename;
+	}
 	char * suffix = ".txt";
-	char * temp = filename;
+	char * temp = ret;
 	strcat(temp, suffix);
 	filename = temp;
 
@@ -184,8 +357,26 @@ void addSuffixTXT(char* filename) {
 
 void addSuffixBMP(char* filename) {
 
+	uint8_t length = 0;
+	length = strlen(filename);
+	bool has_suffix = FALSE;
+	const char ch = '.';
+	char * ret;
+
+	for (int i = 0; i < length; i++) {
+		if (filename[i] == ch) {
+			has_suffix = TRUE;
+			break;
+		}
+	}
+
+	if (has_suffix) {
+		ret = strtok(filename, &ch);
+	} else {
+		ret = filename;
+	}
 	char * suffix = ".bmp";
-	char * temp = filename;
+	char * temp = ret;
 	strcat(temp, suffix);
 	filename = temp;
 

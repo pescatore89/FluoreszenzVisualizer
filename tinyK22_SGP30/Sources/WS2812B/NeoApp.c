@@ -1423,6 +1423,10 @@ static void NeoTask(void* pvParameters) {
 				case ALL:
 
 
+
+
+/*
+
 					for (j = 0; j < NEOC_NOF_LANES; j++) {
 						for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
 							for (i = 0; i < MATRIX_RES; i++) {
@@ -1440,17 +1444,17 @@ static void NeoTask(void* pvParameters) {
 					}
 					NEO_TransferPixels();
 
-					for (int k = 0; k < 20; k++) {
+					for (int k = 0; k < 40; k++) {
 						for (int z = 1; z < 13; z++) {
 							setRingData(z, 0xff00ff);
 							NEO_TransferPixels();
-							vTaskDelay(pdMS_TO_TICKS(100));
+							vTaskDelay(pdMS_TO_TICKS(50));
 							NEO_ClearAllPixel();
 							NEO_TransferPixels();
 						}
 					}
 					NEOA_Lauflicht();
-
+*/
 					break;
 				case MODE1:
 					/*Display MODE 1*/

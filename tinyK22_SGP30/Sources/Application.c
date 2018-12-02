@@ -16,6 +16,7 @@
 #include "Sensor.h"
 #include "TmDt1.h"
 #include  "Message.h"
+#include "config.h"
 #if PL_CONFIG_HAS_NEO_PIXEL
 #include "WS2812B/NeoApp.h"
 #endif
@@ -52,6 +53,10 @@ static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 
 static void AppTask(void *pv) {
 	(void) pv;
+
+	vTaskDelay(pdMS_TO_TICKS(1000));
+	 initConfigData();
+
 	for (;;) {
 		LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
@@ -59,6 +64,9 @@ static void AppTask(void *pv) {
 }
 
 void APP_Run(void) {
+
+
+
 
 	mutex = FRTOS1_xSemaphoreCreateMutex();
 	if (mutex == NULL) {
@@ -93,10 +101,11 @@ void APP_Run(void) {
 #endif
 
 	SENSOR_Init();
+
 	int ups = 19;
 	if (xTaskCreate(AppTask, /* pointer to the task */
 	"App", /* task name for kernel awareness debugging */
-	500 / sizeof(StackType_t), /* task stack size */
+	2500 / sizeof(StackType_t), /* task stack size */
 	(void*) NULL, /* optional task startup argument */
 	tskIDLE_PRIORITY + 1, /* initial priority */
 	(xTaskHandle*) NULL /* optional task handle to create */
@@ -119,6 +128,7 @@ void APP_Run(void) {
 		for (;;)
 			; /* failure!?! */
 	}
+
 	vTaskStartScheduler();
 	for (;;) {
 		__asm("nop");

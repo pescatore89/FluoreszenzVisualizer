@@ -17,7 +17,13 @@
 uint8_t Config_ReadIni(const CLS1_StdIOType *io);
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
-uint8_t Config_ReadPollen(const CLS1_StdIOType *io);
+uint8_t Config_ReadPollen(void);
+uint8_t Config_Setup(void);
 char** getNamelist(void);
-char** namelist;					// Platzhalter für die namen der Pollen
+void initConfigData(void);
+bool getSensorEnabled(void);
+void setSensorEnabled(bool enabled);
+char** namelist;	// Platzhalter für die namen der Pollen
+uint8_t powerEnabled;
+bool lightSensor;
 #endif /* SOURCES_CONFIG_H_ */

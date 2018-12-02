@@ -17,9 +17,10 @@
 #define INI_FILE_NAME			"Config.txt"
 #define INI_FILE_NAME_POLLEN	"Pollen.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
+#define INI_SECTION_NAME_SENSOR "LIGHTSENSOR"
 #define INI_SECTION_NAME		"names"
 #define INI_SECTION_NAME_LED	"LED"
-#define MAX_NAME_LENGTH			100
+#define MAX_NAME_LENGTH			 100
 
 //#endif
 
@@ -44,8 +45,8 @@ uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 	} else if (UTIL1_strncmp((char*) cmd, "CONFIG printConfig",
 			sizeof("CONFIG printConfig ") - 1) == 0) { //reads the Config file on the SD-Card
 		*handled = TRUE;
-		return Config_ReadPollen(io);
-		//return Config_ReadIni(io);
+		//return Config_ReadPollen();
+		return Config_ReadIni(io);
 	}
 	return ERR_OK;
 }
@@ -82,7 +83,39 @@ uint8_t Config_ReadIni(const CLS1_StdIOType *io) {
 	return ERR_OK;
 
 }
-uint8_t Config_ReadPollen(const CLS1_StdIOType *io) {
+
+void initConfigData(void) {
+
+	Config_Setup();			// sets up all the Configurations
+	Config_ReadPollen();	// reads/stores all the names of the pollen
+}
+
+uint8_t Config_Setup(void) {
+
+	int val;
+	int power = -1;
+	int lines = -1;
+
+	uint8_t buf[32];
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	powerEnabled = buf[0];
+
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	if (buf[0]) {
+		lightSensor = TRUE;
+	} else {
+		lightSensor = FALSE;
+	}
+
+	return ERR_OK;
+
+}
+
+uint8_t Config_ReadPollen(void) {
 
 	int val;
 	int power = -1;
@@ -128,7 +161,7 @@ uint8_t Config_ReadPollen(const CLS1_StdIOType *io) {
 		MINI1_ini_gets("names", key_p, "-", (char* ) buf, sizeof(buf),
 				INI_FILE_NAME_POLLEN);
 
-		strcpy(namelist[i-1],buf);
+		strcpy(namelist[i - 1], buf);
 
 	}
 
@@ -136,8 +169,30 @@ uint8_t Config_ReadPollen(const CLS1_StdIOType *io) {
 
 }
 
+bool getSensorEnabled(void) {
 
-char** getNamelist(void){
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	bool temp = lightSensor;
+	CS1_ExitCritical()
+	;
+
+	return temp;
+
+}
+
+
+void setSensorEnabled(bool enabled){
+
+	CS1_CriticalVariable()	;
+	CS1_EnterCritical()	;
+	lightSensor = enabled;
+	CS1_ExitCritical()	;
+}
+
+char** getNamelist(void) {
 	return namelist;
 }
 

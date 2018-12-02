@@ -17,5 +17,7 @@
 uint8_t Config_ReadIni(const CLS1_StdIOType *io);
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
-
+uint8_t Config_ReadPollen(const CLS1_StdIOType *io);
+char** getNamelist(void);
+char** namelist;					// Platzhalter für die namen der Pollen
 #endif /* SOURCES_CONFIG_H_ */

@@ -13,6 +13,7 @@
 #include "FRTOS1.h"
 #include "LED1.h"
 #include "PixelDMA.h"
+#include "config.h"
 #if PL_CONFIG_HAS_MMA8451
 #include "MMA1.h"
 #endif
@@ -42,6 +43,9 @@ static bool NEOA_useGammaCorrection = TRUE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
+
+
+
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
 	/* single lane, 3x64 modules from left to right */
@@ -1429,6 +1433,10 @@ static void NeoTask(void* pvParameters) {
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
 					value = 1;
+					char ** names;
+					names = getNamelist();
+
+
 					SetTrail(0x200020, 16, 4, 60, 50);
 					break;
 				case MODE2:

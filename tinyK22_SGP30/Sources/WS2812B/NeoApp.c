@@ -530,6 +530,7 @@ uint8_t DimmPercentRing(uint8_t ring, uint32_t percent) {
 	return res;
 
 }
+
 uint8_t DimmPercentPixel(int x, int y, uint8_t percent) {
 	uint8_t red, green, blue;
 	uint32_t dRed, dGreen, dBlue;
@@ -539,12 +540,12 @@ uint8_t DimmPercentPixel(int x, int y, uint8_t percent) {
 
 	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
 		return ERR_RANGE;
-	} else if ((y > 0) && (y < 9)) {
-		res = NEO_GetPixelColor(0, ((x - 1) * 8 + (y - 1)), &color);
-	} else if ((y > 8) && (y < 17)) {
-		res = NEO_GetPixelColor(1, ((x - 1) * 8 + (y - 9)), &color);
-	} else if (y > 16) {
-		res = NEO_GetPixelColor(2, ((x - 1) * 8 + (y - 17)), &color);
+	} else if (y < 9) {
+		res = NEO_GetPixelColor(0, (191 - (x - 1) * 8 - (y - 1)), &color);
+	} else if (y < 17) {
+		res = NEO_GetPixelColor(1, (191 - (x - 1) * 8 - (y - 9)), &color);
+	} else {
+		res = NEO_GetPixelColor(2, (191 - (x - 1) * 8 - (y - 17)), &color);
 	}
 
 	if (res != ERR_OK) {
@@ -562,11 +563,11 @@ uint8_t DimmPercentPixel(int x, int y, uint8_t percent) {
 	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
 		return ERR_RANGE;
 	} else if ((y > 0) && (y < 9)) {
-		return NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), color);
+		return NEO_SetPixelColor(0, (191 - (x - 1) * 8 - (y - 1)), color);
 	} else if ((y > 8) && (y < 17)) {
-		return NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), color);
+		return NEO_SetPixelColor(1, (191 - (x - 1) * 8 - (y - 9)), color);
 	} else if (y > 16) {
-		return NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), color);
+		return NEO_SetPixelColor(2, (191 - (x - 1) * 8 - (y - 17)), color);
 	}
 
 	return res;

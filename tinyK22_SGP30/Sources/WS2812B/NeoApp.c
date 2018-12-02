@@ -87,8 +87,6 @@ const static uint8_t ring_5[3][16] = { { 128, 120, 112, 104, 96, 88, 80, 72, 64,
 		56 }, { 128, 129, 130, 131, 132, 133, 134, 135, 56, 57, 58, 59, 60, 61,
 		62, 63 }, { 135, 127, 119, 111, 103, 95, 87, 79, 71, 63 } };
 
-
-
 const static uint8_t ring_6[3][16] = { { 137, 129, 121, 113, 105, 97, 89, 81,
 		73, 65, 57, 49, 48, 136 }, { 136, 137, 138, 139, 140, 141, 142, 143, 48,
 		49, 50, 51, 52, 53, 54, 55 }, { 142, 134, 126, 118, 110, 102, 94, 86,
@@ -160,12 +158,12 @@ uint8_t SetCoordinate(int x, int y, uint32_t color) {
 
 	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
 		return ERR_RANGE;
-	} else if ((y > 0) && (y < 9)) {
-		NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), color);
-	} else if ((y > 8) && (y < 17)) {
-		NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), color);
-	} else if (y > 16) {
-		NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), color);
+	} else if (y < 9) {
+		NEO_SetPixelColor(0, (191 - (x - 1) * 8 - (y - 1)), color);
+	} else if (y < 17) {
+		NEO_SetPixelColor(1, (191 - (x - 1) * 8 - (y - 9)), color);
+	} else {
+		NEO_SetPixelColor(2, (191 - (x - 1) * 8 - (y - 17)), color);
 	}
 
 	return ERR_OK;
@@ -176,12 +174,12 @@ uint8_t ClearCoordinate(int x, int y) {
 
 	if ((x <= 0) || (x > 24) || (y <= 0) || (y > 25)) {
 		return ERR_RANGE;
-	} else if ((y > 0) && (y < 9)) {
-		NEO_SetPixelColor(0, ((x - 1) * 8 + (y - 1)), 0x000000);
-	} else if ((y > 8) && (y < 17)) {
-		NEO_SetPixelColor(1, ((x - 1) * 8 + (y - 9)), 0x000000);
-	} else if (y > 16) {
-		NEO_SetPixelColor(2, ((x - 1) * 8 + (y - 17)), 0x000000);
+	} else if (y < 9) {
+		NEO_SetPixelColor(0, (191 - (x - 1) * 8 - (y - 1)), 0x000000);
+	} else if (y < 17) {
+		NEO_SetPixelColor(1, (191 - (x - 1) * 8 - (y - 9)), 0x000000);
+	} else {
+		NEO_SetPixelColor(2, (191 - (x - 1) * 8 - (y - 17)), 0x000000);
 	}
 
 	return ERR_OK;
@@ -194,7 +192,7 @@ uint8_t setRingData(uint8_t ring, uint32_t color) {
 	uint8_t lenght_lane_1 = 0;
 	uint8_t lenght_lane_2 = 0;
 	uint8_t res = ERR_OK;
-	uint8_t temp ;
+	uint8_t temp;
 	int i = 0;
 
 	if (ring < 1 || ring > 12) {
@@ -245,9 +243,9 @@ uint8_t setRingData(uint8_t ring, uint32_t color) {
 
 	case 6:
 
-		lenght_lane_0 = 14;//sizeof(ring_6[0]) / sizeof(ring_6[0][0]);
+		lenght_lane_0 = 14; //sizeof(ring_6[0]) / sizeof(ring_6[0][0]);
 		lenght_lane_1 = 16;
-		lenght_lane_2 = 14;//sizeof(ring_6[2]) / sizeof(ring_6[0][0]);
+		lenght_lane_2 = 14; //sizeof(ring_6[2]) / sizeof(ring_6[0][0]);
 
 		for (i = 0; i < lenght_lane_0; i++) {
 			temp = ring_6[0][i];
@@ -1328,10 +1326,6 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 				blue = (image->data[cnt + 2]);
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
-
-
-
-
 
 				cnt = cnt + ((image->biBitCount) / 8);
 

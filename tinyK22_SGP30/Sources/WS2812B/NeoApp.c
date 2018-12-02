@@ -1327,22 +1327,18 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 				blue = (image->data[cnt + 2]);
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
-
 				cnt = cnt + ((image->biBitCount) / 8);
-
-				//vTaskDelay(pdMS_TO_TICKS(50));
-
 			}
 		}
 
 	}
 	NEO_TransferPixels();
-//	NEO_TransferPixels();
 
 	return res;
 }
 
 #if NEOA_CONFIG_PARSE_COMMAND_ENABLED
+
 uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 		const CLS1_StdIOType *io) {
 	uint8_t res = ERR_OK;
@@ -1389,8 +1385,6 @@ static void NeoTask(void* pvParameters) {
 
 	queue_handler = pvParameters;
 	int value = -1;
-//Message_t *pxMessage;
-//pxMessage = &xMessage;
 	QUEUE_RESULT res = QUEUE_OK;
 	Message_t *pxRxedMessage;
 	pxRxedMessage = &xMessage;
@@ -1415,8 +1409,6 @@ static void NeoTask(void* pvParameters) {
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
 					value = 0;
-					int blub[] = { 1, 2, 3, 6, 7 };
-					int kluk = sizeof(blub) / (sizeof(blub[0]));
 
 					for (int k = 0; k < 20; k++) {
 						for (int z = 1; z < 13; z++) {
@@ -1464,16 +1456,14 @@ static void NeoTask(void* pvParameters) {
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
-					SetCoordinate(2, 17, 0x0a295b);
-					SetCoordinate(3, 17, 0x0a295b);
-					SetCoordinate(2, 20, 0x0a295b);
-					SetCoordinate(3, 20, 0x0a295b);
-					SetCoordinate(2, 23, 0x0a295b);
-					SetCoordinate(3, 23, 0x0a295b);
-					SetCoordinate(4, 18, 0x0a295b);
-					SetCoordinate(4, 19, 0x0a295b);
-					SetCoordinate(4, 21, 0x0a295b);
-					SetCoordinate(4, 22, 0x0a295b);
+					setRingData(2, 0xff0000);
+					setRingData(3, 0xff0000);
+					setRingData(4, 0xff0000);
+					setRingData(5, 0xff0000);
+					setRingData(6, 0xff0000);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					DimmPercentRing(4,80);
 
 					NEO_TransferPixels();
 					value = 3;

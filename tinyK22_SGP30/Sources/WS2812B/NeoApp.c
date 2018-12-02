@@ -44,8 +44,6 @@ xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
 
-
-
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
 	/* single lane, 3x64 modules from left to right */
@@ -1393,6 +1391,22 @@ static void NeoTask(void* pvParameters) {
 	Message_t *pxRxedMessage;
 	pxRxedMessage = &xMessage;
 
+	uint32_t size;
+	uint32_t position = 0;
+	uint8_t red = 0;
+	uint8_t green = 0;
+	uint8_t blue = 0;
+	uint32_t colorValue = 0;
+	uint8_t lane = 0;
+	uint32_t color;
+	uint32_t cnt = 0;
+	int j = 0;
+	int k = 0;
+	int i = 0;
+
+
+
+
 	for (;;) {
 		if (TakeMessageFromQueue(queue_handler, pxRxedMessage) == QUEUE_EMPTY) {
 			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
@@ -1407,12 +1421,24 @@ static void NeoTask(void* pvParameters) {
 				switch (pxRxedMessage->modus) {
 
 				case ALL:
-					/*Display single Image*/
-					CLS1_SendStr((unsigned char*) "Playing Single Image  ",
-							CLS1_GetStdio()->stdOut);
-					CLS1_SendStr((unsigned char*) "\r\n ",
-							CLS1_GetStdio()->stdOut);
-					value = 0;
+
+
+					for (j = 0; j < NEOC_NOF_LANES; j++) {
+						for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
+							for (i = 0; i < MATRIX_RES; i++) {
+								position = lookUpMatrix[k][i];
+								red = (pxRxedMessage->data[cnt]);
+								green = (pxRxedMessage->data[cnt + 1]);
+								blue = (pxRxedMessage->data[cnt + 2]);
+								colorValue = (red << 16) + (green << 8)
+										+ (blue);
+								NEO_SetPixelColor(j, position, colorValue);
+								cnt = cnt + 3;
+							}
+						}
+
+					}
+					NEO_TransferPixels();
 
 					for (int k = 0; k < 20; k++) {
 						for (int z = 1; z < 13; z++) {
@@ -1435,7 +1461,6 @@ static void NeoTask(void* pvParameters) {
 					value = 1;
 					char ** names;
 					names = getNamelist();
-
 
 					SetTrail(0x200020, 16, 4, 60, 50);
 					break;
@@ -1471,7 +1496,7 @@ static void NeoTask(void* pvParameters) {
 					setRingData(6, 0xff0000);
 					NEO_TransferPixels();
 					vTaskDelay(pdMS_TO_TICKS(1000));
-					DimmPercentRing(4,80);
+					DimmPercentRing(4, 80);
 
 					NEO_TransferPixels();
 					value = 3;

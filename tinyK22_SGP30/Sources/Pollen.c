@@ -8,7 +8,7 @@
 #include "Pollen.h"
 #include "FAT1.h"
 #include "MINI1.h"
-#include "readBMP.h"
+#include "readSD.h"
 xQueueHandle queue_handler;
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex;
@@ -59,24 +59,28 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 	Message_t *pxMessage;
 	pxMessage = &xMessage;
 	uint8_t result = ERR_OK;
-	result= FAT1_ChangeDirectory(polle, io);
-	 if(result != ERR_OK){
-		 CLS1_SendStr((unsigned char*) "Polle nicht gefunden, Namen überprüfen \r\n ",
-		 					CLS1_GetStdio()->stdOut);
-	 }
-	 else{
-		 pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
+	result = FAT1_ChangeDirectory(polle, io);
+	if (result != ERR_OK) {
+		CLS1_SendStr(
+				(unsigned char*) "Polle nicht gefunden, Namen überprüfen \r\n ",
+				CLS1_GetStdio()->stdOut);
+	} else {
 
-		 image = loadBMPData( polle,io);
-
-
-
+		image = loadBMPData(polle, io);
+		pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
+		pxMessage->data = image->data;
 
 
-	 }
 
-	 return res;
 
+		res = AddMessageToQueue(queue_handler, pxMessage);
+		if (res != QUEUE_OK) {
+			return result = ERR_BUSY;
+		}
+
+	}
+
+	return res;
 
 }
 
@@ -153,7 +157,7 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 				strcpy(polle, p);
 				if (polle != NULL) {
 					*handled = TRUE;
-					res = playPolle(polle,io);
+					res = playPolle(polle, io);
 					FRTOS1_vPortFree(polle);
 				}
 			} else {

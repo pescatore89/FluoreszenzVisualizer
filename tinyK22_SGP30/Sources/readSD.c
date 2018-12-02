@@ -8,7 +8,7 @@
 
 #include <stdio.h>      // Header file for standard file i/o.
 #include <stdlib.h>     // Header file for malloc/free.
-#include "readBMP.h"
+#include "readSD.h"
 #include "FAT1.h"
 #include "WS2812B\NeoPixel.h"
 #include "WS2812B\NeoApp.h"

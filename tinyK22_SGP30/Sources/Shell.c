@@ -36,7 +36,7 @@
 #include "FAT1.h"
 #include "PORT_PDD.h"
 #include "MINI1.h"
-#include "readBMP.h"
+#include "readSD.h"
 #include "Pollen.h"
 #include "config.h"
 #include "stdlib.h"

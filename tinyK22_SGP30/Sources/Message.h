@@ -50,9 +50,46 @@ struct Navigation {
 struct MESSAGE {
 	MODE modus;
 	uint8_t* data;
-	uint32_t color;
-	uint32_t fadeoutTime; /*in ms*/
-	uint16_t excitation; /*Anregungsintensität*/
+	uint32_t color_266;
+	uint32_t color_355;
+	uint32_t color_405;
+
+	uint32_t fadeout_266; /*in ms*/
+	uint32_t fadeout_355; /*in ms*/
+	uint32_t fadeout_405; /*in ms*/
+
+	uint8_t amplitude_266_400;
+	uint8_t amplitude_266_500;
+	uint8_t amplitude_266_600;
+	uint8_t amplitude_266_700;
+
+	uint8_t amplitude_355_400;
+	uint8_t amplitude_355_500;
+	uint8_t amplitude_355_600;
+	uint8_t amplitude_355_700;
+
+	uint8_t amplitude_405_400;
+	uint8_t amplitude_405_500;
+	uint8_t amplitude_405_600;
+	uint8_t amplitude_405_700;
+
+	uint8_t lifetime_266_400;
+	uint8_t lifetime_266_500;
+	uint8_t lifetime_266_600;
+	uint8_t lifetime_266_700;
+
+	uint8_t lifetime_355_400;
+	uint8_t lifetime_355_500;
+	uint8_t lifetime_355_600;
+	uint8_t lifetime_355_700;
+
+	uint8_t lifetime_405_400;
+	uint8_t lifetime_405_500;
+	uint8_t lifetime_405_600;
+	uint8_t lifetime_405_700;
+
+
+	//uint16_t excitation; /*Anregungsintensität*/
 
 } xMessage;
 

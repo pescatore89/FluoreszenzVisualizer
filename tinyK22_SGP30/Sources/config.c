@@ -10,7 +10,7 @@
 #include "FAT1.h"
 #include "PORT_PDD.h"
 #include "MINI1.h"
-#include "readBMP.h"
+#include "readSD.h"
 #include "stdlib.h"
 #include <stdio.h>      // Header file for standard file i/o.
 #include <stdlib.h>     // Header file for malloc/free.

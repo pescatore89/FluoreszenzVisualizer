@@ -29,6 +29,7 @@
 #include "LCD1.h"
 #include "ff.h"
 #include "..\Message.h"
+#include "readSD.h"
 
 #endif
 
@@ -43,6 +44,9 @@ static bool NEOA_useGammaCorrection = TRUE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
+extern uint8_t ImageDataBuffer[2500];
+
+
 
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
@@ -1302,6 +1306,7 @@ uint8_t NEOA_Lauflicht(void) {
 
 uint8_t NEOA_Display_Image(BMPImage* image) {
 
+	BMPImage* rxImage;
 	uint32_t size;
 	uint32_t position = 0;
 	uint8_t red = 0;
@@ -1316,6 +1321,7 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 	int k = 0;
 	int i = 0;
 
+
 	NEO_ClearAllPixel();
 	NEO_TransferPixels();
 //	size = ((image->biWidth) * (image->biHeight));
@@ -1324,9 +1330,9 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
 			for (i = 0; i < MATRIX_RES; i++) {
 				position = lookUpMatrix[k][i];
-				red = (image->data[cnt]);
-				green = (image->data[cnt + 1]);
-				blue = (image->data[cnt + 2]);
+				red = (ImageDataBuffer[cnt]);
+				green = (ImageDataBuffer[cnt + 1]);
+				blue = (ImageDataBuffer[cnt + 2]);
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
 				cnt = cnt + ((image->biBitCount) / 8);
@@ -1421,6 +1427,8 @@ static void NeoTask(void* pvParameters) {
 				switch (pxRxedMessage->modus) {
 
 				case ALL:
+
+						j = 13;
 
 
 

@@ -9,7 +9,7 @@
 #define SOURCES_MESSAGE_H_
 
 #define QUEUE_LENGTH	(100)
-#define QUEUE_ITEM_SIZE	(1)
+#define QUEUE_ITEM_SIZE	(100)
 
 #include "FRTOS1.h"
 
@@ -92,6 +92,9 @@ struct MESSAGE {
 	//uint16_t excitation; /*Anregungsintensität*/
 
 } xMessage;
+
+
+
 
 typedef struct Navigation Navigation_t;
 typedef struct MESSAGE Message_t;

@@ -9,10 +9,13 @@
 #include "FAT1.h"
 #include "MINI1.h"
 #include "readSD.h"
+#include "FRTOS1.h"
+#include "WS2812B\NeoPixel.h"
+#include "WS2812B\NeoApp.h"
 xQueueHandle queue_handler;
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex;
-
+static bool directory_set;
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "pollen",
 			(unsigned char*) "Group of pollen commands\r\n", io->stdOut);
@@ -54,34 +57,50 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 
 uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 
-	QUEUE_RESULT res = QUEUE_OK;
+
 	BMPImage* image;
 	char * temp_filename;
 	Message_t *pxMessage;
 	pxMessage = &xMessage;
 	uint8_t result = ERR_OK;
+	char cd [4] = {"\\.."};
+	char * cd_back = cd;
+
+	if(directory_set){
+		result = FAT1_ChangeDirectory(cd_back, io);		// go back in the directory path
+	}
 	result = FAT1_ChangeDirectory(polle, io);
+
 	if (result != ERR_OK) {
 		CLS1_SendStr(
 				(unsigned char*) "Polle nicht gefunden, Namen überprüfen \r\n ",
 				CLS1_GetStdio()->stdOut);
 	} else {
 
+		directory_set = TRUE;
 		image = loadBMPData(polle, io);
+	//	NEOA_Display_Image(image);
 		pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
-		pxMessage->data = image->data;
+	//	pxMessage->data = image->data;
 
-		res = readCharacteristicValues(polle,pxMessage);
+		result = readCharacteristicValues(polle,pxMessage);
 
 
-		res = AddMessageToQueue(queue_handler, pxMessage);
-		if (res != QUEUE_OK) {
-			return result = ERR_BUSY;
+		result = AddMessageToQueue(queue_handler, pxMessage);
+		if (result != QUEUE_OK) {
+			result = ERR_BUSY;
 		}
+
+
+
+
+
+
+
 
 	}
 
-	return res;
+	return result;
 
 }
 

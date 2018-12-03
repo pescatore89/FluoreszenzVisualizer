@@ -23,7 +23,7 @@
 #define SECTION_NAME_MODE_3		"MODUS3"
 #define NUMBER_OF_LEDS					(576)
 static BMPImage* image = NULL;
-
+static FIL bmpFile;
 /* Simple BMP reading code, should be adaptable to many
  systems. Originally from Windows, ported to Linux, now works on my Mac
  OS system.
@@ -218,7 +218,7 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 			res = NEOA_Display_Image(image);
 		}
 
-		free(image->data);
+//		free(image->data);
 		free(image);
 	} else {
 		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
@@ -326,7 +326,7 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 	return ERR_OK;
 }
 
-static FIL bmpFile;
+
 
 void addSuffixTXT(char* filename) {
 
@@ -396,10 +396,10 @@ BMPImage* loadBMPData(TCHAR *filename, const CLS1_StdIOType *io) {
 	unsigned long size;
 
 	addSuffixBMP(filename);
-
-	image = malloc(sizeof(BMPImage));
-	if (image != NULL) {
-		res = BMPImageLoadData((char *) filename, image);
+	pxImage = &xImage;
+	//pxImage = malloc(sizeof(BMPImage));
+	if (pxImage != NULL) {
+		res = BMPImageLoadData((char *) filename, pxImage);
 		if (res != FR_OK) {
 			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
 					CLS1_GetStdio()->stdOut);
@@ -411,7 +411,7 @@ BMPImage* loadBMPData(TCHAR *filename, const CLS1_StdIOType *io) {
 		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 
 	}
-	return image;
+	return pxImage;
 
 }
 
@@ -426,7 +426,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 	FRESULT res = FR_OK;
 	file = &bmpFile;
 
-	// falls in einem Unterordner muss zuerst darauf verwiesen werden !!!!!!!!!!!!!!!!!!!
+
 
 	res = FAT1_open(file, filename, FA_READ);
 	if (res != FR_OK) {
@@ -440,7 +440,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 		UINT nof = 0;
 		UINT bfOffBits = 0;
 		UINT br; /* Pointer to number of bytes read */
-		uint8_t buf[2500];
+		 buf[100];
 
 		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
 		if (res != FR_OK) {
@@ -457,13 +457,14 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			image->biCompression = buf[30];
 		}
 
-		image->data = malloc(
+		image->data = ImageDataBuffer;
+/*		image->data = malloc(
 				image->biWidth * image->biHeight * sizeof(char)
 						* ((image->biBitCount) / 8));
-		if (image->data != NULL) {
+*/		if (image->data != NULL) {
 			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 			if (res == FR_OK) {
-				res = FAT1_read(file, image->data, sizeof(buf) - 1, &nof); //
+				res = FAT1_read(file, image->data, sizeof(image->data)*2500 - 1, &nof); //
 				if (res == FR_OK) {
 					res = FAT1_close(file);
 				} else {

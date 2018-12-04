@@ -44,6 +44,12 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 
 }
 
+
+uint8_t getDataArray(uint8_t* px){
+	px = ImageDataBuffer;
+
+}
+
 uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxMessage) {
 
 	addSuffixTXT(fileName);

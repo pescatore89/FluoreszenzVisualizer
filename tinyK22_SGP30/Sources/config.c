@@ -134,7 +134,9 @@ uint8_t Config_ReadPollen(void) {
 			INI_FILE_NAME_POLLEN);
 	quantity = buf[0] - '0';
 	CLS1_SendStr((unsigned char*) "Anzahl Pollen: ", CLS1_GetStdio()->stdOut);
-	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+
+	CLS1_SendCh(quantity,CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
 
 	namelist = (char **) malloc(quantity * sizeof(char*));
 	if (namelist == NULL) {
@@ -154,11 +156,14 @@ uint8_t Config_ReadPollen(void) {
 
 		key[0] = i + '0';
 		key[1] = '\0';
-		CLS1_SendStr((unsigned char*) key_p, CLS1_GetStdio()->stdOut);
+
 		MINI1_ini_gets("names", key_p, "-", (char* ) buf, sizeof(buf),
 				INI_FILE_NAME_POLLEN);
 
 		strcpy(namelist[i - 1], buf);
+		CLS1_SendStr((unsigned char*) "-" , CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*)namelist[i - 1], CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
 
 	}
 

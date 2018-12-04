@@ -6,6 +6,7 @@
  */
 
 #include "Platform.h"
+#include <stdlib.h>     // Header file for malloc/free.
 #if PL_CONFIG_HAS_NEO_PIXEL
 #include "NeoApp.h"
 #include "NeoPixel.h"
@@ -1320,10 +1321,15 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 	int j = 0;
 	int k = 0;
 	int i = 0;
-
+	char* data;
 
 	NEO_ClearAllPixel();
 	NEO_TransferPixels();
+
+
+
+
+
 //	size = ((image->biWidth) * (image->biHeight));
 
 	for (j = 0; j < NEOC_NOF_LANES; j++) {

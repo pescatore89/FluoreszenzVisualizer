@@ -33,3 +33,5 @@ uint8_t ImageDataBuffer[2500];
 uint8_t buf[100];
 BMPImage* pxImage;
 BMPImage xImage;
+
+ uint8_t getDataArray(uint8* px);

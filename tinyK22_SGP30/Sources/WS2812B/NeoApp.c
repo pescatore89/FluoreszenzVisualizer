@@ -1415,7 +1415,7 @@ static void NeoTask(void* pvParameters) {
 	int j = 0;
 	int k = 0;
 	int i = 0;
-
+	char ** names;
 
 
 
@@ -1434,8 +1434,24 @@ static void NeoTask(void* pvParameters) {
 
 				case ALL:
 
-						j = 13;
-
+					names = getNamelist();
+					SetCoordinate(8,1,0xff00ff);
+					SetCoordinate(9,1,0xff00ff);
+					SetCoordinate(8,2,0xff00ff);
+					SetCoordinate(9,2,0xff00ff);
+					SetCoordinate(8,3,0xff00ff);
+					SetCoordinate(9,3,0xff00ff);
+					SetCoordinate(8,4,0xff00ff);
+					SetCoordinate(9,4,0xff00ff);
+					SetCoordinate(8,5,0xff00ff);
+					SetCoordinate(9,5,0xff00ff);
+					SetCoordinate(8,6,0xff00ff);
+					SetCoordinate(9,6,0xff00ff);
+					SetCoordinate(8,7,0xff00ff);
+					SetCoordinate(9,7,0xff00ff);
+					SetCoordinate(8,8,0xff00ff);
+					SetCoordinate(9,8,0xff00ff);
+					NEO_TransferPixels();
 
 
 
@@ -1470,9 +1486,9 @@ static void NeoTask(void* pvParameters) {
 					NEOA_Lauflicht();
 */
 					break;
-				case MODE1:
+				case SINGLE:
 					/*Display MODE 1*/
-					CLS1_SendStr((unsigned char*) "Playing Mode 1  ",
+					CLS1_SendStr((unsigned char*) "Playing single Polle  ",
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
@@ -1482,9 +1498,9 @@ static void NeoTask(void* pvParameters) {
 
 					SetTrail(0x200020, 16, 4, 60, 50);
 					break;
-				case MODE2:
+				case LOGO:
 					/*Display Mode 2*/
-					CLS1_SendStr((unsigned char*) "Playing Mode 2  ",
+					CLS1_SendStr((unsigned char*) "Display Logo ",
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);
@@ -1501,9 +1517,9 @@ static void NeoTask(void* pvParameters) {
 					NEO_TransferPixels();
 
 					break;
-				case MODE3:
+				case LAUFLICHT:
 					/*Display Mode 3*/
-					CLS1_SendStr((unsigned char*) "Playing Mode 3  ",
+					CLS1_SendStr((unsigned char*) "Playing fancy Lauflicht  ",
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
 							CLS1_GetStdio()->stdOut);

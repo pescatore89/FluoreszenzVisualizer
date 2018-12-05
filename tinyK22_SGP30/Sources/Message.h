@@ -34,10 +34,10 @@ typedef enum {
 } MENU;
 
 typedef enum {
-	 ALL = 0, /* (1) Einzelnes Bild darstellen */
-	MODE1, /* (2) Modus 1 */
-	MODE2, /* (3) Modus 2 */
-	MODE3, /* (4) Modus 3*/
+	 SINGLE = 1, /* (1) einzelne Polle abspielen */
+	ALL, 		 /* (2) Alle Pollen werden in einer Enlosschlaufe abgespielt */
+	LOGO, 		 /* (3) Das Logo darstellen*/
+	LAUFLICHT, 	 /* (4) FANCY Lauflicht wird abgespielt */
 	CALIBRATION /*Calibration Mode*/
 
 } MODE;

@@ -1483,8 +1483,8 @@ static void NeoTask(void* pvParameters) {
 							NEO_TransferPixels();
 						}
 					}
-					NEOA_Lauflicht();
-*/
+*/					NEOA_Lauflicht();
+
 					break;
 				case SINGLE:
 					/*Display MODE 1*/

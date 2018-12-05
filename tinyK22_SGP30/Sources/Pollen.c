@@ -104,7 +104,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 
 }
 
-uint8_t SetNav(int32_t nav) {
+uint8_t SetNav(MENU nav) {
 
 	Navigation_t * pxNav;
 	pxNav = &xNavigation;

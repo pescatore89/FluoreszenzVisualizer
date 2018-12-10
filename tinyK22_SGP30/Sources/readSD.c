@@ -14,7 +14,7 @@
 #include "MINI1.h"
 #include "WS2812B\NeoPixel.h"
 #include "WS2812B\NeoApp.h"
-
+#include "Message.h"
 #define INI_FILE_NAME			"Config.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
 #define INI_SECTION_NAME_LED	"LED"
@@ -24,6 +24,7 @@
 #define NUMBER_OF_LEDS					(576)
 static BMPImage* image = NULL;
 static FIL bmpFile;
+xQueueHandle queue_handler;
 /* Simple BMP reading code, should be adaptable to many
  systems. Originally from Windows, ported to Linux, now works on my Mac
  OS system.
@@ -210,6 +211,8 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	uint32_t color;
 	FRESULT res = FR_OK;
 	uint32_t cnt = 0;
+	Message_t *pxMessage;
+	pxMessage = &xMessage;
 	unsigned long size;
 	if (image == NULL) {
 		image = malloc(sizeof(BMPImage));
@@ -232,8 +235,13 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 		CLS1_SendStr((unsigned char*) "ERROR loading File  ",
 				CLS1_GetStdio()->stdOut);
 	} else {
-
-		res = NEOA_Display_Image(image);
+		pxMessage->modus = SINGLE;
+		pxMessage->data = image->data;
+		res = AddMessageToQueue(queue_handler, pxMessage);
+		if (res != QUEUE_OK) {
+			return ERR_BUSY;
+		}
+		//res = NEOA_Display_Image(image);
 	}
 
 	//free(image->data);

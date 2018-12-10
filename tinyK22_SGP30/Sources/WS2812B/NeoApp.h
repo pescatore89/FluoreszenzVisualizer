@@ -18,7 +18,7 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 #include "..\my_types.h"
 void NEOA_Init(void* queue_handler);
 uint8_t NEOA_Lauflicht(void);
-uint8_t NEOA_Display_Image(BMPImage* image);
+uint8_t NEOA_Display_Image(char* image,unsigned short farbtiefe);
 uint8_t SetCoordinate(int x, int y, uint32_t color);
 uint8_t SetTrail(uint32_t color,  uint32_t end, uint32_t nofTail, uint8_t dimmPercent, uint16_t delayMs);
 uint8_t ClearCoordinate(int x, int y);

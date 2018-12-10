@@ -1305,7 +1305,7 @@ uint8_t NEOA_Lauflicht(void) {
 
 }
 
-uint8_t NEOA_Display_Image(BMPImage* image) {
+uint8_t NEOA_Display_Image(char* image,unsigned short farbtiefe) {
 
 	BMPImage* rxImage;
 	uint32_t size;
@@ -1336,12 +1336,12 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
 			for (i = 0; i < MATRIX_RES; i++) {
 				position = lookUpMatrix[k][i];
-				red = (image->data[cnt]);
-				green = (image->data[cnt + 1]);
-				blue = (image->data[cnt + 2]);
+				red = (image[cnt]);
+				green = (image[cnt + 1]);
+				blue = (image[cnt + 2]);
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
-				cnt = cnt + ((image->biBitCount) / 8);
+				cnt = cnt + ((farbtiefe) / 8);
 
 
 			}
@@ -1491,6 +1491,10 @@ static void NeoTask(void* pvParameters) {
 					break;
 				case SINGLE:
 					/*Display MODE 1*/
+
+					NEOA_Display_Image(pxRxedMessage->data,0x18);
+					/*
+
 					CLS1_SendStr((unsigned char*) "Playing single Polle  ",
 							CLS1_GetStdio()->stdOut);
 					CLS1_SendStr((unsigned char*) "\r\n ",
@@ -1500,6 +1504,7 @@ static void NeoTask(void* pvParameters) {
 					names = getNamelist();
 
 					SetTrail(0x200020, 16, 4, 60, 50);
+					*/
 					break;
 				case LOGO:
 					/*Display Mode 2*/

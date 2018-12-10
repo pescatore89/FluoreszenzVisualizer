@@ -1342,11 +1342,14 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
 				cnt = cnt + ((image->biBitCount) / 8);
+
+
 			}
 		}
 
 	}
 	NEO_TransferPixels();
+
 
 	return res;
 }

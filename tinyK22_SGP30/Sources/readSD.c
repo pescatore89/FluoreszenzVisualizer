@@ -44,8 +44,7 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 
 }
 
-
-uint8_t getDataArray(uint8_t* px){
+uint8_t getDataArray(uint8_t* px) {
 	px = ImageDataBuffer;
 
 }
@@ -212,24 +211,34 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	FRESULT res = FR_OK;
 	uint32_t cnt = 0;
 	unsigned long size;
-
-	image = malloc(sizeof(BMPImage));
-	if (image != NULL) {
-		res = BMPImageLoadData((char *) fileName, image);
-		if (res != FR_OK) {
-			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
-					CLS1_GetStdio()->stdOut);
-		} else {
-
-			res = NEOA_Display_Image(image);
+	if (image == NULL) {
+		image = malloc(sizeof(BMPImage));
+		if (image == NULL) {
+			CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
+			return FR_NOT_ENOUGH_CORE;
+			/*malloc failed*/
 		}
-
-//		free(image->data);
-		free(image);
-	} else {
-		CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
-		return FR_NOT_ENOUGH_CORE;
+		else{
+			image->data = malloc(sizeof(char)*2500);
+			if(image->data == NULL){
+				CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
+				return FR_NOT_ENOUGH_CORE;
+				/*malloc failed*/
+			}
+		}
 	}
+	res = BMPImageLoadData((char *) fileName, image);
+	if (res != FR_OK) {
+		CLS1_SendStr((unsigned char*) "ERROR loading File  ",
+				CLS1_GetStdio()->stdOut);
+	} else {
+
+		res = NEOA_Display_Image(image);
+	}
+
+	//free(image->data);
+	//free(image);
+
 	return res;
 
 }
@@ -332,8 +341,6 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 	return ERR_OK;
 }
 
-
-
 void addSuffixTXT(char* filename) {
 
 	uint8_t length = 0;
@@ -432,8 +439,6 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 	FRESULT res = FR_OK;
 	file = &bmpFile;
 
-
-
 	res = FAT1_open(file, filename, FA_READ);
 	if (res != FR_OK) {
 		//error occured
@@ -446,7 +451,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 		UINT nof = 0;
 		UINT bfOffBits = 0;
 		UINT br; /* Pointer to number of bytes read */
-		 buf[100];
+		buf[100];
 
 		res = FAT1_read(file, buf, sizeof(buf) - 1, &nof);
 		if (res != FR_OK) {
@@ -463,28 +468,27 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			image->biCompression = buf[30];
 		}
 
-		image->data = ImageDataBuffer;
-/*		image->data = malloc(
-				image->biWidth * image->biHeight * sizeof(char)
-						* ((image->biBitCount) / 8));
-*/		if (image->data != NULL) {
+		//image->data = ImageDataBuffer;
+		/*		image->data = malloc(
+		 image->biWidth * image->biHeight * sizeof(char)
+		 * ((image->biBitCount) / 8));
+		 */
+
 			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 			if (res == FR_OK) {
-				res = FAT1_read(file, image->data, sizeof(image->data)*2500 - 1, &nof); //
+				res = FAT1_read(file, image->data,
+						sizeof(image->data) * 2500 - 1, &nof); //
 				if (res == FR_OK) {
 					res = FAT1_close(file);
 				} else {
-					res = FR_DENIED; 	// close failed
-					return res;
+				res = FR_DENIED; 	// close failed
+				return res;
 				}
 			} else {
 				res = FR_NOT_ENABLED; 	// seek failed
 				return res;
 			}
-		} else {
-			res = FR_NOT_ENOUGH_CORE;	// malloc failed
-			return res;
-		}
+
 	}
 
 	if ((image->biBitCount) == 0x18) { /*24 Bit Farbtiefe*/

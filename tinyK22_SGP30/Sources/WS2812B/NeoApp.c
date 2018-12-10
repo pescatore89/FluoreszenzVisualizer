@@ -1336,9 +1336,9 @@ uint8_t NEOA_Display_Image(BMPImage* image) {
 		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
 			for (i = 0; i < MATRIX_RES; i++) {
 				position = lookUpMatrix[k][i];
-				red = (ImageDataBuffer[cnt]);
-				green = (ImageDataBuffer[cnt + 1]);
-				blue = (ImageDataBuffer[cnt + 2]);
+				red = (image->data[cnt]);
+				green = (image->data[cnt + 1]);
+				blue = (image->data[cnt + 2]);
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
 				cnt = cnt + ((image->biBitCount) / 8);

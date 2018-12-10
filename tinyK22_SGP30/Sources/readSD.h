@@ -29,7 +29,7 @@ BMPImage* loadBMPData(TCHAR *filename,
 void addSuffixTXT(char* filename);
 uint8_t nOfDigits(const char*);
 uint32_t getRealValue(const char *value);
-uint8_t ImageDataBuffer[2500];
+ uint8_t ImageDataBuffer[2500];
 uint8_t buf[100];
 BMPImage* pxImage;
 BMPImage xImage;

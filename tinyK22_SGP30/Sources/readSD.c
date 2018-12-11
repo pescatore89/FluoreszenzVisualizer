@@ -22,7 +22,8 @@
 #define SECTION_NAME_MODE_2		"MODUS2"
 #define SECTION_NAME_MODE_3		"MODUS3"
 #define NUMBER_OF_LEDS					(576)
-static BMPImage* image = NULL;
+//static BMPImage* image = NULL;
+static BMPImage* image2 = NULL;
 static FIL bmpFile;
 xQueueHandle queue_handler;
 /* Simple BMP reading code, should be adaptable to many
@@ -202,6 +203,8 @@ uint8_t nOfDigits(const char* value) {
 
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
+
+	BMPImage* image = NULL;
 	uint32_t position = 0;
 	uint8_t red = 0;
 	uint8_t green = 0;
@@ -214,21 +217,31 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	Message_t *pxMessage;
 	pxMessage = &xMessage;
 	unsigned long size;
+
+
+
+
+
 	if (image == NULL) {
-		image = malloc(sizeof(BMPImage));
+		image = FRTOS1_pvPortMalloc(sizeof(BMPImage));
 		if (image == NULL) {
 			CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 			return FR_NOT_ENOUGH_CORE;
 			/*malloc failed*/
 		}
 		else{
-			image->data = malloc(sizeof(char)*2500);
+			image->data = FRTOS1_pvPortMalloc(sizeof(char)*2500);
 			if(image->data == NULL){
 				CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 				return FR_NOT_ENOUGH_CORE;
 				/*malloc failed*/
 			}
 		}
+	}
+
+	else if(image->data == NULL){
+		image->data = FRTOS1_pvPortMalloc(sizeof(char)*2500);
+
 	}
 	res = BMPImageLoadData((char *) fileName, image);
 	if (res != FR_OK) {
@@ -241,11 +254,8 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 		if (res != QUEUE_OK) {
 			return ERR_BUSY;
 		}
-		//res = NEOA_Display_Image(image);
-	}
 
-	//free(image->data);
-	//free(image);
+	}
 
 	return res;
 
@@ -253,6 +263,7 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
 uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
+	BMPImage* image;
 	FRESULT res = ERR_OK;
 	unsigned char* biCount = NULL;
 	image = malloc(sizeof(BMPImage));

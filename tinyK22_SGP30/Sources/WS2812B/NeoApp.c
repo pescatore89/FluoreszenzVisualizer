@@ -1493,6 +1493,8 @@ static void NeoTask(void* pvParameters) {
 					/*Display MODE 1*/
 
 					NEOA_Display_Image(pxRxedMessage->data,0x18);
+				 	FRTOS1_vPortFree(pxRxedMessage->data);
+
 					/*
 
 					CLS1_SendStr((unsigned char*) "Playing single Polle  ",

@@ -431,7 +431,7 @@ void PE_low_level_init(void)
     PEX_RTOS_INIT();                   /* Initialization of the selected RTOS. Macro is defined by the RTOS component. */
   #endif
   
-  
+
   /* NMI, reset and debug pins port clock gate enable */
   
   #if CPU_NMI_PIN | CPU_RESET_PIN | CPU_SWD_DIO_PIN | CPU_SWD_CLK_PIN

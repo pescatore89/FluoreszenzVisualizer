@@ -58,7 +58,7 @@ static void AppTask(void *pv) {
 	 initConfigData();
 
 	for (;;) {
-		LED1_Neg();
+	//	LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }

@@ -110,8 +110,11 @@ int main(void)
   PE_low_level_init();
   /*** End of Processor Expert internal initialization.                    ***/
 
+
+
   /* Write your code here */
   WAIT1_Waitms(100);
+
   APP_Run();		// this is where it all begins...
   /* For example: for(;;) { } */
 

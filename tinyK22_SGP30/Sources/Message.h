@@ -43,6 +43,7 @@ typedef enum {
 } MODE;
 
 struct Navigation {
+	uint8_t *nameActiv;
 	MENU menu;
 
 } xNavigation;

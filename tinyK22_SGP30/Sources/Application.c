@@ -17,6 +17,7 @@
 #include "TmDt1.h"
 #include  "Message.h"
 #include "config.h"
+#include "Player.h"
 #if PL_CONFIG_HAS_NEO_PIXEL
 #include "WS2812B/NeoApp.h"
 #endif
@@ -100,7 +101,12 @@ void APP_Run(void) {
 
 	SENSOR_Init();
 
-	int ups = 19;
+
+	PLAYER_Init();
+
+
+
+
 	if (xTaskCreate(AppTask, /* pointer to the task */
 	"App", /* task name for kernel awareness debugging */
 	2500 / sizeof(StackType_t), /* task stack size */

@@ -100,7 +100,7 @@ static lv_res_t Btn_TempHum_click_action(struct _lv_obj_t *obj) {
  * @return LV_ACTION_RES_INV because the window is deleted in the function
  */
 static lv_res_t Btn_NeoPixel_click_action(struct _lv_obj_t *obj) {
-	GUI_NEO_Create();
+//	GUI_NEO_Create();
 	return LV_RES_OK;
 }
 #endif

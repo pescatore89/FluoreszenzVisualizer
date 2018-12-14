@@ -12,6 +12,6 @@
 
 void NEO_GUI_SetLightLevel(uint8_t val);
 
-void GUI_NEO_Create(void);
+void GUI_NEO_Create(uint8_t* name);
 
 #endif /* GUI_AIR_H_ */

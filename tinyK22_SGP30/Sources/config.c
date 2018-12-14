@@ -121,7 +121,7 @@ uint8_t Config_ReadPollen(void) {
 	int lines = -1;
 	int nLEDsPerLine = -1;
 	uint8_t buf[100];
-	int quantity = 0;
+
 	char key[2];
 	char *key_p;
 	key_p = key;
@@ -199,4 +199,10 @@ void setSensorEnabled(bool enabled) {
 char** getNamelist(void) {
 	return namelist;
 }
+
+int getQuantity(void){
+	return quantity;
+}
+
+
 

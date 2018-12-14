@@ -23,6 +23,10 @@ uint8_t SetCoordinate(int x, int y, uint32_t color);
 uint8_t SetTrail(uint32_t color,  uint32_t end, uint32_t nofTail, uint8_t dimmPercent, uint16_t delayMs);
 uint8_t ClearCoordinate(int x, int y);
 uint8_t DimmPercentPixel(int x, int y, uint8_t percent);
+void NEOA_SetLightLevel(uint8_t level);
+uint8_t NEOA_GetLightLevel(void);
+bool NEOA_GetAutoLightLevelSetting(void);
+bool NEOA_SetAutoLightLevelSetting(bool set);
 
 struct CYRCLES {
 	uint8_t* C_1;

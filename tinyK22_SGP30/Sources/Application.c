@@ -56,6 +56,9 @@ static void AppTask(void *pv) {
 
 	vTaskDelay(pdMS_TO_TICKS(1000));
 	 initConfigData();
+#if PL_CONFIG_HAS_GUI
+	GUI_Init();
+#endif
 
 	for (;;) {
 	//	LED1_Neg();
@@ -64,9 +67,6 @@ static void AppTask(void *pv) {
 }
 
 void APP_Run(void) {
-
-
-
 
 	mutex = FRTOS1_xSemaphoreCreateMutex();
 	if (mutex == NULL) {
@@ -96,9 +96,7 @@ void APP_Run(void) {
 #if PL_CONFIG_HAS_SPI
 	SPI_Init();
 #endif
-#if PL_CONFIG_HAS_GUI
-	GUI_Init();
-#endif
+
 
 	SENSOR_Init();
 

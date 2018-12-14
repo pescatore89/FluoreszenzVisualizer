@@ -46,7 +46,22 @@ xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
 extern uint8_t ImageDataBuffer[2500];
+void NEOA_SetLightLevel(uint8_t level){
+	NEOA_LightLevel = level;
+}
 
+uint8_t NEOA_GetLightLevel(void){
+	return NEOA_LightLevel;
+}
+
+
+bool NEOA_GetAutoLightLevelSetting(void){
+	return NEOA_isAutoLightLevel;
+}
+
+bool NEOA_SetAutoLightLevelSetting(bool set){
+	NEOA_isAutoLightLevel = set;
+}
 static void SetPixel(int x, int y, uint32_t color) {
 	/* 0, 0 is left upper corner */
 	/* single lane, 3x64 modules from left to right */

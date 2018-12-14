@@ -8,19 +8,10 @@
 #ifndef GUI_NEO_H_
 #define GUI_NEO_H_
 
+#include <stdint.h>
 
+void NEO_GUI_SetLightLevel(uint8_t val);
 
-#define N_OF_POLLS_HOLO				(3)
-#define DISTANCE_BTW_BUTTON 		(0x16)
-#define OFFSET_DISTANCE_BUTTON_ZERO	(0x19)
 void GUI_NEO_Create(void);
-
-enum themes{
-    SWITZERLAND = 1,
-    CIRCLE,
-    SMILEY,
-    NOF_THEMES,
-};
-
 
 #endif /* GUI_AIR_H_ */

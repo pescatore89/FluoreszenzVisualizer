@@ -13,6 +13,8 @@
 #include "../lv_themes/lv_theme.h"
 #include "../lv_misc/lv_anim.h"
 #include "../lv_misc/lv_math.h"
+#include<stdio.h>
+#include<stdlib.h>
 
 /*********************
  *      DEFINES
@@ -214,6 +216,11 @@ lv_obj_t * lv_list_add(lv_obj_t * list, const void * img_src, const char * txt, 
     if(txt != NULL) {
         lv_obj_t * label = lv_label_create(liste, NULL);
         lv_label_set_text(label, txt);
+
+
+
+
+
         lv_obj_set_click(label, false);
         lv_label_set_long_mode(label, LV_LABEL_LONG_ROLL);
         lv_obj_set_width(label, liste->coords.x2 - label->coords.x1);

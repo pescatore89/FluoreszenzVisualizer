@@ -20,6 +20,8 @@ uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 uint8_t Config_ReadPollen(void);
 uint8_t Config_Setup(void);
 char** getNamelist(void);
+int quantity;
+int getQuantity(void);
 void initConfigData(void);
 bool getSensorEnabled(void);
 void setSensorEnabled(bool enabled);

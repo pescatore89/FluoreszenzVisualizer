@@ -122,7 +122,7 @@ typedef struct _lv_obj_t
     lv_signal_func_t signal_func;     /*Object type specific signal function*/
     lv_design_func_t design_func;     /*Object type specific design function*/
 
-    void * ext_attr;                 /*Object type specific extended data*/
+    void* ext_attr;                 /*Object type specific extended data*/
     lv_style_t * style_p;       /*Pointer to the object's style*/
 
 #if LV_OBJ_FREE_PTR != 0

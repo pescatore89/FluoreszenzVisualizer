@@ -16,7 +16,7 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 		const CLS1_StdIOType *io);
 
 uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io );
-uint8_t SetNav(MENU nav);
+
 uint8_t playPolle(char * polle, const CLS1_StdIOType *io);
 uint8_t playAll(void);
 

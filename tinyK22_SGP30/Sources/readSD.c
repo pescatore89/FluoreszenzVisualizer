@@ -248,7 +248,7 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 		CLS1_SendStr((unsigned char*) "ERROR loading File  ",
 				CLS1_GetStdio()->stdOut);
 	} else {
-		pxMessage->modus = SINGLE;
+		//pxMessage->modus = SINGLE;
 		pxMessage->data = image->data;
 		res = AddMessageToQueue(queue_handler, pxMessage);
 		if (res != QUEUE_OK) {

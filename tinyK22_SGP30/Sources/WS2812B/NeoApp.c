@@ -1260,61 +1260,7 @@ static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 #endif /* NEOA_CONFIG_PARSE_COMMAND_ENABLED */
 
 uint8_t NEOA_Lauflicht(void) {
-	uint32_t position;
-	int j = 0;
-	int k = 0;
-	int i = 0;
 
-	Navigation_t* rxNav;
-	rxNav = &xNavigation;
-
-	uint8_t res = ERR_OK;
-	NEO_ClearAllPixel();
-	NEO_TransferPixels();
-	for (j = 0; j < NEOC_NOF_LANES; j++) {
-		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
-			for (i = 0; i < MATRIX_RES; i++) {
-				position = lookUpMatrix[k][i];
-				res = NEO_SetPixelColor(j, position, 0x002020);
-				if (res != ERR_OK) {
-					break; /*Something went wrong*/
-
-				}
-
-				if (NEO_TransferPixels() != ERR_OK) {
-					break; /*Something went wrong*/
-				}
-				if (TakeNavigationFromQueue(queue_handler_Navigation, rxNav)
-						!= QUEUE_EMPTY) {
-					switch (rxNav->menu) {
-					case pause:
-						for (;;) {
-							if (TakeNavigationFromQueue(
-									queue_handler_Navigation, rxNav)
-									!= QUEUE_EMPTY) {
-								switch (rxNav->menu) {
-								case play:
-									break;
-								case stop:
-									NEO_ClearAllPixel();
-									NEO_TransferPixels();
-									goto finish;
-								}
-
-							} else {
-								vTaskDelay(pdMS_TO_TICKS(10));
-							}
-						}
-					}
-				}
-				vTaskDelay(pdMS_TO_TICKS(100));
-
-			}
-		}
-
-	}
-
-	finish: return res;
 
 }
 
@@ -1421,19 +1367,10 @@ static void NeoTask(void* pvParameters) {
 	Message_t *pxRxedMessage;
 	pxRxedMessage = &xMessage;
 
-	uint32_t size;
-	uint32_t position = 0;
-	uint8_t red = 0;
-	uint8_t green = 0;
-	uint8_t blue = 0;
-	uint32_t colorValue = 0;
-	uint8_t lane = 0;
-	uint32_t color;
-	uint32_t cnt = 0;
-	int j = 0;
-	int k = 0;
-	int i = 0;
-	char ** names;
+	for(;;){
+		vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
+	}
+
 
 	for (;;) {
 		if (TakeMessageFromQueue(queue_handler, pxRxedMessage) == QUEUE_EMPTY) {
@@ -1446,176 +1383,14 @@ static void NeoTask(void* pvParameters) {
 						CLS1_GetStdio()->stdOut);
 
 			} else {
-				switch (pxRxedMessage->modus) {
 
-				case ALL:
-
-					names = getNamelist();
-					SetCoordinate(8, 1, 0xff00ff);
-					SetCoordinate(9, 1, 0xff00ff);
-					SetCoordinate(8, 2, 0xff00ff);
-					SetCoordinate(9, 2, 0xff00ff);
-					SetCoordinate(8, 3, 0xff00ff);
-					SetCoordinate(9, 3, 0xff00ff);
-					SetCoordinate(8, 4, 0xff00ff);
-					SetCoordinate(9, 4, 0xff00ff);
-					SetCoordinate(8, 5, 0xff00ff);
-					SetCoordinate(9, 5, 0xff00ff);
-					SetCoordinate(8, 6, 0xff00ff);
-					SetCoordinate(9, 6, 0xff00ff);
-					SetCoordinate(8, 7, 0xff00ff);
-					SetCoordinate(9, 7, 0xff00ff);
-					SetCoordinate(8, 8, 0xff00ff);
-					SetCoordinate(9, 8, 0xff00ff);
-					NEO_TransferPixels();
-
-					/*
-
-					 for (j = 0; j < NEOC_NOF_LANES; j++) {
-					 for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
-					 for (i = 0; i < MATRIX_RES; i++) {
-					 position = lookUpMatrix[k][i];
-					 red = (pxRxedMessage->data[cnt]);
-					 green = (pxRxedMessage->data[cnt + 1]);
-					 blue = (pxRxedMessage->data[cnt + 2]);
-					 colorValue = (red << 16) + (green << 8)
-					 + (blue);
-					 NEO_SetPixelColor(j, position, colorValue);
-					 cnt = cnt + 3;
-					 }
-					 }
-
-					 }
-					 NEO_TransferPixels();
-
-					 for (int k = 0; k < 40; k++) {
-					 for (int z = 1; z < 13; z++) {
-					 setRingData(z, 0xff00ff);
-					 NEO_TransferPixels();
-					 vTaskDelay(pdMS_TO_TICKS(50));
-					 NEO_ClearAllPixel();
-					 NEO_TransferPixels();
-					 }
-					 }
-					 */
-					NEOA_Lauflicht();
-
-					break;
-				case SINGLE:
-					/*Display MODE 1*/
-
-					NEOA_Display_Image(pxRxedMessage->data, 0x18);
-					FRTOS1_vPortFree(pxRxedMessage->data);
-
-					/*
-
-					 CLS1_SendStr((unsigned char*) "Playing single Polle  ",
-					 CLS1_GetStdio()->stdOut);
-					 CLS1_SendStr((unsigned char*) "\r\n ",
-					 CLS1_GetStdio()->stdOut);
-					 value = 1;
-					 char ** names;
-					 names = getNamelist();
-
-					 SetTrail(0x200020, 16, 4, 60, 50);
-					 */
-					break;
-				case LOGO:
-					/*Display Mode 2*/
-					CLS1_SendStr((unsigned char*) "Display Logo ",
-							CLS1_GetStdio()->stdOut);
-					CLS1_SendStr((unsigned char*) "\r\n ",
-							CLS1_GetStdio()->stdOut);
-					setRingData(2, 0xff0000);
-					setRingData(3, 0xff0000);
-					setRingData(4, 0xff0000);
-					setRingData(5, 0xff0000);
-					setRingData(6, 0xff0000);
-					NEO_TransferPixels();
-					DimmPercentRing(3, 20);
-					DimmPercentRing(4, 80);
-					DimmPercentRing(5, 95);
-					DimmPercentRing(6, 99);
-					NEO_TransferPixels();
-
-					break;
-				case LAUFLICHT:
-					/*Display Mode 3*/
-					CLS1_SendStr((unsigned char*) "Playing fancy Lauflicht  ",
-							CLS1_GetStdio()->stdOut);
-					CLS1_SendStr((unsigned char*) "\r\n ",
-							CLS1_GetStdio()->stdOut);
-					setRingData(2, 0xff0000);
-					setRingData(3, 0xff0000);
-					setRingData(4, 0xff0000);
-					setRingData(5, 0xff0000);
-					setRingData(6, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					DimmPercentRing(4, 80);
-
-					NEO_TransferPixels();
-					value = 3;
-					break;
-
-				case CALIBRATION:
-					/*Calibration Mode*/
-					CLS1_SendStr((unsigned char*) "Start calibration...  ",
-							CLS1_GetStdio()->stdOut);
-					CLS1_SendStr((unsigned char*) "\r\n ",
-							CLS1_GetStdio()->stdOut);
-					SetCoordinate(1, 1, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(9, 1, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(17, 1, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(1, 9, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(9, 9, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(17, 9, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(1, 17, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(9, 17, 0xff0000);
-					NEO_TransferPixels();
-					vTaskDelay(pdMS_TO_TICKS(1000));
-					SetCoordinate(17, 17, 0xff0000);
-					NEO_TransferPixels();
-					CLS1_SendStr((unsigned char*) "...calibration done",
-							CLS1_GetStdio()->stdOut);
-					CLS1_SendStr((unsigned char*) "\r\n ",
-							CLS1_GetStdio()->stdOut);
-					break;
-				}
 
 			}
-			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
-				/*Couldnt return Mutex*/
-				for (;;) { /*shouldnt go here*/
-				}
-			}
+
 		}
 
 	}
 
-#if PL_CONFIG_HAS_MMA8451
-	int16_t xmg, ymg, zmg;
-#endif
-
-	NEO_SetAllPixelColor(0xff0000);
-// do something on the LED Matrix
-	for (;;) {
-		vTaskDelay(pdMS_TO_TICKS(100));
-	}
 }
 
 uint8_t SetTrail(uint32_t color, uint32_t end, uint32_t nofTail,

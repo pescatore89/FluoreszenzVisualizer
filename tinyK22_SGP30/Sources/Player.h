@@ -10,6 +10,6 @@
 
 
 void PLAYER_Init(void);
-
+float powerRegulation(char* data);
 
 #endif /* SOURCES_PLAYER_H_ */

@@ -8,16 +8,16 @@
 #include "Player.h"
 #include "Message.h"
 #include "FRTOS1.h"
-xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
+xQueueHandle queue_handler_playlist; /*QueueHandler declared in Message.h*/
 
 static void PlayerTask(void *pvParameters) {
-	Navigation_t* rxNav;
-	rxNav = &xNavigation;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
 
 	for (;;) {
-		if (TakeNavigationFromQueue(queue_handler_Navigation, rxNav)
+		if (TakeMessageFromPlaylistQueue(queue_handler_playlist, pxPlaylistMessage)
 				!= QUEUE_EMPTY) {
-			switch (rxNav->menu) {
+			switch (pxPlaylistMessage->cmd) {
 			case pause:
 				break;
 			case play:

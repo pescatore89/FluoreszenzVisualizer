@@ -90,13 +90,24 @@ void initConfigData(void) {
 	Config_ReadPollen();	// reads/stores all the names of the pollen
 }
 
-
-void setPowerConnected(uint8_t val){
+void setPowerConnected(uint8_t val) {
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
 	powerEnabled = val;
+	CS1_ExitCritical();
+
 }
-uint8_t getPowerConnected(void){
-	return powerEnabled;
+uint8_t getPowerConnected(void) {
+
+	uint8_t res;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	res = powerEnabled;
+	CS1_ExitCritical();
+
+	return res;
 }
+
 
 
 uint8_t Config_Setup(void) {
@@ -104,15 +115,10 @@ uint8_t Config_Setup(void) {
 	int val;
 	int power = -1;
 	int lines = -1;
-
 	uint8_t buf[32];
-
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
-
-	setPowerConnected(buf[0]-(char)'0');
-
-
+	setPowerConnected(buf[0] - (char) '0');
 	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
 	if (buf[0]) {
@@ -120,9 +126,7 @@ uint8_t Config_Setup(void) {
 	} else {
 		lightSensor = FALSE;
 	}
-
 	return ERR_OK;
-
 }
 
 uint8_t Config_ReadPollen(void) {
@@ -146,7 +150,7 @@ uint8_t Config_ReadPollen(void) {
 	quantity = buf[0] - '0';
 	CLS1_SendStr((unsigned char*) "Anzahl Pollen: ", CLS1_GetStdio()->stdOut);
 
-	CLS1_SendCh(quantity,CLS1_GetStdio()->stdOut);
+	CLS1_SendCh(quantity, CLS1_GetStdio()->stdOut);
 	CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
 
 	namelist = (char **) malloc(quantity * sizeof(char*));
@@ -172,8 +176,8 @@ uint8_t Config_ReadPollen(void) {
 				INI_FILE_NAME_POLLEN);
 
 		strcpy(namelist[i - 1], buf);
-		CLS1_SendStr((unsigned char*) "-" , CLS1_GetStdio()->stdOut);
-		CLS1_SendStr((unsigned char*)namelist[i - 1], CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "-", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) namelist[i - 1], CLS1_GetStdio()->stdOut);
 		CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
 
 	}
@@ -208,12 +212,16 @@ void setSensorEnabled(bool enabled) {
 }
 
 char** getNamelist(void) {
-	return namelist;
+	char** res;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	res = namelist;
+	CS1_ExitCritical();
+
+	return res;
 }
 
-int getQuantity(void){
+int getQuantity(void) {
 	return quantity;
 }
-
-
 

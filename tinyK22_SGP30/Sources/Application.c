@@ -7,7 +7,7 @@
 
 #include "Platform.h"
 #include "CLS1.h"
-#include "FRTOS1.h"
+//#include "FRTOS1.h"
 #include "LED1.h"
 #include "TRG1.h"
 #include "TMOUT1.h"
@@ -42,6 +42,11 @@
 static xTimerHandle timerHndl;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
+
+xQueueHandle queue_handler_playlist;
+xQueueHandle queue_handler_data;
+xQueueHandle queue_handler_update;
+
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message.h*/
 static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 #if PL_CONFIG_HAS_GUI
@@ -56,56 +61,82 @@ static void AppTask(void *pv) {
 	(void) pv;
 
 	vTaskDelay(pdMS_TO_TICKS(1000));
-	 initConfigData();
+	initConfigData();
 #if PL_CONFIG_HAS_GUI
 	GUI_Init();
 #endif
 
 	for (;;) {
-	//	LED1_Neg();
+		//	LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }
 
+uint8_t createQueues(void) {
+
+	uint8_t res = ERR_OK;
+
+	/*Initialize Playlist Queue*/
+	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
+			sizeof(struct PlaylistMessage*));
+
+	if (queue_handler_playlist == NULL) {
+		return ERR_FAILED;
+	} else {
+		vQueueAddToRegistry(queue_handler_playlist, "Playlist Queue");
+	}
+
+	/*Itialize other Queues*/
+#if 0
+	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
+			sizeof(struct PlaylistMessage*));
+
+	if (queue_handler_playlist == NULL) {
+		return ERR_FAILED;
+	} else {
+		vQueueAddToRegistry(queue_handler_playlist, "Playlist Queue");
+	}
+
+	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
+			sizeof(struct PlaylistMessage*));
+
+	if (queue_handler_playlist == NULL) {
+		return ERR_FAILED;
+	} else {
+		vQueueAddToRegistry(queue_handler_playlist, "Playlist Queue");
+	}
+
+#endif
+
+	return res;
+}
+
 void APP_Run(void) {
 
+
+
+	uint8_t res = createQueues();
+	if(res != ERR_OK){
+		/*error initializing queues*/
+	}
 	mutex = FRTOS1_xSemaphoreCreateMutex();
 	if (mutex == NULL) {
 		/*Something went wrong*/
 	}
-	queue_handler_Navigation = FRTOS1_xQueueCreate(QUEUE_LENGTH,
-			sizeof(struct MENU *));
-	if (queue_handler_Navigation == NULL) {
-		/*Something went wrong*/
-	} else {
-		vQueueAddToRegistry(queue_handler_Navigation, "Navigation Queue");
-	}
-	queue_handler = FRTOS1_xQueueCreate(QUEUE_LENGTH, sizeof(struct MESSAGE *));/*Queue erstellen*/
-	if (queue_handler == NULL) {
-		/*Something went wrong*/
-	}
-
-	else {
-		vQueueAddToRegistry(queue_handler, "Message Queue");
 
 #if PL_CONFIG_HAS_NEO_PIXEL
-		NEOA_Init(queue_handler); /*Dem NeoTask den QueueHandler mitgeben*/
+	NEOA_Init(queue_handler); /*Dem NeoTask den QueueHandler mitgeben*/
 #endif
-	}
+
 	SHELL_Init();
 
 #if PL_CONFIG_HAS_SPI
 	SPI_Init();
 #endif
 
-
 	SENSOR_Init();
 
-
 	PLAYER_Init();
-
-
-
 
 	if (xTaskCreate(AppTask, /* pointer to the task */
 	"App", /* task name for kernel awareness debugging */

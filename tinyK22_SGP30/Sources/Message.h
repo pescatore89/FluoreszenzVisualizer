@@ -8,14 +8,55 @@
 #ifndef SOURCES_MESSAGE_H_
 #define SOURCES_MESSAGE_H_
 
-#define QUEUE_LENGTH	(100)
-#define QUEUE_ITEM_SIZE	(100)
+#define QUEUE_PLAYLIST_LENGTH			(100)
+#define QUEUE_UPDATE_LENGTH				(100)
+#define QUEUE_DATA_LENGTH				(100)
+#define QUEUE_ITEM_PLAYLIST_SIZE		(100)
+#define QUEUE_ITEM_UPDATE_SIZE			(100)
+#define QUEUE_ITEM_DATA_SIZE			(100)
 
 #include "FRTOS1.h"
 
 extern xQueueHandle queue_handler;
-extern xSemaphoreHandle mutex;
-extern xQueueHandle queue_handler_Navigation;
+
+extern xQueueHandle queue_handler_playlist; /*Queue handler for Playlist Queue*/
+extern xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
+extern xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
+
+
+
+
+/*Message for Playlist Queue*/
+
+
+
+
+typedef enum {
+	play,
+	pause,
+	stop,
+	skipF,
+	skipR
+}COMMAND;
+
+typedef enum {
+	newData,		/*Update Playlist*/
+	newCMD,			/*updated Commando*/
+	newImage		/*Display an Image*/
+} STATE;
+
+
+
+struct PlaylistMessage {
+	COMMAND cmd;
+	uint8_t* playlist;
+	STATE state;
+} xPlaylistMessage;
+
+
+
+typedef struct PlaylistMessage PlaylistMessage_t;
+
 
 typedef enum {
 	QUEUE_OK = 0, /* (0) Succeeded */
@@ -28,28 +69,30 @@ typedef enum {
 	QUEUE_IS_FULL /* (7)Queue is full */
 } QUEUE_RESULT;
 
-typedef enum {
-	pause = 1, play, stop, skip_backward, skip_forward
+QUEUE_RESULT AddMessageToPlaylistQueue(xQueueHandle handle,PlaylistMessage_t *msg);
+QUEUE_RESULT TakeMessageFromPlaylistQueue(xQueueHandle handle,PlaylistMessage_t *msg);
 
-} MENU;
 
-typedef enum {
-	 SINGLE = 1, /* (1) einzelne Polle abspielen */
-	ALL, 		 /* (2) Alle Pollen werden in einer Enlosschlaufe abgespielt */
-	LOGO, 		 /* (3) Das Logo darstellen*/
-	LAUFLICHT, 	 /* (4) FANCY Lauflicht wird abgespielt */
-	CALIBRATION /*Calibration Mode*/
 
-} MODE;
 
-struct Navigation {
-	uint8_t *nameActiv;
-	MENU menu;
 
-} xNavigation;
+
+
+
+
+
+
+
+
+extern xSemaphoreHandle mutex;
+extern xQueueHandle queue_handler_Navigation;
+
+
+
+
+
 
 struct MESSAGE {
-	MODE modus;
 	uint8_t* data;
 	uint32_t color_266;
 	uint32_t color_355;
@@ -89,13 +132,9 @@ struct MESSAGE {
 	uint8_t lifetime_405_600;
 	uint8_t lifetime_405_700;
 
-
 	//uint16_t excitation; /*Anregungsintensität*/
 
 } xMessage;
-
-
-
 
 typedef struct Navigation Navigation_t;
 typedef struct MESSAGE Message_t;

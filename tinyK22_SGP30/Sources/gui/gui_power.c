@@ -43,7 +43,6 @@ static lv_res_t Btn_Power_click_action(lv_obj_t *btn) {
 			lv_btn_set_state(btn30A, LV_BTN_STATE_REL);
 		}
 		lv_btn_set_state(btn10A, LV_BTN_STATE_INA);
-
 	}
 
 	else if (btn == btn20A) {
@@ -55,7 +54,6 @@ static lv_res_t Btn_Power_click_action(lv_obj_t *btn) {
 			lv_btn_set_state(btn30A, LV_BTN_STATE_REL);
 		}
 		lv_btn_set_state(btn20A, LV_BTN_STATE_INA);
-
 	}
 
 	else if (btn == btn30A) {
@@ -67,10 +65,7 @@ static lv_res_t Btn_Power_click_action(lv_obj_t *btn) {
 			lv_btn_set_state(btn20A, LV_BTN_STATE_REL);
 		}
 		lv_btn_set_state(btn30A, LV_BTN_STATE_INA);
-
 	}
-
-	//GUI_NEO_Create(namesSet);
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 

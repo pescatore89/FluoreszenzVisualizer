@@ -24,9 +24,12 @@ static lv_obj_t *win; /* object for window */
 static lv_obj_t *label_auto_light_level; /* label for auto mode */
 static lv_obj_t *label_slider_level; /* label for level value */
 #include "Message.h"
-xQueueHandle queue_handler_Navigation;
+
+
+xQueueHandle queue_handler_playlist;
+
 static uint8_t namesAvtiv[MAX_N_POLLS_STORED];
-uint8_t* n;
+static uint8_t* namesActive;
 static void SetLabelValue(lv_obj_t *label, int32_t val) {
 	uint8_t buf[16];
 	if (label != NULL) {
@@ -89,12 +92,13 @@ static uint8_t* getNamesActiv (void){
 
 
 static lv_res_t btn_play_click_action(lv_obj_t *btn) {
-	Navigation_t *pxNavigation;
-	pxNavigation = &xNavigation;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
 	uint8_t res;
-	pxNavigation->nameActiv =n;
-	pxNavigation->menu = play;
-	res = AddNavigationToQueue(queue_handler_Navigation,pxNavigation );
+	pxPlaylistMessage->playlist = namesActive;
+	pxPlaylistMessage->cmd = play;
+
+	res = AddMessageToPlaylistQueue(queue_handler_playlist,pxPlaylistMessage );
 
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
@@ -123,7 +127,7 @@ static lv_res_t btn_loop_click_action(lv_obj_t *btn) {
 
 void GUI_NEO_Create(uint8_t * name) {
 
-	n = name;	// schreibt die Namen der aktiven pollen auf den globalen pointer
+	namesActive = name;	// schreibt die Namen der aktiven pollen auf den globalen pointer
 
 
 

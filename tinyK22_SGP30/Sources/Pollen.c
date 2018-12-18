@@ -33,7 +33,7 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 	Message_t *pxMessage;
 	pxMessage = &xMessage;
 
-	pxMessage->modus = mode;
+
 	uint8_t daten[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4,
 			5, 6, 5, 1, 2, 3, 4, 5, 6, 5, 4, 5, 6, 5, 4, 5, 6, 5, 4, 5, 1, 2, 3,
 			4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 4, 5, 6, 5, 1, 2, 3, 4,
@@ -80,7 +80,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 		directory_set = TRUE;
 		image = loadBMPData(polle, io);
 	//	NEOA_Display_Image(image);
-		pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
+	//	pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
 	//	pxMessage->data = image->data;
 
 		result = readCharacteristicValues(polle,pxMessage);
@@ -104,24 +104,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 
 }
 
-uint8_t SetNav(MENU nav) {
 
-	Navigation_t * pxNav;
-	pxNav = &xNavigation;
-	pxNav->menu = nav;
-
-	uint8_t result = ERR_OK;
-	QUEUE_RESULT res = QUEUE_OK;
-
-	uint8_t val = 0;
-	res = AddNavigationToQueue(queue_handler_Navigation, pxNav);
-	if (res != QUEUE_OK) {
-		return result = ERR_BUSY;
-	}
-
-	return result;
-
-}
 
 uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 		const CLS1_StdIOType *io) {
@@ -199,13 +182,13 @@ uint8_t POLLEN_ParseCommand(const unsigned char* cmd, bool *handled,
 		res = SetMode(5, NULL, io); /*Mode 5 is Calibration mode*/
 	} else if (UTIL1_strncmp((char*) cmd, "pollen pause",
 			sizeof("pollen pause") - 1) == 0) {
-		res = SetNav(pause);
+		//res = SetNav(pause);
 	} else if (UTIL1_strncmp((char*) cmd, "pollen play",
 			sizeof("pollen play") - 1) == 0) {
-		res = SetNav(play);
+		//res = SetNav(play);
 	} else if (UTIL1_strncmp((char*) cmd, "pollen stop",
 			sizeof("pollen stop") - 1) == 0) {
-		res = SetNav(stop);
+		//res = SetNav(stop);
 	}
 
 	*handled = TRUE;

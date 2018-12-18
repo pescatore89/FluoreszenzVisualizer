@@ -7,9 +7,9 @@
 
 #ifndef SOURCES_APPLICATION_H_
 #define SOURCES_APPLICATION_H_
-
+#include "FRTOS1.h"
 
 void APP_Run(void);
-
+uint8_t createQueues(void);
 
 #endif /* SOURCES_APPLICATION_H_ */

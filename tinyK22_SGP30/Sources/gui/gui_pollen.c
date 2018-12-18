@@ -16,7 +16,7 @@
 
 
 
-static bool namesSet[MAX_N_POLLS_STORED];
+static uint8_t namesSet[MAX_N_POLLS_STORED];
 static lv_obj_t *win; /* object for window */
 static lv_res_t win_close_action(lv_obj_t *btn) {
 	GUI_GroupPull();
@@ -39,7 +39,6 @@ static lv_res_t my_click_action(struct _lv_obj_t *obj) {
 static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 	GUI_NEO_Create(namesSet);
 	return LV_RES_OK; /* Return OK if the button is not deleted */
-
 }
 
 static uint16_t getPosInNamelist(char* name) {
@@ -71,17 +70,7 @@ static lv_res_t cb_release_action(lv_obj_t * cb) {
 
 void GUI_POLLEN_Create(void) {
 
-	static lv_style_t style_sb;
-	lv_style_copy(&style_sb, &lv_style_plain);
-	style_sb.body.main_color = LV_COLOR_BLACK;
-	style_sb.body.grad_color = LV_COLOR_BLACK;
-	style_sb.body.border.color = LV_COLOR_WHITE;
-	style_sb.body.border.width = 1;
-	style_sb.body.border.opa = LV_OPA_70;
-	style_sb.body.radius = LV_RADIUS_CIRCLE;
-	style_sb.body.opa = LV_OPA_60;
-	style_sb.body.padding.hor = 3; /*Horizontal padding on the right*/
-	style_sb.body.padding.inner = 8; /*Scrollbar width*/
+
 
 	lv_obj_t *closeBtn;
 	win = lv_win_create(lv_scr_act(), NULL);
@@ -95,8 +84,7 @@ void GUI_POLLEN_Create(void) {
 	lv_group_focus_obj(closeBtn);
 
 	lv_win_set_title(win, "Pollenarten");
-	lv_win_set_style(win, LV_WIN_STYLE_SB, &style_sb);
-	lv_win_set_sb_mode(win, LV_SB_MODE_AUTO);
+
 
 	/********************************************
 	 * Create list ob objects

@@ -31,6 +31,7 @@
 #endif
 
 #include "gui_pollen.h"
+#include "gui_power.h"
 
 #if PL_CONFIG_HAS_MMA8451
 /**
@@ -105,6 +106,17 @@ static lv_res_t Btn_NeoPixel_click_action(struct _lv_obj_t *obj) {
 }
 #endif
 
+static lv_res_t Btn_Power_click_action(struct _lv_obj_t *obj) {
+	GUI_Power_Create();
+	return LV_RES_OK;
+}
+
+static lv_res_t Btn_More_click_action(struct _lv_obj_t *obj) {
+
+	return LV_RES_OK;
+}
+
+
 static lv_res_t Btn_Pollen_click_action(struct _lv_obj_t *obj) {
 	GUI_POLLEN_Create();
 	return LV_RES_OK;
@@ -157,7 +169,8 @@ void GUI_MainMenuCreate(void) {
 	GUI_GroupPush();
 	/* create window */
 	gui_win = lv_win_create(lv_scr_act(), NULL);
-	lv_win_set_title(gui_win, "Main Menu");
+	lv_win_set_title(gui_win, "Menu");
+
 
 	/* Make the window content responsive */
 	//lv_win_set_layout(gui_win, LV_LAYOUT_PRETTY); /* this will arrange the buttons */
@@ -195,11 +208,7 @@ void GUI_MainMenuCreate(void) {
 	obj = lv_list_add(list1, SYMBOL_DIRECTORY, "Air", Btn_Air_click_action);
 	GUI_AddObjToGroup(obj);
 #endif
-#if PL_CONFIG_HAS_TSL2561
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "Ambient", Btn_Ambient_click_action);
 
-	GUI_AddObjToGroup(obj);
-#endif
 #if PL_CONFIG_HAS_RTC_DS3231
 	obj = lv_list_add(list1, SYMBOL_CLOSE, "Clock", Btn_Clock_click_action);
 	GUI_AddObjToGroup(obj);
@@ -210,12 +219,36 @@ void GUI_MainMenuCreate(void) {
 #endif
 #if PL_CONFIG_HAS_NEO_PIXEL
 	//obj = lv_list_add(list1, SYMBOL_CLOSE, "Pollen", Btn_NeoPixel_click_action);
-	obj = lv_list_add(list1, SYMBOL_CLOSE, "Pollen", Btn_Pollen_click_action);
+	obj = lv_list_add(list1, NULL, "Pollen", Btn_Pollen_click_action);
 	GUI_AddObjToGroup(obj);
 
 
 #endif
-	lv_obj_set_size(list1, 64, 100); /* fixed size */
+#if PL_CONFIG_HAS_NEO_PIXEL
+	//obj = lv_list_add(list1, SYMBOL_CLOSE, "Pollen", Btn_NeoPixel_click_action);
+	obj = lv_list_add(list1, NULL, "Power", Btn_Power_click_action);
+	GUI_AddObjToGroup(obj);
+
+
+#endif
+
+#if PL_CONFIG_HAS_TSL2561
+	obj = lv_list_add(list1, NULL, "Ambient", Btn_Ambient_click_action);
+
+	GUI_AddObjToGroup(obj);
+#endif
+
+#if PL_CONFIG_HAS_TSL2561
+	obj = lv_list_add(list1, NULL, "More", Btn_More_click_action);
+
+	GUI_AddObjToGroup(obj);
+#endif
+
+
+	lv_obj_set_size(list1, 80, 100); /* fixed size */
+
+	lv_obj_align(list1,gui_win,LV_ALIGN_CENTER,0, 0);
+
 }
 
 #endif /* PL_CONFIG_HAS_GUI */

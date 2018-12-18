@@ -26,6 +26,8 @@ void initConfigData(void);
 bool getSensorEnabled(void);
 void setSensorEnabled(bool enabled);
 char** namelist;	// Platzhalter für die namen der Pollen
-uint8_t powerEnabled;
+
+void setPowerConnected(uint8_t);
+uint8_t getPowerConnected(void);
 bool lightSensor;
 #endif /* SOURCES_CONFIG_H_ */

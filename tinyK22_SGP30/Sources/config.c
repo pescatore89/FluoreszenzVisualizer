@@ -23,7 +23,7 @@
 #define MAX_NAME_LENGTH			 100
 
 //#endif
-
+static uint8_t powerEnabled;
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "CONFIG",
 			(unsigned char*) "Configurations on the SD-Card\r\n", io->stdOut);
@@ -90,6 +90,15 @@ void initConfigData(void) {
 	Config_ReadPollen();	// reads/stores all the names of the pollen
 }
 
+
+void setPowerConnected(uint8_t val){
+	powerEnabled = val;
+}
+uint8_t getPowerConnected(void){
+	return powerEnabled;
+}
+
+
 uint8_t Config_Setup(void) {
 
 	int val;
@@ -100,7 +109,9 @@ uint8_t Config_Setup(void) {
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
-	powerEnabled = buf[0];
+
+	setPowerConnected(buf[0]-(char)'0');
+
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);

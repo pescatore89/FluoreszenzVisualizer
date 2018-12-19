@@ -154,15 +154,32 @@ typedef struct DataMessage DataMessage_t;
 
 
 QUEUE_RESULT AddMessageToDataQueue(xQueueHandle handle,DataMessage_t *msg);
-QUEUE_RESULT TakeMessageFroDataQueue(xQueueHandle handle,DataMessage_t *msg);
+QUEUE_RESULT TakeMessageFromDataQueue(xQueueHandle handle,DataMessage_t *msg);
 
 
 
 
 
+/* ******************************************************************************************
+ *
+ * MEssage for the Update Queue
+ *
+ * ******************************************************************************************/
 
 
 
+
+struct UpdateMessage {
+	COMMAND cmd;
+	char* name;
+}xUpdateMessage;
+
+
+typedef struct UpdateMessage UpdateMessage_t;
+
+
+QUEUE_RESULT AddMessageToUpdateQueue(xQueueHandle handle,UpdateMessage_t *msg);
+QUEUE_RESULT TakeMessageFromUpdateQueue(xQueueHandle handle,UpdateMessage_t *msg);
 
 
 

@@ -283,21 +283,21 @@ void GUI_NEO_Create(uint8_t * name) {
 
 	/* play buttons */
 	btn_play = lv_btn_create(win, NULL);
-	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 12, 35);
+	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 35);
 	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
 	label = lv_label_create(btn_play, NULL);
 	lv_label_set_text(label, SYMBOL_PLAY);
 	GUI_AddObjToGroup(btn_play);
 	/* pause button */
 	btn_pause = lv_btn_create(win, NULL);
-	lv_obj_align(btn_pause, btn_play, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+	lv_obj_align(btn_pause, btn_play, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 	lv_btn_set_action(btn_pause, LV_BTN_ACTION_CLICK, btn_pause_click_action);
 	label = lv_label_create(btn_pause, NULL);
 	lv_label_set_text(label, SYMBOL_PAUSE);
 	GUI_AddObjToGroup(btn_pause);
 	/* stop button */
 	btn_stop = lv_btn_create(win, NULL);
-	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 	lv_btn_set_action(btn_stop, LV_BTN_ACTION_CLICK, btn_stop_click_action);
 	label = lv_label_create(btn_stop, NULL);
 	lv_label_set_text(label, SYMBOL_STOP);

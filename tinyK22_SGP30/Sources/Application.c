@@ -86,17 +86,19 @@ uint8_t createQueues(void) {
 		vQueueAddToRegistry(queue_handler_playlist, "Playlist Queue");
 	}
 
-	/*Itialize other Queues*/
-#if 0
-	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
-			sizeof(struct PlaylistMessage*));
+	/*Initialize Data Queue*/
 
-	if (queue_handler_playlist == NULL) {
+	queue_handler_data = FRTOS1_xQueueCreate(QUEUE_DATA_LENGTH,
+			sizeof(struct DataMessage_t*));
+
+	if (queue_handler_data == NULL) {
 		return ERR_FAILED;
 	} else {
-		vQueueAddToRegistry(queue_handler_playlist, "Playlist Queue");
+		vQueueAddToRegistry(queue_handler_data, "Data Queue");
 	}
 
+
+#if 0
 	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
 			sizeof(struct PlaylistMessage*));
 

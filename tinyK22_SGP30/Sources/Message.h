@@ -19,6 +19,7 @@
 
 extern xQueueHandle queue_handler;
 
+
 extern xQueueHandle queue_handler_playlist; /*Queue handler for Playlist Queue*/
 extern xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
 extern xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
@@ -26,8 +27,11 @@ extern xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
 
 
 
-/*Message for Playlist Queue*/
-
+/* ******************************************************************************************
+ *
+ * MEssage for the Playlist Queue
+ *
+ * ******************************************************************************************/
 
 
 
@@ -76,6 +80,92 @@ QUEUE_RESULT TakeMessageFromPlaylistQueue(xQueueHandle handle,PlaylistMessage_t 
 
 
 
+/* ******************************************************************************************
+ *
+ * Message for the Data Queue
+ *
+ * ******************************************************************************************/
+
+
+struct DATA {
+
+	/*Data for seq. 1*/
+	uint8_t* data;
+	uint32_t color_266;
+	uint32_t color_355;
+	uint32_t color_405;
+
+	uint32_t fadeout_266; /*in ms*/
+	uint32_t fadeout_355; /*in ms*/
+	uint32_t fadeout_405; /*in ms*/
+
+	/*Data for seq. 2*/
+
+	uint8_t amplitude_266_1;
+	uint8_t amplitude_266_2;
+	uint8_t amplitude_266_3;
+	uint8_t amplitude_266_4;
+	uint8_t amplitude_266_5;
+
+	uint8_t amplitude_355_1;
+	uint8_t amplitude_355_2;
+	uint8_t amplitude_355_3;
+	uint8_t amplitude_355_4;
+	uint8_t amplitude_355_5;
+
+	uint8_t amplitude_405_1;
+	uint8_t amplitude_405_2;
+	uint8_t amplitude_405_3;
+	uint8_t amplitude_405_4;
+	uint8_t amplitude_405_5;
+
+
+	/*Data for seq. 3*/
+
+	uint8_t lifetime_266_1;
+	uint8_t lifetime_266_2;
+	uint8_t lifetime_266_3;
+	uint8_t lifetime_266_4;
+
+	uint8_t lifetime_355_1;
+	uint8_t lifetime_355_2;
+	uint8_t lifetime_355_3;
+	uint8_t lifetime_355_4;
+
+	uint8_t lifetime_405_1;
+	uint8_t lifetime_405_2;
+	uint8_t lifetime_405_3;
+	uint8_t lifetime_405_4;
+
+	//uint16_t excitation; /*Anregungsintensität*/
+
+};
+typedef struct DATA DATA_t;
+
+
+struct DataMessage {
+	DATA_t data;
+	char* name;
+	COMMAND cmd;
+}xDataMessage;
+
+typedef struct DataMessage DataMessage_t;
+
+
+
+QUEUE_RESULT AddMessageToDataQueue(xQueueHandle handle,DataMessage_t *msg);
+QUEUE_RESULT TakeMessageFroDataQueue(xQueueHandle handle,DataMessage_t *msg);
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -86,10 +176,6 @@ QUEUE_RESULT TakeMessageFromPlaylistQueue(xQueueHandle handle,PlaylistMessage_t 
 
 extern xSemaphoreHandle mutex;
 extern xQueueHandle queue_handler_Navigation;
-
-
-
-
 
 
 struct MESSAGE {

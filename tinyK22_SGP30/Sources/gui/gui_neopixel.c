@@ -25,8 +25,18 @@ static lv_obj_t *label_auto_light_level; /* label for auto mode */
 static lv_obj_t *label_slider_level; /* label for level value */
 #include "Message.h"
 
-
 xQueueHandle queue_handler_playlist;
+
+
+static lv_obj_t *btn_play;
+static lv_obj_t *btn_pause;
+static lv_obj_t *btn_stop;
+static lv_obj_t *btn_next;
+static lv_obj_t *btn_prev;
+static lv_obj_t *btn_loop;
+
+static lv_obj_t *polle_label;
+static char* pollenLabel;
 
 static uint8_t namesAvtiv[MAX_N_POLLS_STORED];
 static uint8_t* namesActive;
@@ -45,7 +55,7 @@ static lv_res_t slider_action(lv_obj_t *slider) {
 	val = lv_slider_get_value(slider); /* get current value from slider */
 	/* map to target range: */
 	val = UTIL1_map(val, SLIDER_LEVEL_MIN_RANGE, SLIDER_LEVEL_MAX_RANGE,
-			SLIDER_LEVEL_LIGHT_MIN, SLIDER_LEVEL_LIGHT_MAX);
+	SLIDER_LEVEL_LIGHT_MIN, SLIDER_LEVEL_LIGHT_MAX);
 	NEOA_SetLightLevel(val); /* update model */
 	SetLabelValue(label_slider_level, val);
 	return LV_RES_OK;
@@ -75,21 +85,18 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
 	return LV_RES_INV;
 }
 
+static void setNamesActiv(uint8_t * name) {
 
-static void setNamesActiv (uint8_t * name){
-
-	int n =  getQuantity();
-	for(int i = 0; i <n;i++){
+	int n = getQuantity();
+	for (int i = 0; i < n; i++) {
 		namesAvtiv[i] = name[i];
 	}
 
 }
 
-
-static uint8_t* getNamesActiv (void){
+static uint8_t* getNamesActiv(void) {
 	return namesAvtiv;
 }
-
 
 static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 	PlaylistMessage_t *pxPlaylistMessage;
@@ -97,13 +104,17 @@ static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 	uint8_t res;
 	pxPlaylistMessage->playlist = namesActive;
 	pxPlaylistMessage->cmd = play;
+	pxPlaylistMessage->state = newData;
+	res = AddMessageToPlaylistQueue(queue_handler_playlist, pxPlaylistMessage);
+	lv_btn_set_state(btn, LV_BTN_STATE_INA);
 
-	res = AddMessageToPlaylistQueue(queue_handler_playlist,pxPlaylistMessage );
 
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
 static lv_res_t btn_pause_click_action(lv_obj_t *btn) {
+
+	lv_btn_set_state(btn_play, LV_BTN_STATE_REL);
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
@@ -123,13 +134,19 @@ static lv_res_t btn_loop_click_action(lv_obj_t *btn) {
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
+void updatePollenLabel(char* text){
+
+	pollenLabel = text;
+
+}
+
+
+
 
 
 void GUI_NEO_Create(uint8_t * name) {
 
 	namesActive = name;	// schreibt die Namen der aktiven pollen auf den globalen pointer
-
-
 
 	lv_obj_t *closeBtn, *slider1;
 
@@ -183,13 +200,13 @@ void GUI_NEO_Create(uint8_t * name) {
 	GUI_AddObjToGroup(slider1);
 	lv_obj_set_size(slider1, 50, 15);
 	lv_slider_set_range(slider1, SLIDER_LEVEL_MIN_RANGE,
-			SLIDER_LEVEL_MAX_RANGE);
+	SLIDER_LEVEL_MAX_RANGE);
 	lv_obj_align(slider1, slider1_label, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
 	lv_slider_set_action(slider1, slider_action);
 	lv_bar_set_value(slider1,
 			UTIL1_map(NEOA_GetLightLevel(), SLIDER_LEVEL_LIGHT_MIN,
-					SLIDER_LEVEL_LIGHT_MAX, SLIDER_LEVEL_MIN_RANGE,
-					SLIDER_LEVEL_MAX_RANGE));
+			SLIDER_LEVEL_LIGHT_MAX, SLIDER_LEVEL_MIN_RANGE,
+			SLIDER_LEVEL_MAX_RANGE));
 
 	/* Create a label with the slider value right to the slider */
 	label_slider_level = lv_label_create(win, NULL);
@@ -221,34 +238,11 @@ void GUI_NEO_Create(uint8_t * name) {
 	style_knob.body.opa = LV_OPA_70;
 	style_knob.body.padding.ver = 10;
 
-	/*-------------------------------------------------------*/
-	/* buttons for play, pause, stop, ... */
-	/*-------------------------------------------------------*/
-	lv_obj_t *label;
-	lv_obj_t *btn_play, *btn_pause, *btn_stop, *btn_next, *btn_prev, *btn_loop;
 
-	/* play buttons */
-	btn_play = lv_btn_create(win, NULL);
-	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 12, 6);
-	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
-	label = lv_label_create(btn_play, NULL);
-	lv_label_set_text(label, SYMBOL_PLAY);
-	GUI_AddObjToGroup(btn_play);
-	/* pause button */
-	btn_pause = lv_btn_create(win, NULL);
-	lv_obj_align(btn_pause, btn_play, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
-	lv_btn_set_action(btn_pause, LV_BTN_ACTION_CLICK, btn_pause_click_action);
-	label = lv_label_create(btn_pause, NULL);
-	lv_label_set_text(label, SYMBOL_PAUSE);
-	GUI_AddObjToGroup(btn_pause);
-	/* stop button */
-	btn_stop = lv_btn_create(win, NULL);
-	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
-	lv_btn_set_action(btn_stop, LV_BTN_ACTION_CLICK, btn_stop_click_action);
-	label = lv_label_create(btn_stop, NULL);
-	lv_label_set_text(label, SYMBOL_STOP);
-	GUI_AddObjToGroup(btn_stop);
 	/* previous button */
+
+
+#if 0
 	btn_prev = lv_btn_create(win, NULL);
 	lv_obj_align(btn_prev, btn_play, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
 	lv_btn_set_action(btn_prev, LV_BTN_ACTION_CLICK, btn_prev_click_action);
@@ -269,5 +263,53 @@ void GUI_NEO_Create(uint8_t * name) {
 	label = lv_label_create(btn_loop, NULL);
 	lv_label_set_text(label, SYMBOL_LOOP);
 	GUI_AddObjToGroup(btn_loop);
+
+#endif
+
+	/* Create a label with the name of the playing polle */
+	polle_label = lv_label_create(win, NULL);
+	lv_label_set_text(polle_label, pollenLabel);
+	lv_obj_align(polle_label, slider1, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+	GUI_AddObjToGroup(polle_label);
+
+
+
+
+	/*-------------------------------------------------------*/
+	/* buttons for play, pause, stop, ... */
+	/*-------------------------------------------------------*/
+	lv_obj_t *label;
+
+
+	/* play buttons */
+	btn_play = lv_btn_create(win, NULL);
+	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 12, 35);
+	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
+	label = lv_label_create(btn_play, NULL);
+	lv_label_set_text(label, SYMBOL_PLAY);
+	GUI_AddObjToGroup(btn_play);
+	/* pause button */
+	btn_pause = lv_btn_create(win, NULL);
+	lv_obj_align(btn_pause, btn_play, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+	lv_btn_set_action(btn_pause, LV_BTN_ACTION_CLICK, btn_pause_click_action);
+	label = lv_label_create(btn_pause, NULL);
+	lv_label_set_text(label, SYMBOL_PAUSE);
+	GUI_AddObjToGroup(btn_pause);
+	/* stop button */
+	btn_stop = lv_btn_create(win, NULL);
+	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+	lv_btn_set_action(btn_stop, LV_BTN_ACTION_CLICK, btn_stop_click_action);
+	label = lv_label_create(btn_stop, NULL);
+	lv_label_set_text(label, SYMBOL_STOP);
+	GUI_AddObjToGroup(btn_stop);
+
+
+
+
+
+
+
+
+
 }
 #endif /* PL_CONFIG_HAS_NEO_PIXEL */

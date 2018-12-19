@@ -13,5 +13,6 @@
 void NEO_GUI_SetLightLevel(uint8_t val);
 
 void GUI_NEO_Create(uint8_t* name);
+void updatePollenLabel(char* text);
 
 #endif /* GUI_AIR_H_ */

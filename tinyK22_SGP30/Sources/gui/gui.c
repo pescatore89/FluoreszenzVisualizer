@@ -17,6 +17,7 @@
   #include "KEY1.h"
 #endif
 #include "gui_mainmenu.h"
+#include "gui_neopixel.h"
 
 #if PL_CONFIG_HAS_GUI_KEY_NAV
 #define GUI_GROUP_NOF_IN_STACK   4
@@ -102,6 +103,7 @@ static void GuiTask(void *p) {
 #endif
   GUI_MainMenuCreate();
 	for(;;) {
+		updatePollenLabel(" The Andyman can");
 		LV_Task(); /* call this every 1-20 ms */
 #if PL_CONFIG_HAS_KEYS
 		KEY1_ScanKeys();
@@ -126,7 +128,7 @@ void GUI_Init(void) {
  // lv_style_btn_rel.body.padding.hor = LV_DPI / 8;
  // lv_style_btn_rel.body.padding.ver = LV_DPI / 12;
 
-  if (xTaskCreate(GuiTask, "Gui", 1700/sizeof(StackType_t), NULL, tskIDLE_PRIORITY+1, NULL) != pdPASS) {
+  if (xTaskCreate(GuiTask, "Gui", 2000/sizeof(StackType_t), NULL, tskIDLE_PRIORITY+1, NULL) != pdPASS) {
     for(;;){} /* error */
   }
 #if PL_CONFIG_HAS_GUI_KEY_NAV

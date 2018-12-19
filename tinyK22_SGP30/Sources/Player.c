@@ -15,18 +15,37 @@ static void PlayerTask(void *pvParameters) {
 	pxPlaylistMessage = &xPlaylistMessage;
 
 	for (;;) {
-		if (TakeMessageFromPlaylistQueue(queue_handler_playlist, pxPlaylistMessage)
-				!= QUEUE_EMPTY) {
-			switch (pxPlaylistMessage->cmd) {
-			case pause:
-				break;
-			case play:
+		if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
+				pxPlaylistMessage) != QUEUE_EMPTY) {
+
+			switch (pxPlaylistMessage->state) {
+			case newCMD:
+				switch (pxPlaylistMessage->cmd) {
+				case pause:
+					break;
+				case play:
+					break;
+
+				case stop:
+					break;
+
+				case skipF:
+					break;
+
+				case skipR:
+					break;
+
+				}
 				break;
 
+			case newImage:
+				break;
+
+			case newData:
+				break;
 			}
 
-		}
-		else{
+		} else {
 			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 		}
 	}

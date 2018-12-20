@@ -29,11 +29,9 @@ extern xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
 
 /* ******************************************************************************************
  *
- * MEssage for the Playlist Queue
+ * Message for the Playlist Queue
  *
  * ******************************************************************************************/
-
-
 
 typedef enum {
 	play,
@@ -50,17 +48,13 @@ typedef enum {
 } STATE;
 
 
-
 struct PlaylistMessage {
 	COMMAND cmd;
 	uint8_t* playlist;
 	STATE state;
 } xPlaylistMessage;
 
-
-
 typedef struct PlaylistMessage PlaylistMessage_t;
-
 
 typedef enum {
 	QUEUE_OK = 0, /* (0) Succeeded */
@@ -86,21 +80,17 @@ QUEUE_RESULT TakeMessageFromPlaylistQueue(xQueueHandle handle,PlaylistMessage_t 
  *
  * ******************************************************************************************/
 
-
 struct DATA {
-
 	/*Data for seq. 1*/
-	uint8_t* data;
+
 	uint32_t color_266;
 	uint32_t color_355;
 	uint32_t color_405;
-
 	uint32_t fadeout_266; /*in ms*/
 	uint32_t fadeout_355; /*in ms*/
 	uint32_t fadeout_405; /*in ms*/
 
 	/*Data for seq. 2*/
-
 	uint8_t amplitude_266_1;
 	uint8_t amplitude_266_2;
 	uint8_t amplitude_266_3;
@@ -119,9 +109,7 @@ struct DATA {
 	uint8_t amplitude_405_4;
 	uint8_t amplitude_405_5;
 
-
 	/*Data for seq. 3*/
-
 	uint8_t lifetime_266_1;
 	uint8_t lifetime_266_2;
 	uint8_t lifetime_266_3;
@@ -136,15 +124,16 @@ struct DATA {
 	uint8_t lifetime_405_2;
 	uint8_t lifetime_405_3;
 	uint8_t lifetime_405_4;
-
-	//uint16_t excitation; /*Anregungsintensität*/
-
 };
+
+
+
 typedef struct DATA DATA_t;
 
 
 struct DataMessage {
-	DATA_t data;
+	DATA_t* char_data;
+	char* color_data;
 	char* name;
 	COMMAND cmd;
 }xDataMessage;
@@ -155,7 +144,7 @@ typedef struct DataMessage DataMessage_t;
 
 QUEUE_RESULT AddMessageToDataQueue(xQueueHandle handle,DataMessage_t *msg);
 QUEUE_RESULT TakeMessageFromDataQueue(xQueueHandle handle,DataMessage_t *msg);
-
+QUEUE_RESULT PeekDataQueue(xQueueHandle handle,DataMessage_t *msg);
 
 
 

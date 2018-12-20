@@ -8,52 +8,143 @@
 #include "Player.h"
 #include "Message.h"
 #include "FRTOS1.h"
+#include "readSD.h"
+#include "config.h"
+#include <stdio.h>      // Header file for standard file i/o.
+#include <stdlib.h>     // Header file for malloc/free.
+#include <ctype.h>
 xQueueHandle queue_handler_playlist; /*QueueHandler declared in Message.h*/
+xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
+
+
+static uint8_t listEnabled[100];
+static uint8_t nPollenEnabled;
+static uint8_t nameCNT;
+
+
+static uint8_t updateListEnabled(uint8_t* playlist){
+	int counter = 0;
+	int nOfPollen = getQuantity();
+	int i = 0;
+	for(i=0; i< nOfPollen;i++){
+		if(playlist[i]!=0){
+			listEnabled[counter] = i;
+			counter++;
+		}
+	}
+	return counter;
+
+}
+
+static char* getName() {
+
+	char** pollenNamelist;
+
+	if(nameCNT >= nPollenEnabled){
+		nameCNT = 0;
+	}
+
+	pollenNamelist = getNamelist();
+
+
+
+	return pollenNamelist[listEnabled[nameCNT++]];
+
+	//strcpy(polle, pollenNamelist);
+
+}
 
 static void PlayerTask(void *pvParameters) {
 	PlaylistMessage_t *pxPlaylistMessage;
 	pxPlaylistMessage = &xPlaylistMessage;
 
+	DataMessage_t * pxDataMessage;
+	pxDataMessage = &xDataMessage;
+
+	//int nOfPollen = getQuantity();
+
+
+	int nOfPollen = getQuantity();
+
+
+	char** playList = NULL;
+
+	PLAYER_STATE state = IDLE;
+
+	uint8_t res;
+
+	int k = 12;
 	for (;;) {
-		if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
-				pxPlaylistMessage) != QUEUE_EMPTY) {
 
-			switch (pxPlaylistMessage->state) {
-			case newCMD:
-				switch (pxPlaylistMessage->cmd) {
-				case pause:
-					break;
-				case play:
-					break;
+		switch (state) {
 
-				case stop:
-					break;
+		case IDLE:
 
-				case skipF:
-					break;
-
-				case skipR:
-					break;
-
-				}
+			if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
+					pxPlaylistMessage) != QUEUE_EMPTY) {
+				state = READ_NEW;
 				break;
+			} else {
+				vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
+			}
+			break;
 
-			case newImage:
+		case READ_NEW:
+			if ((pxPlaylistMessage->state) == newCMD) {
+				/*Do something*/
+			} else if ((pxPlaylistMessage->state) == newData) {
+				state = UPDATE_PLAYLIST;
 				break;
+			} else if ((pxPlaylistMessage->state) == newImage) {
+				/*Do something*/
+			}
 
-			case newData:
+			break;
+
+		case UPDATE_PLAYLIST:
+
+			nPollenEnabled = updateListEnabled(pxPlaylistMessage->playlist);
+			/*Update the playlist*/
+			nameCNT = 0;
+			state = PLAY_LIST;
+			break;
+
+		case PLAY_LIST:
+			if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
+					pxPlaylistMessage) != QUEUE_EMPTY) {
+				state = READ_NEW; /*new Element in the Playlist Queue*/
 				break;
 			}
 
-		} else {
-			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
+			else {
+
+				if (PeekDataQueue(queue_handler_data, pxDataMessage)
+						!= QUEUE_EMPTY) {
+					vTaskDelay(pdMS_TO_TICKS(10)); /*LED Task is busy playing*/
+				} else {
+
+					/*send new Data to DataQueue*/
+				//	pxDataMessage->name = (getNamesActive(
+				//			pxPlaylistMessage->playlist, playList));
+
+					pxDataMessage->name = getName();
+					res = readDataFromSD(pxDataMessage);
+					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+							!= QUEUE_OK) {
+						/*Queue is full*/
+
+					}
+
+				}
+			}
+			break;
 		}
 	}
 }
-
 void PLAYER_Init(void) {
 //	CLS1_SetStdio(ios[0].stdio); /* using the first one as the default channel */
-	if (xTaskCreate(PlayerTask, "Player", 6000 / sizeof(StackType_t), NULL,
+	if (xTaskCreate(PlayerTask, "Player", 6000 / sizeof(StackType_t),
+	NULL,
 	tskIDLE_PRIORITY + 2, NULL) != pdPASS) {
 		for (;;) {
 		} /* error */

@@ -42,8 +42,11 @@
 static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
-xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
-xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
+
+
+xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
+xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
+
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
 extern uint8_t ImageDataBuffer[2500];
 void NEOA_SetLightLevel(uint8_t level){
@@ -1361,32 +1364,23 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 
 static void NeoTask(void* pvParameters) {
 
-	queue_handler = pvParameters;
+	//queue_handler = pvParameters;
 	int value = -1;
 	QUEUE_RESULT res = QUEUE_OK;
-	Message_t *pxRxedMessage;
-	pxRxedMessage = &xMessage;
 
-	for(;;){
-		vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
-	}
+	DataMessage_t * pxRxDataMessage;
+	pxRxDataMessage = &xDataMessage;
+
 
 
 	for (;;) {
-		if (TakeMessageFromQueue(queue_handler, pxRxedMessage) == QUEUE_EMPTY) {
+		if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage) == QUEUE_EMPTY) {
 			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 		} else {
 			CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-			if (FRTOS1_xSemaphoreTake(mutex,pdMS_TO_TICKS(10)) != pdTRUE) {
-				/*Access to Mutex denied*/
-				CLS1_SendStr((unsigned char*) "Mutex nicht erhalten\r\n ",
-						CLS1_GetStdio()->stdOut);
-
-			} else {
-
-
-			}
-
+			CLS1_SendStr((unsigned char*) "taken out Data from :", CLS1_GetStdio()->stdOut);
+			CLS1_SendStr((unsigned char*) pxRxDataMessage->name, CLS1_GetStdio()->stdOut);
+			vTaskDelay(pdMS_TO_TICKS(1000)); /*Queue is Empty*/
 		}
 
 	}

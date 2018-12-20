@@ -12,6 +12,8 @@
 #include "readSD.h"
 #include "FAT1.h"
 #include "MINI1.h"
+#include "CLS1.h"
+
 #include "WS2812B\NeoPixel.h"
 #include "WS2812B\NeoApp.h"
 #include "Message.h"
@@ -51,7 +53,82 @@ uint8_t getDataArray(uint8_t* px) {
 
 }
 
-uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxMessage) {
+uint8_t readDataFromSD(DataMessage_t * pxData) {
+
+	BMPImage* image = NULL;
+	DATA_t* charData = NULL;
+	char* filename = pxData->name;
+	char* polle = NULL;
+
+
+
+	polle = FRTOS1_pvPortMalloc(sizeof(char*));
+	if (polle != NULL) {
+		strcpy(polle, filename);
+	}
+
+	char cd[4] = { "\\.." };
+	char * cd_back = cd;
+	uint8_t result;
+	FRESULT res = FR_OK;
+
+	CLS1_StdIOType *io = stdout;
+	if (FAT1_ChangeDirectory(polle, io) != ERR_OK) {
+		/*something wnet wrong*/
+	}
+
+	else {
+
+		/*allocate */
+
+		image = FRTOS1_pvPortMalloc(sizeof(BMPImage));
+		if (image == NULL) {
+			CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
+			return FR_NOT_ENOUGH_CORE;
+			/*malloc failed*/
+		} else {
+			image->data = FRTOS1_pvPortMalloc(sizeof(char) * 2500); /*MAGIC NUMBER*/
+			if (image->data == NULL) {
+				CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
+				return FR_NOT_ENOUGH_CORE;
+				/*malloc failed*/
+			} else {
+				charData = FRTOS1_pvPortMalloc(sizeof(DATA_t*));
+				if (charData == NULL) {
+					CLS1_SendStr((unsigned char*) "malloc failed!\r\n",
+							io->stdErr);
+					return FR_NOT_ENOUGH_CORE;
+					/*malloc failed*/
+				}
+			}
+		}
+
+		addSuffixBMP(polle);
+		res = BMPImageLoadData(polle, image);
+		if (res != FR_OK) {
+			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
+					CLS1_GetStdio()->stdOut);
+			return ERR_FAILED;
+		} else {
+
+			pxData->color_data = image->data;
+			//	res = AddMessageToQueue(queue_handler, pxMessage);
+			if (res != QUEUE_OK) {
+				return ERR_BUSY;
+			}
+
+		}
+
+		result = readCharacteristicValues(polle, charData);
+		pxData->char_data = charData;
+
+	}
+
+	FRTOS1_vPortFree(polle);
+
+}
+
+uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA) {
 
 	addSuffixTXT(fileName);
 
@@ -66,104 +143,113 @@ uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxMessage) {
 
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color266", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
-	pxMessage->color_266 = getRealValue(buff8);
+	pxDATA->color_266 = getRealValue(buff8);
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
-	pxMessage->color_355 = getRealValue(buff8);
+	pxDATA->color_355 = getRealValue(buff8);
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
-	pxMessage->color_405 = getRealValue(buff8);
+	pxDATA->color_405 = getRealValue(buff8);
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
-	pxMessage->fadeout_266 = getRealValue(buff8);
+	pxDATA->fadeout_266 = getRealValue(buff8);
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
-	pxMessage->fadeout_355 = getRealValue(buff8);
+	pxDATA->fadeout_355 = getRealValue(buff8);
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout405", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
-	pxMessage->fadeout_405 = getRealValue(buff8);
+	pxDATA->fadeout_405 = getRealValue(buff8);
 
 	/*Read out all values beeing part of Modus 2*/
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength400", "0",
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength1", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_266_400 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength500", "0",
+	pxDATA->amplitude_266_1 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength2", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_266_500 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength600", "0",
+	pxDATA->amplitude_266_2 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength3", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_266_700 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength700", "0",
+	pxDATA->amplitude_266_3 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength4", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_266_700 = getRealValue(buff8);
+	pxDATA->amplitude_266_4 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength5", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxDATA->amplitude_266_5 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength400", "0",
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength1", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_355_400 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength500", "0",
+	pxDATA->amplitude_355_1 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength2", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_355_500 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength600", "0",
+	pxDATA->amplitude_355_2 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength3", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_355_700 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength700", "0",
+	pxDATA->amplitude_355_3 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength4", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_355_700 = getRealValue(buff8);
+	pxDATA->amplitude_355_4 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength5", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxDATA->amplitude_355_5 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength400", "0",
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength1", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_405_400 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength500", "0",
+	pxDATA->amplitude_405_1 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength2", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_405_500 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength600", "0",
+	pxDATA->amplitude_405_2 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength3", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_405_700 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength700", "0",
+	pxDATA->amplitude_405_3 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength4", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->amplitude_405_700 = getRealValue(buff8);
+	pxDATA->amplitude_405_4 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength5", "0",
+			(char* ) buff8, sizeof(buff8), fileName);
+	pxDATA->amplitude_405_5 = getRealValue(buff8);
 
 	/*Read out all values beeing part of Modus 3*/
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength400", "0",
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength1", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_266_400 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength500", "0",
+	pxDATA->lifetime_266_1 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength2", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_266_500 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength600", "0",
+	pxDATA->lifetime_266_2 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength3", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_266_600 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength700", "0",
+	pxDATA->lifetime_266_3 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength4", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_266_700 = getRealValue(buff8);
+	pxDATA->lifetime_266_4 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength400", "0",
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength1", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_355_400 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength500", "0",
+	pxDATA->lifetime_355_1 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength2", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_355_500 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength600", "0",
+	pxDATA->lifetime_355_2 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength3", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_355_600 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength700", "0",
+	pxDATA->lifetime_355_3 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength4", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_355_700 = getRealValue(buff8);
+	pxDATA->lifetime_355_4 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength400", "0",
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength1", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_405_400 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength500", "0",
+	pxDATA->lifetime_405_1 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength2", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_405_500 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength600", "0",
+	pxDATA->lifetime_405_2 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength3", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_405_600 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength700", "0",
+	pxDATA->lifetime_405_3 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength4", "0",
 			(char* ) buff8, sizeof(buff8), fileName);
-	pxMessage->lifetime_405_700 = getRealValue(buff8);
+	pxDATA->lifetime_405_4 = getRealValue(buff8);
 
 }
 
@@ -203,7 +289,6 @@ uint8_t nOfDigits(const char* value) {
 
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
-
 	BMPImage* image = NULL;
 	uint32_t position = 0;
 	uint8_t red = 0;
@@ -218,20 +303,15 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	pxMessage = &xMessage;
 	unsigned long size;
 
-
-
-
-
 	if (image == NULL) {
 		image = FRTOS1_pvPortMalloc(sizeof(BMPImage));
 		if (image == NULL) {
 			CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 			return FR_NOT_ENOUGH_CORE;
 			/*malloc failed*/
-		}
-		else{
-			image->data = FRTOS1_pvPortMalloc(sizeof(char)*2500);
-			if(image->data == NULL){
+		} else {
+			image->data = FRTOS1_pvPortMalloc(sizeof(char) * 2500);
+			if (image->data == NULL) {
 				CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 				return FR_NOT_ENOUGH_CORE;
 				/*malloc failed*/
@@ -239,8 +319,8 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 		}
 	}
 
-	else if(image->data == NULL){
-		image->data = FRTOS1_pvPortMalloc(sizeof(char)*2500);
+	else if (image->data == NULL) {
+		image->data = FRTOS1_pvPortMalloc(sizeof(char) * 2500);
 
 	}
 	res = BMPImageLoadData((char *) fileName, image);
@@ -248,9 +328,9 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 		CLS1_SendStr((unsigned char*) "ERROR loading File  ",
 				CLS1_GetStdio()->stdOut);
 	} else {
-		//pxMessage->modus = SINGLE;
+
 		pxMessage->data = image->data;
-		res = AddMessageToQueue(queue_handler, pxMessage);
+		//	res = AddMessageToQueue(queue_handler, pxMessage);
 		if (res != QUEUE_OK) {
 			return ERR_BUSY;
 		}
@@ -266,7 +346,7 @@ uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	BMPImage* image;
 	FRESULT res = ERR_OK;
 	unsigned char* biCount = NULL;
-	image = malloc(sizeof(BMPImage));
+	//image = malloc(sizeof(BMPImage));
 	if (image != NULL) {
 
 		CLS1_SendStr((unsigned char*) "reading Bitmap file:  ", io->stdOut);
@@ -493,20 +573,20 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 		 * ((image->biBitCount) / 8));
 		 */
 
-			res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
+		res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
+		if (res == FR_OK) {
+			res = FAT1_read(file, image->data, sizeof(image->data) * 2500 - 1,
+					&nof); //
 			if (res == FR_OK) {
-				res = FAT1_read(file, image->data,
-						sizeof(image->data) * 2500 - 1, &nof); //
-				if (res == FR_OK) {
-					res = FAT1_close(file);
-				} else {
+				res = FAT1_close(file);
+			} else {
 				res = FR_DENIED; 	// close failed
 				return res;
-				}
-			} else {
-				res = FR_NOT_ENABLED; 	// seek failed
-				return res;
 			}
+		} else {
+			res = FR_NOT_ENABLED; 	// seek failed
+			return res;
+		}
 
 	}
 

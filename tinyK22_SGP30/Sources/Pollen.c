@@ -46,7 +46,7 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 	pxMessage->data = daten;
 
 	uint8_t val = 0;
-	res = AddMessageToQueue(queue_handler, pxMessage);
+	//res = AddMessageToQueue(queue_handler, pxMessage);
 	if (res != QUEUE_OK) {
 		return result = ERR_BUSY;
 	}
@@ -86,7 +86,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 		result = readCharacteristicValues(polle,pxMessage);
 
 
-		result = AddMessageToQueue(queue_handler, pxMessage);
+	//	result = AddMessageToQueue(queue_handler, pxMessage);
 		if (result != QUEUE_OK) {
 			result = ERR_BUSY;
 		}

@@ -1372,6 +1372,27 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData) {
 
 	SetTrail(0xff00ff, 13, 5, 50, 100);
 	NEOA_Display_Image(colorData, 0x18);
+	uint8_t percente = 0;
+	//vTaskDelay(pdMS_TO_TICKS(1000));
+
+	uint32_t fadeout = characteristicValues->fadeout_266;
+
+	for (int i = 1; i < 13; i++) {
+		DimmPercentRing(i, (percente));
+		percente = percente + 8;
+	}
+	NEO_TransferPixels();
+	//vTaskDelay(pdMS_TO_TICKS(1000));
+
+	percente = 5;
+	for (int i = 0; i < 60; i++) {
+		for (int ring = 1; ring < 13; ring++) {
+			DimmPercentRing(ring, (percente));
+			NEO_TransferPixels();
+			vTaskDelay(pdMS_TO_TICKS(2));
+		}
+
+	}
 
 }
 
@@ -1384,23 +1405,100 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData) {
 static void playSeq2(DATA_t * characteristicValues) {
 
 	uint8_t wave266_1 = characteristicValues->amplitude_266_1;
+	uint8_t wave266_2 = characteristicValues->amplitude_266_2;
+	uint8_t wave266_3 = characteristicValues->amplitude_266_3;
+	uint8_t wave266_4 = characteristicValues->amplitude_266_4;
+	uint8_t wave266_5 = characteristicValues->amplitude_266_5;
 	uint8_t nPixels;
+	uint8_t nPixels2;
+	uint8_t nPixels3;
+	uint8_t nPixels4;
+	uint8_t nPixels5;
 	float n;
-	if (wave266_1 < 4) {
-		nPixels = wave266_1;
+	float n2;
+	float n3;
+	float n4;
+	float n5;
+
+	int k = 0;
+
+	if ((characteristicValues->amplitude_266_1) < 4) {
+		nPixels = characteristicValues->amplitude_266_1;
 	} else {
-		n = (wave266_1 / 4);
-		nPixels = (unsigned int)n;
-		if(nPixels >= 0x19){
+		n = (characteristicValues->amplitude_266_1 / 4);
+		nPixels = (unsigned int) n;
+		if (nPixels >= 0x19) {
 			nPixels = 0x18;
 		}
 	}
 
-	for(int i = 1; i <= nPixels; i++){
-		SetCoordinate(4, i, 0xff00ff);
-		SetCoordinate(5, i, 0xff00ff);
+	for (int i = 1; i <= nPixels; i++) {
+		SetCoordinate(4, i, COLOR300);
+		SetCoordinate(5, i, COLOR300);
 
 	}
+
+	if (wave266_2 < 4) {
+		nPixels = wave266_2;
+	} else {
+		n = (wave266_2 / 4);
+		nPixels = (unsigned int) n;
+		if (nPixels >= 0x19) {
+			nPixels = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels; i++) {
+		SetCoordinate(8, i, COLOR430);
+		SetCoordinate(9, i, COLOR430);
+
+	}
+	if (wave266_3 < 4) {
+		nPixels = wave266_3;
+	} else {
+		n = (wave266_3 / 4);
+		nPixels = (unsigned int) n;
+		if (nPixels >= 0x19) {
+			nPixels = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels; i++) {
+		SetCoordinate(12, i, COLOR480);
+		SetCoordinate(13, i, COLOR480);
+
+	}
+	if (wave266_4 < 4) {
+		nPixels = wave266_4;
+	} else {
+		n = (wave266_4 / 4);
+		nPixels = (unsigned int) n;
+		if (nPixels >= 0x19) {
+			nPixels = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels; i++) {
+		SetCoordinate(16, i, COLOR550);
+		SetCoordinate(17, i, COLOR550);
+
+	}
+	if (wave266_5 < 4) {
+		nPixels = wave266_5;
+	} else {
+		n = (wave266_5 / 4);
+		nPixels = (unsigned int) n;
+		if (nPixels >= 0x19) {
+			nPixels = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels; i++) {
+		SetCoordinate(20, i, COLOR700);
+		SetCoordinate(21, i, COLOR700);
+
+	}
+
 	NEO_TransferPixels();
 
 }

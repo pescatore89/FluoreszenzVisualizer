@@ -103,7 +103,7 @@ static void GuiTask(void *p) {
 #endif
   GUI_MainMenuCreate();
 	for(;;) {
-		updatePollenLabel(" The Andyman can");
+		updatePollenLabel("Pollen out of control");
 		LV_Task(); /* call this every 1-20 ms */
 #if PL_CONFIG_HAS_KEYS
 		KEY1_ScanKeys();

@@ -16,18 +16,24 @@
 xQueueHandle queue_handler_playlist; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
 
-
 static uint8_t listEnabled[100];
 static uint8_t nPollenEnabled;
 static uint8_t nameCNT;
 
+typedef enum {
+	IDLE = 0, /* */
+	READ_NEW, /* read new Message from playlistQueue  */
+	UPDATE_PLAYLIST, /*  */
+	PLAY_LIST, /* */
 
-static uint8_t updateListEnabled(uint8_t* playlist){
+} PLAYER_STATE;
+
+static uint8_t updateListEnabled(uint8_t* playlist) {
 	int counter = 0;
 	int nOfPollen = getQuantity();
 	int i = 0;
-	for(i=0; i< nOfPollen;i++){
-		if(playlist[i]!=0){
+	for (i = 0; i < nOfPollen; i++) {
+		if (playlist[i] != 0) {
 			listEnabled[counter] = i;
 			counter++;
 		}
@@ -40,17 +46,48 @@ static char* getName() {
 
 	char** pollenNamelist;
 
-	if(nameCNT >= nPollenEnabled){
+	if (nameCNT >= nPollenEnabled) {
 		nameCNT = 0;
 	}
 
 	pollenNamelist = getNamelist();
 
-
-
 	return pollenNamelist[listEnabled[nameCNT++]];
 
 	//strcpy(polle, pollenNamelist);
+
+}
+
+static uint8_t getMemory(DataMessage_t* px) {
+
+	uint8_t res = 0x01;
+	px->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2500); /*MAGIC NUMBER*/
+	if ((px->color_data) == NULL) {
+
+		return 0x00;
+		/*malloc failed*/
+	} else {
+#if 0
+		px->char_data = FRTOS1_pvPortMalloc(sizeof(DATA_t*));
+		if ((px->char_data) == NULL) {
+
+			return 0x00;
+			/*malloc failed*/
+		}
+#endif
+	}
+	return res;
+}
+
+
+
+static void freeMemory(DataMessage_t* px){
+
+
+//	FRTOS1_vPortFree(px->char_data);
+	FRTOS1_vPortFree(px->color_data);
+
+
 
 }
 
@@ -61,11 +98,9 @@ static void PlayerTask(void *pvParameters) {
 	DataMessage_t * pxDataMessage;
 	pxDataMessage = &xDataMessage;
 
-	//int nOfPollen = getQuantity();
-
+//int nOfPollen = getQuantity();
 
 	int nOfPollen = getQuantity();
-
 
 	char** playList = NULL;
 
@@ -122,11 +157,12 @@ static void PlayerTask(void *pvParameters) {
 						!= QUEUE_EMPTY) {
 					vTaskDelay(pdMS_TO_TICKS(10)); /*LED Task is busy playing*/
 				} else {
-
 					/*send new Data to DataQueue*/
-				//	pxDataMessage->name = (getNamesActive(
-				//			pxPlaylistMessage->playlist, playList));
-
+					//	pxDataMessage->name = (getNamesActive(
+					//			pxPlaylistMessage->playlist, playList));
+					if (!getMemory(pxDataMessage)) {
+						/*problem allocating memory*/
+					}
 					pxDataMessage->name = getName();
 					res = readDataFromSD(pxDataMessage);
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
@@ -134,6 +170,7 @@ static void PlayerTask(void *pvParameters) {
 						/*Queue is full*/
 
 					}
+					freeMemory(pxDataMessage);
 
 				}
 			}

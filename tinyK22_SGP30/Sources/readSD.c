@@ -13,6 +13,7 @@
 #include "FAT1.h"
 #include "MINI1.h"
 #include "CLS1.h"
+#include "pollen.h"
 
 #include "WS2812B\NeoPixel.h"
 #include "WS2812B\NeoApp.h"
@@ -55,17 +56,18 @@ uint8_t getDataArray(uint8_t* px) {
 
 uint8_t readDataFromSD(DataMessage_t * pxData) {
 
-	BMPImage* image = NULL;
+	//BMPImage* image;
+	pxData->image = &xBMPImage;
 	DATA_t* charData = NULL;
 	char* filename = pxData->name;
 	char* polle = NULL;
+	DATA_t * pointerData;
+	pointerData = &xDATA;
+	char nameArray [100];
 
 
+	strcpy(nameArray, filename);
 
-	polle = FRTOS1_pvPortMalloc(sizeof(char*));
-	if (polle != NULL) {
-		strcpy(polle, filename);
-	}
 
 	char cd[4] = { "\\.." };
 	char * cd_back = cd;
@@ -73,62 +75,54 @@ uint8_t readDataFromSD(DataMessage_t * pxData) {
 	FRESULT res = FR_OK;
 
 	CLS1_StdIOType *io = stdout;
-	if (FAT1_ChangeDirectory(polle, io) != ERR_OK) {
+	if (FAT1_ChangeDirectory(nameArray, io) != ERR_OK) {
 		/*something wnet wrong*/
 	}
 
 	else {
 
-		/*allocate */
+		//	 playPolle(polle, io);
 
+
+		/*allocate */
+#if 0
 		image = FRTOS1_pvPortMalloc(sizeof(BMPImage));
 		if (image == NULL) {
 			CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
 			return FR_NOT_ENOUGH_CORE;
 			/*malloc failed*/
-		} else {
-			image->data = FRTOS1_pvPortMalloc(sizeof(char) * 2500); /*MAGIC NUMBER*/
-			if (image->data == NULL) {
-				CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
-				return FR_NOT_ENOUGH_CORE;
-				/*malloc failed*/
-			} else {
-				charData = FRTOS1_pvPortMalloc(sizeof(DATA_t*));
-				if (charData == NULL) {
-					CLS1_SendStr((unsigned char*) "malloc failed!\r\n",
-							io->stdErr);
-					return FR_NOT_ENOUGH_CORE;
-					/*malloc failed*/
-				}
-			}
 		}
+#endif
 
-		addSuffixBMP(polle);
-		res = BMPImageLoadData(polle, image);
+		addSuffixBMP(nameArray);
+		res = BMPImageLoadData(nameArray, pxData->image, pxData->color_data);
 		if (res != FR_OK) {
 			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
 					CLS1_GetStdio()->stdOut);
 			return ERR_FAILED;
 		} else {
 
-			pxData->color_data = image->data;
+			//	pxData->color_data = image->data;
 			//	res = AddMessageToQueue(queue_handler, pxMessage);
-			if (res != QUEUE_OK) {
-				return ERR_BUSY;
-			}
 
 		}
 
-		result = readCharacteristicValues(polle, charData);
-		pxData->char_data = charData;
-
 	}
 
-	FRTOS1_vPortFree(polle);
+	result = readCharacteristicValues(nameArray, pointerData);
+	pxData->char_data = pointerData;
+
+	//FRTOS1_vPortFree(polle);
+
+
+	if (FAT1_ChangeDirectory(cd_back, io) != ERR_OK) {
+		/*something wnet wrong*/
+	}
 
 }
 
 uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA) {
+//	uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxDATA) {
 
 	addSuffixTXT(fileName);
 
@@ -150,15 +144,16 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA) {
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
 	pxDATA->color_405 = getRealValue(buff8);
+
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
 	pxDATA->fadeout_266 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->fadeout_355 = getRealValue(buff8);
 	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout405", "0", (char* ) buff8,
 			sizeof(buff8), fileName);
 	pxDATA->fadeout_405 = getRealValue(buff8);
+	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0", (char* ) buff8,
+			sizeof(buff8), fileName);
+	pxDATA->fadeout_355 = getRealValue(buff8);
 
 	/*Read out all values beeing part of Modus 2*/
 
@@ -287,6 +282,7 @@ uint8_t nOfDigits(const char* value) {
 
 }
 
+#if 0
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
 	BMPImage* image = NULL;
@@ -340,6 +336,8 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 	return res;
 
 }
+
+#endif
 
 uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io) {
 
@@ -435,7 +433,7 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 	} else if (UTIL1_strncmp((char*) cmd, "BMP Display ",
 			sizeof("BMP Display ") - 1) == 0) {
 		*handled = TRUE;
-		return Display_BMP(cmd + sizeof("BMP Display"), io);
+		//return Display_BMP(cmd + sizeof("BMP Display"), io);
 	}
 	return ERR_OK;
 }
@@ -493,7 +491,7 @@ void addSuffixBMP(char* filename) {
 	filename = temp;
 
 }
-
+#if 0
 BMPImage* loadBMPData(TCHAR *filename, const CLS1_StdIOType *io) {
 
 	uint32_t position = 0;
@@ -526,8 +524,9 @@ BMPImage* loadBMPData(TCHAR *filename, const CLS1_StdIOType *io) {
 	return pxImage;
 
 }
+#endif
 
-uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
+uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image, char* data) {
 	FILE *filee;
 	unsigned long size;                 // size of the image in bytes.
 	unsigned long i;                    // standard counter.
@@ -564,7 +563,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 			image->bfOffBits = buf[10];
 			image->biBitCount = buf[28];
 			image->biSizeImage = buf[34];
-			image->biCompression = buf[30];
+			//image->biCompression = buf[30];
 		}
 
 		//image->data = ImageDataBuffer;
@@ -575,8 +574,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 
 		res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 		if (res == FR_OK) {
-			res = FAT1_read(file, image->data, sizeof(image->data) * 2500 - 1,
-					&nof); //
+			res = FAT1_read(file, data, sizeof(data) * 2500 - 1, &nof); //
 			if (res == FR_OK) {
 				res = FAT1_close(file);
 			} else {
@@ -593,17 +591,17 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image) {
 	if ((image->biBitCount) == 0x18) { /*24 Bit Farbtiefe*/
 		size = ((image->biWidth) * (image->biHeight) * 3);
 		for (i = 0; i < size; i += 3) { // reverse all of the colors. (bgr -> rgb)
-			temp = image->data[i];
-			image->data[i] = image->data[i + 2];
-			image->data[i + 2] = temp;
+			temp = data[i];
+			data[i] = data[i + 2];
+			data[i + 2] = temp;
 
 		}
 	} else if ((image->biBitCount) == 0x20) { /*32 Bit Farbtiefe*/
 		size = ((image->biWidth) * (image->biHeight) * 4);
 		for (i = 0; i < size; i += 4) { // reverse all of the colors. (bgr -> rgb)
-			temp = image->data[i];
-			image->data[i] = image->data[i + 2];
-			image->data[i + 2] = temp;
+			temp = data[i];
+			data[i] = data[i + 2];
+			data[i + 2] = temp;
 
 		}
 	}
@@ -650,7 +648,7 @@ uint8_t BMPImageLoadHeader(const TCHAR *filename, BMPImage* image) {
 			image->bfOffBits = buf[10];
 			image->biBitCount = buf[28];
 			image->biSizeImage = buf[34];
-			image->biCompression = buf[30];
+			//image->biCompression = buf[30];
 		}
 
 		res = FAT1_close(file);

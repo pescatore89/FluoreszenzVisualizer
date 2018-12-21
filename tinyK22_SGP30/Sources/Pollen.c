@@ -66,11 +66,12 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 	char cd [4] = {"\\.."};
 	char * cd_back = cd;
 
+#if 0
 	if(directory_set){
 		result = FAT1_ChangeDirectory(cd_back, io);		// go back in the directory path
 	}
 	result = FAT1_ChangeDirectory(polle, io);
-
+#endif
 	if (result != ERR_OK) {
 		CLS1_SendStr(
 				(unsigned char*) "Polle nicht gefunden, Namen überprüfen \r\n ",
@@ -78,13 +79,13 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 	} else {
 
 		directory_set = TRUE;
-		image = loadBMPData(polle, io);
+		//image = loadBMPData(polle, io);
 	//	NEOA_Display_Image(image);
 	//	pxMessage->modus = ALL;		// alle 3 modis werden abgespielt
 	//	pxMessage->data = image->data;
 
-		result = readCharacteristicValues(polle,pxMessage);
 
+		readCharacteristicValues(polle, pxMessage);
 
 	//	result = AddMessageToQueue(queue_handler, pxMessage);
 		if (result != QUEUE_OK) {

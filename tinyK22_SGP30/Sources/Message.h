@@ -27,6 +27,26 @@ extern xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
 
 
 
+/* Image type - contains height, width, and data */
+struct BMPImage {
+
+
+    long biWidth;  					// [18] specifies width in pixels
+    long biHeight;  				// [22] species height in pixels
+    									/*      Ist der Wert positiv, so ist die Bitmap eine sogenannte "bottom-up"-Bitmap (die Bilddaten beginnen mit der untersten und enden mit der obersten Bildzeile). Dies ist die gebräuchlichste Variante.
+        										Ist der Wert negativ, so ist die Bitmap eine "top-down"-Bitmap (die Bilddaten beginnen mit der obersten und enden mit der untersten Bildzeile).*/
+    unsigned int bfOffBits;			// [10] Offset der Bilddaten in Byte vom Beginn der Datei an.
+    unsigned short biBitCount; 		// [28] specifies the number of bit per pixel
+    unsigned long biSizeImage;  	// [34] size of image in bytes
+
+
+  //  char *data;						// Farbwerte
+
+}xBMPImage;
+typedef struct BMPImage BMPImage;
+
+
+
 /* ******************************************************************************************
  *
  * Message for the Playlist Queue
@@ -52,6 +72,7 @@ struct PlaylistMessage {
 	COMMAND cmd;
 	uint8_t* playlist;
 	STATE state;
+	BMPImage* image;
 } xPlaylistMessage;
 
 typedef struct PlaylistMessage PlaylistMessage_t;
@@ -124,7 +145,7 @@ struct DATA {
 	uint8_t lifetime_405_2;
 	uint8_t lifetime_405_3;
 	uint8_t lifetime_405_4;
-};
+}xDATA;
 
 
 
@@ -135,7 +156,9 @@ struct DataMessage {
 	DATA_t* char_data;
 	char* color_data;
 	char* name;
+	uint8_t farbtiefe;
 	COMMAND cmd;
+	BMPImage* image;
 }xDataMessage;
 
 typedef struct DataMessage DataMessage_t;

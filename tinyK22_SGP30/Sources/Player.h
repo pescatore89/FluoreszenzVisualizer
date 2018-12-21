@@ -16,13 +16,7 @@ float powerRegulation(char* data);
 
 
 
-typedef enum {
-	IDLE = 0, /* */
-	READ_NEW, /* read new Message from playlistQueue  */
-	UPDATE_PLAYLIST, /*  */
-	PLAY_LIST, /* */
 
-} PLAYER_STATE;
 
 
 

@@ -111,7 +111,6 @@ int main(void)
   /*** End of Processor Expert internal initialization.                    ***/
 
 
-
   /* Write your code here */
   WAIT1_Waitms(100);
 

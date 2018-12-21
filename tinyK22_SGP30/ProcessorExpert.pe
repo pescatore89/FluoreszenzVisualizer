@@ -3,7 +3,7 @@
   <Header>
     <Name>tinyK22_SGP30</Name>
     <SavedBy>Erich Styger Local</SavedBy>
-    <ModificationStamp>131</ModificationStamp>
+    <ModificationStamp>134</ModificationStamp>
     <Date>2018-09-30</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -16513,8 +16513,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>32768</Value>
-        <Base>HEX</Base>
+        <Value>36864</Value>
+        <Base>DEC</Base>
       </ItemState>
       <ItemState>
         <ItemSymbol>LinkerHeapBaseSymbolName</ItemSymbol>

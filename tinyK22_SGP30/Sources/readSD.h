@@ -16,7 +16,7 @@
 #include "Message.h"
 /* Function that reads in the image; first param is filename, second is image struct */
 /* As side effect, sets w and h */
-uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image);
+uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image, char* data);
 uint8_t BMPImageLoadHeader(const TCHAR *filename, BMPImage* image);
 uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io);
@@ -24,6 +24,7 @@ uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
 uint8_t readDataFromSD(DataMessage_t * pxData);
 uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t *pxDATA);
+//uint8_t readCharacteristicValues(TCHAR *fileName, Message_t *pxDATA);
 void addSuffixBMP(char* filename);
 BMPImage* loadBMPData(TCHAR *filename,
 		const CLS1_StdIOType *io);

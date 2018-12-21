@@ -296,6 +296,8 @@ void GUI_NEO_Create(uint8_t * name) {
 	lv_label_set_text(label, SYMBOL_PAUSE);
 	GUI_AddObjToGroup(btn_pause);
 	/* stop button */
+
+
 	btn_stop = lv_btn_create(win, NULL);
 	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 	lv_btn_set_action(btn_stop, LV_BTN_ACTION_CLICK, btn_stop_click_action);

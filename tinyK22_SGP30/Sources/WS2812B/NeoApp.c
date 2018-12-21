@@ -43,26 +43,33 @@ static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
 
+typedef enum {
+	IDLE_STATE = 0, /* */
+	READ_NEW_CMD, /* read new Message from playlistQueue  */
+	PLAY_SEQ1, /*  */
+	PLAY_SEQ2, /* */
+	PLAY_SEQ3, /* */
+
+} NEO_STATUS;
 
 xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
 xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
 
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
 extern uint8_t ImageDataBuffer[2500];
-void NEOA_SetLightLevel(uint8_t level){
+void NEOA_SetLightLevel(uint8_t level) {
 	NEOA_LightLevel = level;
 }
 
-uint8_t NEOA_GetLightLevel(void){
+uint8_t NEOA_GetLightLevel(void) {
 	return NEOA_LightLevel;
 }
 
-
-bool NEOA_GetAutoLightLevelSetting(void){
+bool NEOA_GetAutoLightLevelSetting(void) {
 	return NEOA_isAutoLightLevel;
 }
 
-bool NEOA_SetAutoLightLevelSetting(bool set){
+bool NEOA_SetAutoLightLevelSetting(bool set) {
 	NEOA_isAutoLightLevel = set;
 }
 static void SetPixel(int x, int y, uint32_t color) {
@@ -1264,13 +1271,11 @@ static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 
 uint8_t NEOA_Lauflicht(void) {
 
-
 }
 
 uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 
 	uint32_t Farbwert = 0;
-	BMPImage* rxImage;
 	uint32_t size;
 	uint32_t position = 0;
 	uint8_t red = 0;
@@ -1289,12 +1294,13 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 
 	NEO_ClearAllPixel();
 	NEO_TransferPixels();
-
+#if 0
 	/*Der Farbwert entspricht dem gesamten Farbwert des Bildes*/
 	for (int z = 0; z < 1728; z++) {
 		val = (image[z]);
 		Farbwert = Farbwert + val;
 	}
+#endif
 
 //	size = ((image->biWidth) * (image->biHeight));
 
@@ -1362,6 +1368,43 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 }
 #endif /* NEOA_CONFIG_PARSE_COMMAND_ENABLED */
 
+static void playSeq1(DATA_t * characteristicValues, char* colorData) {
+
+	SetTrail(0xff00ff, 13, 5, 50, 100);
+	NEOA_Display_Image(colorData, 0x18);
+
+}
+
+#define COLOR300 0xff00ff
+#define COLOR430 0x1b18c9
+#define COLOR480 0x21f2ee
+#define COLOR550 0x20f135
+#define COLOR700 0xf0341f
+
+static void playSeq2(DATA_t * characteristicValues) {
+
+	uint8_t wave266_1 = characteristicValues->amplitude_266_1;
+	uint8_t nPixels;
+	float n;
+	if (wave266_1 < 4) {
+		nPixels = wave266_1;
+	} else {
+		n = (wave266_1 / 4);
+		nPixels = (unsigned int)n;
+		if(nPixels >= 0x19){
+			nPixels = 0x18;
+		}
+	}
+
+	for(int i = 1; i <= nPixels; i++){
+		SetCoordinate(4, i, 0xff00ff);
+		SetCoordinate(5, i, 0xff00ff);
+
+	}
+	NEO_TransferPixels();
+
+}
+
 static void NeoTask(void* pvParameters) {
 
 	//queue_handler = pvParameters;
@@ -1371,20 +1414,57 @@ static void NeoTask(void* pvParameters) {
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 
-
-
+	NEO_STATUS state = IDLE_STATE;
 	for (;;) {
-		if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage) == QUEUE_EMPTY) {
-			vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
-		} else {
-			CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
-			CLS1_SendStr((unsigned char*) "taken out Data from :", CLS1_GetStdio()->stdOut);
-			CLS1_SendStr((unsigned char*) pxRxDataMessage->name, CLS1_GetStdio()->stdOut);
-			vTaskDelay(pdMS_TO_TICKS(1000)); /*Queue is Empty*/
+		switch (state) {
+
+		case IDLE_STATE:
+
+			if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
+					== QUEUE_EMPTY) {
+				vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
+
+			} else {
+				state = READ_NEW_CMD;
+			}
+
+			break;
+
+		case READ_NEW_CMD:
+			if (pxRxDataMessage->cmd == play) {
+				/*update UpdateQueue -- playing---*/
+				state = PLAY_SEQ1;
+				break;
+			}
+
+		case PLAY_SEQ1:
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
+			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data);
+			vTaskDelay(pdMS_TO_TICKS(1000)); /*fadeout*/
+
+			state = PLAY_SEQ2;
+			break;
+
+		case PLAY_SEQ2:
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
+			playSeq2(pxRxDataMessage->char_data);
+			vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
+			state = IDLE_STATE;
+
 		}
 
+#if 0
+		CLS1_SendStr((unsigned char*) "\r\n ", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "taken out Data from :", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) pxRxDataMessage->name, CLS1_GetStdio()->stdOut);
+		vTaskDelay(pdMS_TO_TICKS(1000)); /*Queue is Empty*/
+		// FRTOS1_vPortFree(pxRxDataMessage->char_data);
+		// FRTOS1_vPortFree(pxRxDataMessage->color_data);
+		// FRTOS1_vPortFree(polle);
+#endif
 	}
-
 }
 
 uint8_t SetTrail(uint32_t color, uint32_t end, uint32_t nofTail,
@@ -1395,19 +1475,19 @@ uint8_t SetTrail(uint32_t color, uint32_t end, uint32_t nofTail,
 	for (pixel = 1; pixel <= end + nofTail + 1; pixel++) {
 		/* move head */
 		if (pixel <= end) {
+			SetCoordinate(pixel, 13, color);
 			SetCoordinate(pixel, 12, color);
-			SetCoordinate(pixel, 11, color);
 		}
 		/* clear tail pixel */
 		if ((pixel > (nofTail + 1)) && pixel - (nofTail + 1) <= end) {
+			ClearCoordinate(pixel - (nofTail + 1), 13);
 			ClearCoordinate(pixel - (nofTail + 1), 12);
-			ClearCoordinate(pixel - (nofTail + 1), 11);
 		}
 		/* dim remaining tail pixel */
 		for (i = 0; i < nofTail; i++) {
 			if (pixel > i && pixel - (i + 1) <= end) {
+				DimmPercentPixel(pixel - (i + 1), 13, dimmPercent);
 				DimmPercentPixel(pixel - (i + 1), 12, dimmPercent);
-				DimmPercentPixel(pixel - (i + 1), 11, dimmPercent);
 				//NEO_DimmPercentPixel(1,lookUpMatrix[12][pixel-(i+1)+1], dimmPercent);
 			}
 		}

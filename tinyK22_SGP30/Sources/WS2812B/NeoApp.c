@@ -445,9 +445,9 @@ uint8_t DimmPercentRing(uint8_t ring, uint32_t percent) {
 		break;
 
 	case 6:
-		lenght_lane_0 = sizeof(ring_6[0]) / sizeof(ring_6[0][0]);
+		lenght_lane_0 = 14;
 		lenght_lane_1 = 16;
-		lenght_lane_2 = sizeof(ring_6[2]) / sizeof(ring_6[0][0]);
+		lenght_lane_2 = 14;
 
 		for (i = 0; i < lenght_lane_0; i++) {
 			NEO_DimmPercentPixel(0, ring_6[0][i], percent);

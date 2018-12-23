@@ -1732,6 +1732,10 @@ static void NeoTask(void* pvParameters) {
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 
+
+	UpdateMessage_t * pxMessage;
+	pxMessage = &xUpdateMessage;
+
 	NEO_STATUS state = IDLE_STATE;
 	for (;;) {
 		switch (state) {
@@ -1750,7 +1754,16 @@ static void NeoTask(void* pvParameters) {
 
 		case READ_NEW_CMD:
 			if (pxRxDataMessage->cmd == play) {
-				/*update UpdateQueue -- playing---*/
+
+				pxMessage->cmd = play;
+				pxMessage->name = pxRxDataMessage->name;
+
+				if(AddMessageToUpdateQueue(queue_handler_update,pxMessage)!= QUEUE_OK){
+					/*Queue is somehow full*/
+				}
+
+
+
 				state = PLAY_SEQ1;
 				break;
 			}

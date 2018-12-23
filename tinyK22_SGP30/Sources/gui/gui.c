@@ -18,6 +18,9 @@
 #endif
 #include "gui_mainmenu.h"
 #include "gui_neopixel.h"
+#include "Message.h"
+
+#include "CS1.h"
 
 #if PL_CONFIG_HAS_GUI_KEY_NAV
 #define GUI_GROUP_NOF_IN_STACK   4
@@ -27,6 +30,8 @@ typedef struct {
 } GUI_Group_t;
 
 static GUI_Group_t groups;
+
+xQueueHandle queue_handler_update;
 
 /* style modification callback for the focus of an element */
 static void style_mod_cb(lv_style_t *style) {
@@ -91,19 +96,56 @@ void GUI_GroupPush(void) {
 #endif /* PL_CONFIG_HAS_GUI_KEY_NAV */
 
 #include "GDisp1.h"
+
+
+
+
+
+
+
+QUEUE_RESULT AddMessageToUpdateQueue(xQueueHandle handle,UpdateMessage_t *msg);
+QUEUE_RESULT TakeMessageFromUpdateQueue(xQueueHandle handle,UpdateMessage_t *msg);
+
+
 static void GuiTask(void *p) {
   vTaskDelay(pdMS_TO_TICKS(1000)); /* give hardware time to power up */
   LCD1_Init();
+  uint8_t isActive = false;
+  UpdateMessage_t* rxMessage;
+  rxMessage = &xUpdateMessage;
+
 
 //  GDisp1_DrawBox(0, 0, 50, 20, 2, GDisp1_COLOR_RED);
 //  GDisp1_UpdateFull();
+
+char text [100] = "Push play to start";
+
 
 #if PL_CONFIG_HAS_GUI_KEY_NAV
   //GUI_CreateGroup();
 #endif
   GUI_MainMenuCreate();
 	for(;;) {
-		updatePollenLabel("Pollen out of control");
+
+
+		if(TakeMessageFromUpdateQueue(queue_handler_update,rxMessage)!=QUEUE_EMPTY){
+			if(rxMessage->cmd == play){
+				strcpy(text,"playing: ");
+				strcat(text,rxMessage->name);
+			}
+			else if(rxMessage->cmd == pause){
+				strcpy(text,"paused: ");
+				strcat(text,rxMessage->name);
+			}
+			else{
+				strcpy(text,"Push play to start");
+			}
+		}
+
+		if(getGuiIsActive()){
+			updatePollenLabel(text);
+		}
+
 		LV_Task(); /* call this every 1-20 ms */
 #if PL_CONFIG_HAS_KEYS
 		KEY1_ScanKeys();

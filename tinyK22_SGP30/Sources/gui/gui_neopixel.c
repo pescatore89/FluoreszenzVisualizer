@@ -27,6 +27,7 @@ static lv_obj_t *label_slider_level; /* label for level value */
 
 xQueueHandle queue_handler_playlist;
 
+static uint8_t guiIsActive;
 
 static lv_obj_t *btn_play;
 static lv_obj_t *btn_pause;
@@ -47,6 +48,39 @@ static void SetLabelValue(lv_obj_t *label, int32_t val) {
 		lv_label_set_text(label, buf);
 	}
 }
+
+
+void setGuiIsActive(uint8_t val){
+
+	CS1_CriticalVariable();
+
+
+	CS1_EnterCritical();
+
+	guiIsActive = val;
+
+	CS1_ExitCritical();
+
+}
+
+uint8_t getGuiIsActive(void){
+
+	uint8_t res;
+	CS1_CriticalVariable();
+
+
+	CS1_EnterCritical();
+
+		res = guiIsActive;
+
+	CS1_ExitCritical();
+
+
+
+	return res;
+}
+
+
 
 /* Called when a new value id set on the slider */
 static lv_res_t slider_action(lv_obj_t *slider) {
@@ -82,6 +116,7 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
 	GUI_GroupPull();
 	lv_obj_del(win);
 	win = NULL;
+	setGuiIsActive(false);
 	return LV_RES_INV;
 }
 
@@ -135,9 +170,8 @@ static lv_res_t btn_loop_click_action(lv_obj_t *btn) {
 }
 
 void updatePollenLabel(char* text){
-
 	pollenLabel = text;
-
+	lv_label_set_text(polle_label, pollenLabel);
 }
 
 
@@ -146,7 +180,13 @@ void updatePollenLabel(char* text){
 
 void GUI_NEO_Create(uint8_t * name) {
 
+
+	setGuiIsActive(true);
+
 	namesActive = name;	// schreibt die Namen der aktiven pollen auf den globalen pointer
+
+
+
 
 	lv_obj_t *closeBtn, *slider1;
 

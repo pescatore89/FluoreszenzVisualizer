@@ -159,6 +159,7 @@ struct DataMessage {
 	uint8_t farbtiefe;
 	COMMAND cmd;
 	BMPImage* image;
+	uint8_t excitation;
 }xDataMessage;
 
 typedef struct DataMessage DataMessage_t;

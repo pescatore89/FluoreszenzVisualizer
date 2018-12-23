@@ -50,6 +50,7 @@ typedef enum {
 	PLAY_SEQ1, /*  */
 	PLAY_SEQ2, /* */
 	PLAY_SEQ3, /* */
+	ERROR_STATE,
 
 } NEO_STATUS;
 
@@ -487,6 +488,7 @@ static uint32_t decrementValue(uint32_t color, uint8_t decrementVal) {
 
 	if (red > decrementVal) {
 		red = red - decrementVal;
+
 	} else {
 		red = 0;
 	}
@@ -498,6 +500,7 @@ static uint32_t decrementValue(uint32_t color, uint8_t decrementVal) {
 	}
 	if (blue > decrementVal) {
 		blue = blue - decrementVal;
+
 	} else {
 		blue = 0;
 	}
@@ -563,6 +566,7 @@ static uint8_t decrementRingData(uint8_t ring, uint8_t step) {
 
 			NEO_GetPixelColor(1, ring_1[i], &color);
 			color_value = decrementValue(color, step);
+
 			NEO_SetPixelColor(1, ring_1[i], color_value);
 		}
 		break;
@@ -572,6 +576,7 @@ static uint8_t decrementRingData(uint8_t ring, uint8_t step) {
 		for (i = 0; i < lenght_lane_1; i++) {
 			NEO_GetPixelColor(1, ring_2[i], &color);
 			color_value = decrementValue(color, step);
+
 			NEO_SetPixelColor(1, ring_2[i], color_value);
 		}
 		break;
@@ -581,6 +586,7 @@ static uint8_t decrementRingData(uint8_t ring, uint8_t step) {
 
 			NEO_GetPixelColor(1, ring_3[i], &color);
 			color_value = decrementValue(color, step);
+
 			NEO_SetPixelColor(1, ring_3[i], color_value);
 		}
 		break;
@@ -590,6 +596,7 @@ static uint8_t decrementRingData(uint8_t ring, uint8_t step) {
 
 			NEO_GetPixelColor(1, ring_4[i], &color);
 			color_value = decrementValue(color, step);
+
 			NEO_SetPixelColor(1, ring_4[i], color_value);
 		}
 		break;
@@ -1768,7 +1775,9 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	SetTrail(0xff00ff, 13, 5, 50, 100);
 	NEOA_Display_Image(colorData, farbtiefe);
 
-	uint32_t fadeout = characteristicValues->fadeout_266;
+	//uint32_t fadeout = characteristicValues->fadeout_266;
+
+	uint32_t fadeout = 8000;
 
 	for (int i = 1; i < 13; i++) {
 		DimmPercentRing(i, (percente));
@@ -1828,107 +1837,6 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 #define COLOR550 0x20f135
 #define COLOR700 0xf0341f
 
-static void playSeq2(DATA_t * characteristicValues) {
-
-	uint8_t wave266_1 = characteristicValues->amplitude_266_1;
-	uint8_t wave266_2 = characteristicValues->amplitude_266_2;
-	uint8_t wave266_3 = characteristicValues->amplitude_266_3;
-	uint8_t wave266_4 = characteristicValues->amplitude_266_4;
-	uint8_t wave266_5 = characteristicValues->amplitude_266_5;
-	uint8_t nPixels;
-	uint8_t nPixels2;
-	uint8_t nPixels3;
-	uint8_t nPixels4;
-	uint8_t nPixels5;
-	float n;
-	float n2;
-	float n3;
-	float n4;
-	float n5;
-
-	int k = 0;
-
-	if ((characteristicValues->amplitude_266_1) < 4) {
-		nPixels = characteristicValues->amplitude_266_1;
-	} else {
-		n = (characteristicValues->amplitude_266_1 / 4);
-		nPixels = (unsigned int) n;
-		if (nPixels >= 0x19) {
-			nPixels = 0x18;
-		}
-	}
-
-	for (int i = 1; i <= nPixels; i++) {
-		SetCoordinate(4, i, COLOR300);
-		SetCoordinate(5, i, COLOR300);
-
-	}
-
-	if (wave266_2 < 4) {
-		nPixels = wave266_2;
-	} else {
-		n = (wave266_2 / 4);
-		nPixels = (unsigned int) n;
-		if (nPixels >= 0x19) {
-			nPixels = 0x18;
-		}
-	}
-
-	for (int i = 1; i <= nPixels; i++) {
-		SetCoordinate(8, i, COLOR430);
-		SetCoordinate(9, i, COLOR430);
-
-	}
-	if (wave266_3 < 4) {
-		nPixels = wave266_3;
-	} else {
-		n = (wave266_3 / 4);
-		nPixels = (unsigned int) n;
-		if (nPixels >= 0x19) {
-			nPixels = 0x18;
-		}
-	}
-
-	for (int i = 1; i <= nPixels; i++) {
-		SetCoordinate(12, i, COLOR480);
-		SetCoordinate(13, i, COLOR480);
-
-	}
-	if (wave266_4 < 4) {
-		nPixels = wave266_4;
-	} else {
-		n = (wave266_4 / 4);
-		nPixels = (unsigned int) n;
-		if (nPixels >= 0x19) {
-			nPixels = 0x18;
-		}
-	}
-
-	for (int i = 1; i <= nPixels; i++) {
-		SetCoordinate(16, i, COLOR550);
-		SetCoordinate(17, i, COLOR550);
-
-	}
-	if (wave266_5 < 4) {
-		nPixels = wave266_5;
-	} else {
-		n = (wave266_5 / 4);
-		nPixels = (unsigned int) n;
-		if (nPixels >= 0x19) {
-			nPixels = 0x18;
-		}
-	}
-
-	for (int i = 1; i <= nPixels; i++) {
-		SetCoordinate(20, i, COLOR700);
-		SetCoordinate(21, i, COLOR700);
-
-	}
-
-	NEO_TransferPixels();
-
-}
-
 static uint32_t getColorDimmedWithGamma(uint32_t color, uint8_t percent) {
 	uint32_t red, green, blue;
 	uint32_t redCorr, greenCorr, blueCorr, dRed, dBlue, dGreen;
@@ -1983,6 +1891,117 @@ static uint32_t getResolution(uint32_t lifetime1, uint32_t lifetime2,
 
 }
 
+static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
+
+	uint8_t value1, value2, value3, value4, value5, nPixels1, nPixels2,
+			nPixels3, nPixels4, nPixels5;
+
+	if (excitation == 1) {
+		value1 = characteristicValues->amplitude_266_1;
+		value2 = characteristicValues->amplitude_266_2;
+		value3 = characteristicValues->amplitude_266_3;
+		value4 = characteristicValues->amplitude_266_4;
+		value5 = characteristicValues->amplitude_266_5;
+	}
+
+	else if (excitation == 2) {
+		value1 = characteristicValues->amplitude_355_1;
+		value2 = characteristicValues->amplitude_355_2;
+		value3 = characteristicValues->amplitude_355_3;
+		value4 = characteristicValues->amplitude_355_4;
+		value5 = characteristicValues->amplitude_355_5;
+	} else if (excitation == 3) {
+		value1 = characteristicValues->amplitude_405_1;
+		value2 = characteristicValues->amplitude_405_2;
+		value3 = characteristicValues->amplitude_405_3;
+		value4 = characteristicValues->amplitude_405_4;
+		value5 = characteristicValues->amplitude_405_5;
+
+	}
+
+	float n1, n2, n3, n4, n5;
+
+	if ((value1) < 4) {
+		nPixels1 = value1;
+	} else {
+		n1 = (value1 / 4);
+		nPixels1 = (unsigned int) n1;
+		if (nPixels1 >= 0x19) {
+			nPixels1 = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels1; i++) {
+		SetCoordinate(4, i, COLOR300);
+		SetCoordinate(5, i, COLOR300);
+
+	}
+
+	if (value2 < 4) {
+		nPixels2 = value2;
+	} else {
+		n2 = (value2 / 4);
+		nPixels2 = (unsigned int) n2;
+		if (nPixels2 >= 0x19) {
+			nPixels2 = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels2; i++) {
+		SetCoordinate(8, i, COLOR430);
+		SetCoordinate(9, i, COLOR430);
+
+	}
+	if (value3 < 4) {
+		nPixels3 = value3;
+	} else {
+		n3 = (value3 / 4);
+		nPixels3 = (unsigned int) n3;
+		if (nPixels3 >= 0x19) {
+			nPixels3 = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels3; i++) {
+		SetCoordinate(12, i, COLOR480);
+		SetCoordinate(13, i, COLOR480);
+
+	}
+	if (value4 < 4) {
+		nPixels4 = value4;
+	} else {
+		n4 = (value4 / 4);
+		nPixels4 = (unsigned int) n4;
+		if (nPixels4 >= 0x19) {
+			nPixels4 = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels4; i++) {
+		SetCoordinate(16, i, COLOR550);
+		SetCoordinate(17, i, COLOR550);
+
+	}
+	if (value5 < 4) {
+		nPixels5 = value5;
+	} else {
+		n5 = (value5 / 4);
+		nPixels5 = (unsigned int) n5;
+		if (nPixels5 >= 0x19) {
+			nPixels5 = 0x18;
+		}
+	}
+
+	for (int i = 1; i <= nPixels5; i++) {
+		SetCoordinate(20, i, COLOR700);
+		SetCoordinate(21, i, COLOR700);
+
+	}
+
+	NEO_TransferPixels();
+
+}
+
 #define COORDINATE_X_PIXEL1	8
 #define COORDINATE_X_PIXEL2	12
 #define COORDINATE_X_PIXEL3	16
@@ -2024,33 +2043,80 @@ static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 #define DELAY_TIME 					5		/*5ms */
 #define DECR_DELAY_AT_DELAY_TIME 	((255*5)*((NEO_PROCESSING_TIME)+(DELAY_TIME))/5)
 
-static void playSeq3(DATA_t * characteristicValues) {
+static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 
-	uint32_t resolution = getResolution(characteristicValues->lifetime_266_1,
-			characteristicValues->lifetime_266_2,
-			characteristicValues->lifetime_266_3,
-			characteristicValues->lifetime_266_4);
-
-	uint16_t decrementStep = round((float) DECR_DELAY_AT_DELAY_TIME)
-			/ (float) (resolution);
-
-	uint8_t nPixels1 = ceil(
-			((float) (characteristicValues->lifetime_266_1)
-					/ ((float) (resolution))));
-	uint8_t nPixels2 = ceil(
-			((float) (characteristicValues->lifetime_266_2)
-					/ ((float) (resolution))));
-	uint8_t nPixels3 = ceil(
-			((float) (characteristicValues->lifetime_266_3)
-					/ ((float) (resolution))));
-	uint8_t nPixels4 = ceil(
-			((float) (characteristicValues->lifetime_266_4)
-					/ ((float) (resolution))));
+	uint32_t resolution = 0;
+	uint16_t decrementStep = 0;
+	uint8_t nPixels1 = 0;
+	uint8_t nPixels2 = 0;
+	uint8_t nPixels3 = 0;
+	uint8_t nPixels4 = 0;
 
 	uint32_t color1 = COLOR_PIXEL1;
 	uint32_t color2 = COLOR_PIXEL2;
 	uint32_t color3 = COLOR_PIXEL3;
 	uint32_t color4 = COLOR_PIXEL4;
+
+	if (excitation == 1) {
+		resolution = getResolution(characteristicValues->lifetime_266_1,
+				characteristicValues->lifetime_266_2,
+				characteristicValues->lifetime_266_3,
+				characteristicValues->lifetime_266_4);
+		nPixels1 = ceil(
+				((float) (characteristicValues->lifetime_266_1)
+						/ ((float) (resolution))));
+		nPixels2 = ceil(
+				((float) (characteristicValues->lifetime_266_2)
+						/ ((float) (resolution))));
+		nPixels3 = ceil(
+				((float) (characteristicValues->lifetime_266_3)
+						/ ((float) (resolution))));
+		nPixels4 = ceil(
+				((float) (characteristicValues->lifetime_266_4)
+						/ ((float) (resolution))));
+
+	} else if (excitation == 2) {
+		uint32_t resolution = getResolution(
+				characteristicValues->lifetime_355_1,
+				characteristicValues->lifetime_355_2,
+				characteristicValues->lifetime_355_3,
+				characteristicValues->lifetime_355_4);
+		nPixels1 = ceil(
+				((float) (characteristicValues->lifetime_355_1)
+						/ ((float) (resolution))));
+		nPixels2 = ceil(
+				((float) (characteristicValues->lifetime_355_2)
+						/ ((float) (resolution))));
+		nPixels3 = ceil(
+				((float) (characteristicValues->lifetime_355_3)
+						/ ((float) (resolution))));
+		nPixels4 = ceil(
+				((float) (characteristicValues->lifetime_355_4)
+						/ ((float) (resolution))));
+	}
+
+	else if (excitation == 3) {
+		uint32_t resolution = getResolution(
+				characteristicValues->lifetime_405_1,
+				characteristicValues->lifetime_405_2,
+				characteristicValues->lifetime_405_3,
+				characteristicValues->lifetime_405_4);
+		nPixels1 = ceil(
+				((float) (characteristicValues->lifetime_405_1)
+						/ ((float) (resolution))));
+		nPixels2 = ceil(
+				((float) (characteristicValues->lifetime_405_2)
+						/ ((float) (resolution))));
+		nPixels3 = ceil(
+				((float) (characteristicValues->lifetime_405_3)
+						/ ((float) (resolution))));
+		nPixels4 = ceil(
+				((float) (characteristicValues->lifetime_405_4)
+						/ ((float) (resolution))));
+	}
+
+	decrementStep = round((float) DECR_DELAY_AT_DELAY_TIME)
+			/ (float) (resolution);
 
 	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
 
@@ -2120,7 +2186,7 @@ static void NeoTask(void* pvParameters) {
 	//queue_handler = pvParameters;
 	int value = -1;
 	QUEUE_RESULT res = QUEUE_OK;
-
+	uint8_t excitation = 0;
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 
@@ -2138,7 +2204,13 @@ static void NeoTask(void* pvParameters) {
 				vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 
 			} else {
-				state = READ_NEW_CMD;
+				if (FRTOS1_xSemaphoreTake(mutex,100) != pdTRUE) {
+					/*error taking Mutex*/
+					state = ERROR_STATE;
+				} else {
+					state = READ_NEW_CMD;
+				}
+
 			}
 
 			break;
@@ -2148,7 +2220,7 @@ static void NeoTask(void* pvParameters) {
 
 				pxMessage->cmd = play;
 				pxMessage->name = pxRxDataMessage->name;
-
+				excitation = pxRxDataMessage->excitation;
 				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
 						!= QUEUE_OK) {
 					/*Queue is somehow full*/
@@ -2164,14 +2236,13 @@ static void NeoTask(void* pvParameters) {
 			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data,
 					pxRxDataMessage->image->biBitCount);
 
-
 			state = PLAY_SEQ2;
 			break;
 
 		case PLAY_SEQ2:
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
-			playSeq2(pxRxDataMessage->char_data);
+			playSeq2(pxRxDataMessage->char_data, excitation);
 			vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
 			state = PLAY_SEQ3;
 			break;
@@ -2186,8 +2257,19 @@ static void NeoTask(void* pvParameters) {
 			//NEO_TransferPixels();
 			//vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
 
-			playSeq3(pxRxDataMessage->char_data);
-			state = IDLE_STATE;
+			playSeq3(pxRxDataMessage->char_data, excitation);
+
+			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+				state = ERROR_STATE;
+			} else {
+				state = IDLE_STATE;
+			}
+			break;
+
+		case ERROR_STATE:
+			for (;;) {
+				vTaskDelay(pdMS_TO_TICKS(50));
+			}
 		}
 
 #if 0

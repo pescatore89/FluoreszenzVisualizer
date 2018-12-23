@@ -54,7 +54,7 @@ uint8_t getDataArray(uint8_t* px) {
 
 }
 
-uint8_t readDataFromSD(DataMessage_t * pxData) {
+uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 
 	//BMPImage* image;
 	pxData->image = &xBMPImage;

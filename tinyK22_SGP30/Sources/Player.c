@@ -15,7 +15,7 @@
 #include <ctype.h>
 xQueueHandle queue_handler_playlist; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
-
+xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message.h*/
 static uint8_t listEnabled[100];
 static uint8_t nPollenEnabled;
 static uint8_t nameCNT;
@@ -79,15 +79,10 @@ static uint8_t getMemory(DataMessage_t* px) {
 	return res;
 }
 
-
-
-static void freeMemory(DataMessage_t* px){
-
+static void freeMemory(DataMessage_t* px) {
 
 //	FRTOS1_vPortFree(px->char_data);
 	FRTOS1_vPortFree(px->color_data);
-
-
 
 }
 
@@ -105,7 +100,7 @@ static void PlayerTask(void *pvParameters) {
 	char** playList = NULL;
 
 	PLAYER_STATE state = IDLE;
-
+	uint8_t excitation = 1;
 	uint8_t res;
 
 	int k = 12;
@@ -141,6 +136,7 @@ static void PlayerTask(void *pvParameters) {
 			nPollenEnabled = updateListEnabled(pxPlaylistMessage->playlist);
 			/*Update the playlist*/
 			nameCNT = 0;
+			excitation = 1;
 			state = PLAY_LIST;
 			break;
 
@@ -153,27 +149,40 @@ static void PlayerTask(void *pvParameters) {
 
 			else {
 
-				if (PeekDataQueue(queue_handler_data, pxDataMessage)
-						!= QUEUE_EMPTY) {
+				if ((PeekDataQueue(queue_handler_data, pxDataMessage)
+						!= QUEUE_EMPTY)) {
+					/*NEO Task is busy*/
 					vTaskDelay(pdMS_TO_TICKS(10)); /*LED Task is busy playing*/
+
 				} else {
-					/*send new Data to DataQueue*/
-					//	pxDataMessage->name = (getNamesActive(
-					//			pxPlaylistMessage->playlist, playList));
-					if (!getMemory(pxDataMessage)) {
-						/*problem allocating memory*/
+
+					if ((FRTOS1_xSemaphoreTake(mutex,0) != pdTRUE)) {
+						vTaskDelay(pdMS_TO_TICKS(10)); /*LED Task is busy playing*/
+						break;
+					} else {
+
+						if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+							/*error giving back the semaphore*/
+						}
+
+						if (!getMemory(pxDataMessage)) {
+							/*problem allocating memory*/
+						} else {
+							pxDataMessage->name = getName();
+							res = readDataFromSD(excitation, pxDataMessage);
+							pxDataMessage->excitation = excitation;
+
+							if (AddMessageToDataQueue(queue_handler_data,
+									pxDataMessage) != QUEUE_OK) {
+								/*Queue is full*/
+							}
+
+							freeMemory(pxDataMessage);
+
+						}
 					}
-					pxDataMessage->name = getName();
-					res = readDataFromSD(pxDataMessage);
-
-					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
-							!= QUEUE_OK) {
-						/*Queue is full*/
-
-					}
-					freeMemory(pxDataMessage);
-
 				}
+
 			}
 			break;
 		}

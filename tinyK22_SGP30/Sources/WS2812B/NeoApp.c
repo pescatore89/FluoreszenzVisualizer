@@ -85,6 +85,11 @@ static void SetPixel(int x, int y, uint32_t color) {
 	NEO_SetPixelColor(0, pos, color);
 }
 
+static uint32_t lane12[] = { 4, 12, 20, 28, 36, 44, 52, 60, 68, 76, 84, 92, 100,
+		108, 116, 124, 132, 140, 148, 156, 164, 172, 180, 188 };
+static uint32_t lane13[] = { 3, 11, 19, 27, 35, 43, 51, 59, 67, 75, 83, 91, 99,
+		107, 115, 123, 131, 139, 147, 155, 163, 171, 179, 187 };
+
 #if MATRIX_RES == 24
 
 uint32_t lookUpMatrix[8][24] = { /*Look up Matrix für die Lanes*/
@@ -217,6 +222,7 @@ uint8_t ClearCoordinate(int x, int y) {
 	return ERR_OK;
 
 }
+
 static uint8_t getHighestColorValue(uint32_t color) {
 
 	uint32_t red, green, blue;
@@ -237,6 +243,37 @@ static uint8_t getHighestColorValue(uint32_t color) {
 	}
 
 	return result;
+
+}
+
+static uint8_t getHighestColorValueFromLane() {
+
+	NEO_Color color;
+	uint8_t temp = 0;
+	uint8_t highscore = 0;
+	uint32_t color_val = 0;
+
+	int i = 0;
+
+	for (i = 0; i < 24; i++) {
+		NEO_GetPixelColor(1, lane12[i], &color);
+		temp = getHighestColorValue(color);
+		if (temp >= highscore) {
+			highscore = temp;
+			color_val = color;
+		}
+	}
+
+	for (i = 0; i < 24; i++) {
+		NEO_GetPixelColor(1, lane13[i], &color);
+		temp = getHighestColorValue(color);
+		if (temp >= highscore) {
+			highscore = temp;
+			color_val = color;
+		}
+	}
+
+	return highscore;
 
 }
 
@@ -1774,7 +1811,9 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	uint8_t percente = 0;
 	SetTrail(0xff00ff, 13, 5, 50, 100);
 	NEOA_Display_Image(colorData, farbtiefe);
+	uint8_t highestColVal = 0xff;
 
+	highestColVal = getHighestColorValueFromLane();
 	//uint32_t fadeout = characteristicValues->fadeout_266;
 
 	uint32_t fadeout = 8000;
@@ -1785,8 +1824,7 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	}
 	NEO_TransferPixels();
 
-	uint8_t highestColVal = getHighestColorValue(
-			characteristicValues->color_266);
+
 
 	uint32_t nTicks = rint((float) (fadeout) / (delay));
 
@@ -2189,7 +2227,7 @@ static void NeoTask(void* pvParameters) {
 	uint8_t excitation = 0;
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
-
+	uint8_t highestColorValue;
 	UpdateMessage_t * pxMessage;
 	pxMessage = &xUpdateMessage;
 
@@ -2221,6 +2259,7 @@ static void NeoTask(void* pvParameters) {
 				pxMessage->cmd = play;
 				pxMessage->name = pxRxDataMessage->name;
 				excitation = pxRxDataMessage->excitation;
+
 				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
 						!= QUEUE_OK) {
 					/*Queue is somehow full*/
@@ -2233,6 +2272,7 @@ static void NeoTask(void* pvParameters) {
 		case PLAY_SEQ1:
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
+
 			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data,
 					pxRxDataMessage->image->biBitCount);
 

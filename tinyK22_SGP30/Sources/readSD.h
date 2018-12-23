@@ -23,9 +23,9 @@ uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
 uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData);
-uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t *pxDATA);
+uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t *pxDATA, uint8_t excitation);
 //uint8_t readCharacteristicValues(TCHAR *fileName, Message_t *pxDATA);
-void addSuffixBMP(char* filename);
+void addSuffixBMP(char* filename, uint8_t excitation);
 BMPImage* loadBMPData(TCHAR *filename,
 		const CLS1_StdIOType *io);
 void addSuffixTXT(char* filename);

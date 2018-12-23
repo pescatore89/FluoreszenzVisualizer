@@ -168,7 +168,12 @@ static void PlayerTask(void *pvParameters) {
 						if (!getMemory(pxDataMessage)) {
 							/*problem allocating memory*/
 						} else {
-							pxDataMessage->name = getName();
+
+							if(excitation == 1){
+								pxDataMessage->name = getName();
+							}
+
+
 							res = readDataFromSD(excitation, pxDataMessage);
 							pxDataMessage->excitation = excitation;
 
@@ -177,6 +182,10 @@ static void PlayerTask(void *pvParameters) {
 								/*Queue is full*/
 							}
 
+							excitation++;
+							if(excitation == 4){
+								excitation = 1;
+							}
 							freeMemory(pxDataMessage);
 
 						}

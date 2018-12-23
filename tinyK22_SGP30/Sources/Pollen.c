@@ -57,14 +57,24 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 
 uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 
+	uint8_t result = ERR_OK;
+
+#if 0
 
 	BMPImage* image;
 	char * temp_filename;
 	Message_t *pxMessage;
 	pxMessage = &xMessage;
-	uint8_t result = ERR_OK;
+
+
+
+
+
 	char cd [4] = {"\\.."};
 	char * cd_back = cd;
+
+
+	uint8_t excitation = 1; /*needs to be specified */
 
 #if 0
 	if(directory_set){
@@ -85,7 +95,7 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 	//	pxMessage->data = image->data;
 
 
-		readCharacteristicValues(polle, pxMessage);
+	//	readCharacteristicValues(polle, pxMessage, excitation);
 
 	//	result = AddMessageToQueue(queue_handler, pxMessage);
 		if (result != QUEUE_OK) {
@@ -101,6 +111,8 @@ uint8_t playPolle(char * polle, const CLS1_StdIOType *io) {
 
 	}
 
+
+#endif
 	return result;
 
 }

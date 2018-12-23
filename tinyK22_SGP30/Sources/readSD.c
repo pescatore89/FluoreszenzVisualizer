@@ -49,6 +49,28 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 
 }
 
+static void removeSuffixBMP(char* filename, uint8_t excitation) {
+	uint8_t length = 0;
+	length = strlen(filename);
+	bool has_suffix = FALSE;
+	const char ch = '.';
+	char nExcitation;
+
+	if (excitation == 1) {
+		nExcitation = '1';
+	} else if (excitation == 2) {
+		nExcitation = '2';
+	} else if (excitation == 3) {
+		nExcitation = '3';
+	}
+
+	char * ret;
+
+	ret = strtok(filename, &nExcitation);
+
+	filename = ret;
+}
+
 uint8_t getDataArray(uint8_t* px) {
 //	px = ImageDataBuffer;
 
@@ -63,14 +85,13 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 	char* polle = NULL;
 	DATA_t * pointerData;
 	pointerData = &xDATA;
-	char nameArray [100];
-
+	char nameArray[100];
 
 	strcpy(nameArray, filename);
 
-
 	char cd[4] = { "\\.." };
 	char * cd_back = cd;
+
 	uint8_t result;
 	FRESULT res = FR_OK;
 
@@ -81,20 +102,8 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 
 	else {
 
-		//	 playPolle(polle, io);
+		addSuffixBMP(nameArray, excitation);
 
-
-		/*allocate */
-#if 0
-		image = FRTOS1_pvPortMalloc(sizeof(BMPImage));
-		if (image == NULL) {
-			CLS1_SendStr((unsigned char*) "malloc failed!\r\n", io->stdErr);
-			return FR_NOT_ENOUGH_CORE;
-			/*malloc failed*/
-		}
-#endif
-
-		addSuffixBMP(nameArray);
 		res = BMPImageLoadData(nameArray, pxData->image, pxData->color_data);
 		if (res != FR_OK) {
 			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
@@ -109,11 +118,11 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 
 	}
 
-	result = readCharacteristicValues(nameArray, pointerData);
+	removeSuffixBMP(nameArray, excitation);
+	result = readCharacteristicValues(nameArray, pointerData, excitation);
 	pxData->char_data = pointerData;
 
 	//FRTOS1_vPortFree(polle);
-
 
 	if (FAT1_ChangeDirectory(cd_back, io) != ERR_OK) {
 		/*something wnet wrong*/
@@ -121,7 +130,8 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 
 }
 
-uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA) {
+uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
+		uint8_t excitation) {
 //	uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxDATA) {
 
 	addSuffixTXT(fileName);
@@ -133,119 +143,129 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA) {
 	uint32_t temp;
 	uint8_t buff8[50];
 
-	/*Read out all values beeing part of Modus 1*/
+	/*Read out all values beeing part of Excitation  1*/
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color266", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->color_266 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->color_355 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->color_405 = getRealValue(buff8);
+	if (excitation == 1) {
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->fadeout_266 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout405", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->fadeout_405 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0", (char* ) buff8,
-			sizeof(buff8), fileName);
-	pxDATA->fadeout_355 = getRealValue(buff8);
+#if 0
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color266", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->color_266 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->color_355 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->color_405 = getRealValue(buff8);
+#endif
 
-	/*Read out all values beeing part of Modus 2*/
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->fadeout_266 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength1", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_266_1 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength2", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_266_2 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength3", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_266_3 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength4", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_266_4 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength5", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_266_5 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_266_1 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_266_2 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_266_3 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_266_4 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "266wavelength5", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_266_5 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength1", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_355_1 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength2", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_355_2 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength3", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_355_3 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength4", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_355_4 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength5", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_355_5 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_266_1 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_266_2 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_266_3 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_266_4 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength1", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_405_1 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength2", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_405_2 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength3", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_405_3 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength4", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_405_4 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength5", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->amplitude_405_5 = getRealValue(buff8);
+	}
 
-	/*Read out all values beeing part of Modus 3*/
+	else if (excitation == 2) { /*Read out all values beeing part of Excitation 2*/
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength1", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_266_1 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength2", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_266_2 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength3", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_266_3 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength4", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_266_4 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->fadeout_355 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength1", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_355_1 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength2", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_355_2 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength3", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_355_3 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength4", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_355_4 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_355_1 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_355_2 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_355_3 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_355_4 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "355wavelength5", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_355_5 = getRealValue(buff8);
 
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength1", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_405_1 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength2", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_405_2 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength3", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_405_3 = getRealValue(buff8);
-	val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength4", "0",
-			(char* ) buff8, sizeof(buff8), fileName);
-	pxDATA->lifetime_405_4 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_355_1 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_355_2 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_355_3 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_355_4 = getRealValue(buff8);
 
+	}
+
+	else if (excitation == 3) { /*Read out all values beeing part of Excitation 3*/
+
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout405", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->fadeout_405 = getRealValue(buff8);
+
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_405_1 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_405_2 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_405_3 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_405_4 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_2, "405wavelength5", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->amplitude_405_5 = getRealValue(buff8);
+
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_405_1 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_405_2 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_405_3 = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime_405_4 = getRealValue(buff8);
+	}
 }
 
 int getRawInt(char c) {
@@ -465,12 +485,22 @@ void addSuffixTXT(char* filename) {
 
 }
 
-void addSuffixBMP(char* filename) {
+void addSuffixBMP(char* filename, uint8_t excitation) {
 
 	uint8_t length = 0;
 	length = strlen(filename);
 	bool has_suffix = FALSE;
 	const char ch = '.';
+	char* nExcitation;
+
+	if (excitation == 1) {
+		nExcitation = "1";
+	} else if (excitation == 2) {
+		nExcitation = "2";
+	} else if (excitation == 3) {
+		nExcitation = "3";
+	}
+
 	char * ret;
 
 	for (int i = 0; i < length; i++) {
@@ -485,8 +515,10 @@ void addSuffixBMP(char* filename) {
 	} else {
 		ret = filename;
 	}
+
 	char * suffix = ".bmp";
 	char * temp = ret;
+	strcat(temp, nExcitation);
 	strcat(temp, suffix);
 	filename = temp;
 
@@ -565,7 +597,6 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image, char* data) {
 			image->biSizeImage = buf[34];
 			//image->biCompression = buf[30];
 		}
-
 
 		res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 		if (res == FR_OK) {

@@ -31,6 +31,7 @@
 #include "ff.h"
 #include "..\Message.h"
 #include "readSD.h"
+#include <math.h>
 
 #endif
 
@@ -56,7 +57,7 @@ xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
 xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
 
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message*/
-extern uint8_t ImageDataBuffer[2500];
+//extern uint8_t ImageDataBuffer[2500];
 void NEOA_SetLightLevel(uint8_t level) {
 	NEOA_LightLevel = level;
 }
@@ -1503,6 +1504,225 @@ static void playSeq2(DATA_t * characteristicValues) {
 
 }
 
+static uint32_t decrementValue(uint32_t color,uint8_t decrementVal) {
+	uint32_t red, green, blue;
+
+	red = NEO_GET_COLOR_RED(color);
+	green = NEO_GET_COLOR_GREEN(color);
+	blue = NEO_GET_COLOR_BLUE(color);
+
+	if (red > decrementVal) {
+		red = red - decrementVal;
+	}
+	else{
+		red = 0;
+	}
+	if (green > decrementVal) {
+		green = green - decrementVal;
+
+	}
+	else{
+		green = 0;
+	}
+	if (blue > decrementVal) {
+		blue = blue - decrementVal;
+	}
+	else{
+		blue = 0;
+	}
+
+	return NEO_MAKE_COLOR_RGB(red, green, blue);
+}
+
+static uint32_t getColorDimmedWithGamma(uint32_t color, uint8_t percent) {
+	uint32_t red, green, blue;
+	uint32_t redCorr, greenCorr, blueCorr, dRed, dBlue, dGreen;
+
+	red = NEO_GET_COLOR_RED(color);
+	green = NEO_GET_COLOR_GREEN(color);
+	blue = NEO_GET_COLOR_BLUE(color);
+	dRed = ((uint32_t) red * (100 - percent)) / 100;
+	dGreen = ((uint32_t) green * (100 - percent)) / 100;
+	dBlue = ((uint32_t) blue * (100 - percent)) / 100;
+
+	redCorr = NEO_GammaCorrect8(dRed);
+	greenCorr = NEO_GammaCorrect8(dGreen);
+	blueCorr = NEO_GammaCorrect8(dBlue);
+	return NEO_MAKE_COLOR_RGB(redCorr, greenCorr, blueCorr);
+}
+
+static uint32_t getColorPercentage(uint32_t color, uint8_t percent) {
+	uint32_t red, green, blue;
+	uint32_t redCorr, greenCorr, blueCorr, dRed, dBlue, dGreen;
+
+	red = NEO_GET_COLOR_RED(color);
+	green = NEO_GET_COLOR_GREEN(color);
+	blue = NEO_GET_COLOR_BLUE(color);
+	dRed = ((uint32_t) red * (100 - percent)) / 100;
+	dGreen = ((uint32_t) green * (100 - percent)) / 100;
+	dBlue = ((uint32_t) blue * (100 - percent)) / 100;
+	return NEO_MAKE_COLOR_RGB(dRed, dGreen, dBlue);
+
+}
+
+static uint32_t getResolution(uint32_t lifetime1, uint32_t lifetime2,
+		uint32_t lifetime3, uint32_t lifetime4) {
+
+	float temp;
+	uint32_t resolution = 0;
+	if ((lifetime1 >= lifetime2) && (lifetime1 >= lifetime3)
+			&& (lifetime1 >= lifetime4)) {
+		resolution = ceil((float) ((float) (lifetime1) / (float) (24)));
+	}
+	else if ((lifetime2 >= lifetime3) && (lifetime2 >= lifetime4)) {
+		resolution = ceil((float) ((float) (lifetime2) / (float) (24)));
+
+	} else if ((lifetime3 >= lifetime4)) {
+		resolution = ceil((float) ((float) (lifetime3) / (float) (24)));
+	}
+
+	else {
+		resolution = ceil((float) ((float) (lifetime4) / (float) (24)));
+	}
+
+	return resolution;
+
+}
+
+
+#define COORDINATE_X_PIXEL1	8
+#define COORDINATE_X_PIXEL2	12
+#define COORDINATE_X_PIXEL3	16
+#define COORDINATE_X_PIXEL4	20
+
+#define COLOR_PIXEL1	0xff00ff
+#define COLOR_PIXEL2	0x00ffff
+#define COLOR_PIXEL3	0x00ff00
+#define COLOR_PIXEL4	0xff0000
+
+
+
+
+static void setupMatrix(uint8_t nPixels1,uint8_t nPixels2,uint8_t nPixels3,uint8_t nPixels4 ){
+
+	int i;
+	for(i = 1; i <=nPixels1; i ++){
+		SetCoordinate(COORDINATE_X_PIXEL1,i,COLOR_PIXEL1);
+		SetCoordinate(COORDINATE_X_PIXEL1 + 1,i,COLOR_PIXEL1);
+	}
+
+	for(i = 1; i <=nPixels2; i ++){
+		SetCoordinate(COORDINATE_X_PIXEL2,i,COLOR_PIXEL2);
+		SetCoordinate(COORDINATE_X_PIXEL2 + 1,i,COLOR_PIXEL2);
+	}
+
+	for(i = 1; i <=nPixels3; i ++){
+		SetCoordinate(COORDINATE_X_PIXEL3,i,COLOR_PIXEL3);
+		SetCoordinate(COORDINATE_X_PIXEL3 + 1,i,COLOR_PIXEL3);
+	}
+
+	for(i = 1; i <=nPixels4; i ++){
+		SetCoordinate(COORDINATE_X_PIXEL4,i,COLOR_PIXEL4);
+		SetCoordinate(COORDINATE_X_PIXEL4 + 1,i,COLOR_PIXEL4);
+	}
+
+	NEO_TransferPixels();
+
+
+
+}
+
+#define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
+#define DELAY_TIME 					5		/*5ms */
+#define DECR_DELAY_AT_DELAY_TIME 	((255*5)*((NEO_PROCESSING_TIME)+(DELAY_TIME))/5)
+
+static void playSeq3(DATA_t * characteristicValues) {
+
+	uint32_t resolution = getResolution(characteristicValues->lifetime_266_1,
+			characteristicValues->lifetime_266_2,
+			characteristicValues->lifetime_266_3,
+			characteristicValues->lifetime_266_4);
+
+	uint16_t decrementStep = round((float)DECR_DELAY_AT_DELAY_TIME)/(float)(resolution);
+
+	uint8_t nPixels1 = ceil(((float)(characteristicValues->lifetime_266_1) /((float)(resolution))));
+	uint8_t nPixels2 = ceil(((float)(characteristicValues->lifetime_266_2) /((float)(resolution))));
+	uint8_t nPixels3 = ceil(((float)(characteristicValues->lifetime_266_3) /((float)(resolution))));
+	uint8_t nPixels4 = ceil(((float)(characteristicValues->lifetime_266_4) /((float)(resolution))));
+
+	uint32_t color1 = COLOR_PIXEL1;
+	uint32_t color2 = COLOR_PIXEL2;
+	uint32_t color3 = COLOR_PIXEL3;
+	uint32_t color4 = COLOR_PIXEL4;
+
+
+	setupMatrix(nPixels1,nPixels2,nPixels3,nPixels4);
+
+
+	while(!((nPixels1 == 0)&&(nPixels2 == 0)&&(nPixels3 == 0)&&(nPixels4 == 0))){
+
+		if(nPixels1 != 0){
+			color1 = decrementValue(color1,decrementStep);
+			if(color1 == 0x000000){
+				nPixels1 --;
+				ClearCoordinate(COORDINATE_X_PIXEL1,nPixels1);
+				ClearCoordinate(COORDINATE_X_PIXEL1 + 1,nPixels1);
+				color1 = COLOR_PIXEL1;
+			}
+			else{
+				SetCoordinate(COORDINATE_X_PIXEL1,nPixels1,color1);
+				SetCoordinate(COORDINATE_X_PIXEL1 + 1,nPixels1,color1);
+			}
+		}
+
+		if(nPixels2 != 0){
+			color2 = decrementValue(color2,decrementStep);
+			if(color2 == 0x000000){
+				nPixels2 --;
+				ClearCoordinate(COORDINATE_X_PIXEL2,nPixels2);
+				ClearCoordinate(COORDINATE_X_PIXEL2 + 1,nPixels2);
+				color2 = COLOR_PIXEL2;
+			}
+			else{
+				SetCoordinate(COORDINATE_X_PIXEL2,nPixels2,color2);
+				SetCoordinate(COORDINATE_X_PIXEL2 + 1,nPixels2,color2);
+			}
+		}
+
+		if(nPixels3 != 0){
+			color3 = decrementValue(color3,decrementStep);
+			if(color3 == 0x000000){
+				nPixels3 --;
+				ClearCoordinate(COORDINATE_X_PIXEL3,nPixels3);
+				ClearCoordinate(COORDINATE_X_PIXEL3 + 1,nPixels3);
+				color3 = COLOR_PIXEL3;
+			}
+			else{
+				SetCoordinate(COORDINATE_X_PIXEL3,nPixels3,color3);
+				SetCoordinate(COORDINATE_X_PIXEL3 + 1,nPixels3,color3);
+			}
+		}
+
+		if(nPixels4 != 0){
+			color4 = decrementValue(color4,decrementStep);
+			if(color4 == 0x000000){
+				nPixels4 --;
+				ClearCoordinate(COORDINATE_X_PIXEL4,nPixels4);
+				ClearCoordinate(COORDINATE_X_PIXEL4 + 1,nPixels4);
+				color4 = COLOR_PIXEL4;
+			}
+			else{
+				SetCoordinate(COORDINATE_X_PIXEL4,nPixels4,color4);
+				SetCoordinate(COORDINATE_X_PIXEL4 + 1,nPixels4,color4);
+			}
+		}
+
+		NEO_TransferPixels();
+		vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
+
+	}
+}
+
 static void NeoTask(void* pvParameters) {
 
 	//queue_handler = pvParameters;
@@ -1549,8 +1769,21 @@ static void NeoTask(void* pvParameters) {
 			NEO_TransferPixels();
 			playSeq2(pxRxDataMessage->char_data);
 			vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
-			state = IDLE_STATE;
+			state = PLAY_SEQ3;
+			break;
 
+		case PLAY_SEQ3:
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
+
+			//SetCoordinate(10,10,0xff7eff);
+			//SetCoordinate(24,16,0xff7eff);
+			//SetCoordinate(24,15,0xff7eff);
+			//NEO_TransferPixels();
+			//vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
+
+			playSeq3(pxRxDataMessage->char_data);
+			state = IDLE_STATE;
 		}
 
 #if 0
@@ -1602,7 +1835,7 @@ void NEOA_Init(void* queue_handler) {
 	"Neo", /* task name for kernel awareness debugging */
 	2000 / sizeof(StackType_t), /* task stack size */
 	(void*) queue_handler, /* optional task startup argument */
-	tskIDLE_PRIORITY + 1, /* initial priority */
+	tskIDLE_PRIORITY + 3, /* initial priority */
 	(xTaskHandle*) NULL /* optional task handle to create */
 	) != pdPASS) {
 		/*lint -e527 */

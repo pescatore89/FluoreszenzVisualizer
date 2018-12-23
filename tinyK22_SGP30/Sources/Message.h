@@ -131,20 +131,20 @@ struct DATA {
 	uint8_t amplitude_405_5;
 
 	/*Data for seq. 3*/
-	uint8_t lifetime_266_1;
-	uint8_t lifetime_266_2;
-	uint8_t lifetime_266_3;
-	uint8_t lifetime_266_4;
+	uint32_t lifetime_266_1;
+	uint32_t lifetime_266_2;
+	uint32_t lifetime_266_3;
+	uint32_t lifetime_266_4;
 
-	uint8_t lifetime_355_1;
-	uint8_t lifetime_355_2;
-	uint8_t lifetime_355_3;
-	uint8_t lifetime_355_4;
+	uint32_t lifetime_355_1;
+	uint32_t lifetime_355_2;
+	uint32_t lifetime_355_3;
+	uint32_t lifetime_355_4;
 
-	uint8_t lifetime_405_1;
-	uint8_t lifetime_405_2;
-	uint8_t lifetime_405_3;
-	uint8_t lifetime_405_4;
+	uint32_t lifetime_405_1;
+	uint32_t lifetime_405_2;
+	uint32_t lifetime_405_3;
+	uint32_t lifetime_405_4;
 }xDATA;
 
 

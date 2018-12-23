@@ -50,7 +50,7 @@ static uint8_t ReadBMPCmd(const unsigned char *cmd,
 }
 
 uint8_t getDataArray(uint8_t* px) {
-	px = ImageDataBuffer;
+//	px = ImageDataBuffer;
 
 }
 

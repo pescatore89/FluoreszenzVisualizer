@@ -308,8 +308,8 @@ void GUI_NEO_Create(uint8_t * name) {
 
 	/* Create a label with the name of the playing polle */
 	polle_label = lv_label_create(win, NULL);
-	lv_label_set_text(polle_label, pollenLabel);
-	lv_obj_align(polle_label, slider1, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+	lv_label_set_text(polle_label, "");
+	lv_obj_align(polle_label, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 	GUI_AddObjToGroup(polle_label);
 
 

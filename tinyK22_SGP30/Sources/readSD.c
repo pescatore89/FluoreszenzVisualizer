@@ -566,11 +566,6 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image, char* data) {
 			//image->biCompression = buf[30];
 		}
 
-		//image->data = ImageDataBuffer;
-		/*		image->data = malloc(
-		 image->biWidth * image->biHeight * sizeof(char)
-		 * ((image->biBitCount) / 8));
-		 */
 
 		res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 		if (res == FR_OK) {

@@ -165,6 +165,7 @@ static void PlayerTask(void *pvParameters) {
 					}
 					pxDataMessage->name = getName();
 					res = readDataFromSD(pxDataMessage);
+
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
 							!= QUEUE_OK) {
 						/*Queue is full*/

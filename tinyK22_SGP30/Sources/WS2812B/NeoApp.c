@@ -2321,6 +2321,12 @@ static void NeoTask(void* pvParameters) {
 					== QUEUE_EMPTY) {
 				vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 
+				pxMessage->cmd=stop ;
+				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+						!= QUEUE_OK) {
+					/*Queue is somehow full*/
+				}
+
 			} else {
 				if (FRTOS1_xSemaphoreTake(mutex,100) != pdTRUE) {
 					/*error taking Mutex*/
@@ -2379,6 +2385,9 @@ static void NeoTask(void* pvParameters) {
 			//vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
 
 			playSeq3(pxRxDataMessage->char_data, excitation);
+
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
 
 			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 				state = ERROR_STATE;

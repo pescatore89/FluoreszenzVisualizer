@@ -32,6 +32,12 @@ static uint8_t updateListEnabled(uint8_t* playlist) {
 	int counter = 0;
 	int nOfPollen = getQuantity();
 	int i = 0;
+
+	/*delete current list*/
+	for (i = 0; i < nOfPollen; i++) {
+		listEnabled[i] = 0;
+	}
+
 	for (i = 0; i < nOfPollen; i++) {
 		if (playlist[i] != 0) {
 			listEnabled[counter] = i;
@@ -134,10 +140,16 @@ static void PlayerTask(void *pvParameters) {
 		case UPDATE_PLAYLIST:
 
 			nPollenEnabled = updateListEnabled(pxPlaylistMessage->playlist);
-			/*Update the playlist*/
+			if (nPollenEnabled == 0) {
+				state = IDLE;
+			} else {
+				/*Update the playlist*/
+
+				state = PLAY_LIST;
+
+			}
 			nameCNT = 0;
 			excitation = 1;
-			state = PLAY_LIST;
 			break;
 
 		case PLAY_LIST:
@@ -169,10 +181,9 @@ static void PlayerTask(void *pvParameters) {
 							/*problem allocating memory*/
 						} else {
 
-							if(excitation == 1){
+							if (excitation == 1) {
 								pxDataMessage->name = getName();
 							}
-
 
 							res = readDataFromSD(excitation, pxDataMessage);
 							pxDataMessage->excitation = excitation;
@@ -183,7 +194,7 @@ static void PlayerTask(void *pvParameters) {
 							}
 
 							excitation++;
-							if(excitation == 4){
+							if (excitation == 4) {
 								excitation = 1;
 							}
 							freeMemory(pxDataMessage);

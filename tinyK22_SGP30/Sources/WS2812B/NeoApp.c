@@ -1805,11 +1805,20 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 #define STARTING_DEGRADATION		3
 
 static void playSeq1(DATA_t * characteristicValues, char* colorData,
-		unsigned short farbtiefe) {
+		unsigned short farbtiefe, uint8_t excitation) {
 
 	uint8_t delay = (DELAY_MS) + (NEO_PROCESSING_TIME);
 	uint8_t percente = 0;
-	SetTrail(0xff00ff, 13, 5, 50, 100);
+	if(excitation==1){
+		SetTrail(characteristicValues->color_266, 13, 5, 50, 100);
+	}
+	else if(excitation == 2){
+		SetTrail(characteristicValues->color_355, 13, 5, 50, 100);
+	}
+	else if(excitation ==3){
+		SetTrail(characteristicValues->color_405, 13, 5, 50, 100);
+	}
+
 	NEOA_Display_Image(colorData, farbtiefe);
 	uint8_t highestColVal = 0xff;
 
@@ -2114,7 +2123,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 						/ ((float) (resolution))));
 
 	} else if (excitation == 2) {
-		uint32_t resolution = getResolution(
+		 resolution = getResolution(
 				characteristicValues->lifetime_355_1,
 				characteristicValues->lifetime_355_2,
 				characteristicValues->lifetime_355_3,
@@ -2134,7 +2143,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	else if (excitation == 3) {
-		uint32_t resolution = getResolution(
+		 resolution = getResolution(
 				characteristicValues->lifetime_405_1,
 				characteristicValues->lifetime_405_2,
 				characteristicValues->lifetime_405_3,
@@ -2274,7 +2283,7 @@ static void NeoTask(void* pvParameters) {
 			NEO_TransferPixels();
 
 			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data,
-					pxRxDataMessage->image->biBitCount);
+					pxRxDataMessage->image->biBitCount, excitation);
 
 			state = PLAY_SEQ2;
 			break;

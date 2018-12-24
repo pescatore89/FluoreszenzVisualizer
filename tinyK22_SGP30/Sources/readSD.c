@@ -147,17 +147,13 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 
 	if (excitation == 1) {
 
-#if 0
+
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color266", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
 		pxDATA->color_266 = getRealValue(buff8);
-		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0",
-				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->color_355 = getRealValue(buff8);
-		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0",
-				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->color_405 = getRealValue(buff8);
-#endif
+
+
+
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
@@ -196,6 +192,11 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 
 	else if (excitation == 2) { /*Read out all values beeing part of Excitation 2*/
 
+
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->color_355 = getRealValue(buff8);
+
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout355", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
 		pxDATA->fadeout_355 = getRealValue(buff8);
@@ -232,6 +233,10 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 	}
 
 	else if (excitation == 3) { /*Read out all values beeing part of Excitation 3*/
+
+		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color405", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->color_405 = getRealValue(buff8);
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout405", "0",
 				(char* ) buff8, sizeof(buff8), fileName);

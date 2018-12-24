@@ -185,6 +185,7 @@ QUEUE_RESULT PeekDataQueue(xQueueHandle handle,DataMessage_t *msg);
 struct UpdateMessage {
 	COMMAND cmd;
 	char* name;
+	uint8_t excitation;
 }xUpdateMessage;
 
 

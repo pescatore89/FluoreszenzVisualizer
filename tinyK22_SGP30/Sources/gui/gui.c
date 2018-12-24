@@ -130,7 +130,16 @@ char text [100] = "Push play to start";
 
 		if(TakeMessageFromUpdateQueue(queue_handler_update,rxMessage)!=QUEUE_EMPTY){
 			if(rxMessage->cmd == play){
-				strcpy(text,"playing: ");
+				if(rxMessage->excitation == 1){
+					strcpy(text,"Anregung 266 nm\n ");
+				}
+				else if(rxMessage->excitation == 2){
+					strcpy(text,"Anregung 355 nm\n ");
+				}
+				else if(rxMessage->excitation ==3){
+					strcpy(text,"Anregung 405 nm\n ");
+				}
+
 				strcat(text,rxMessage->name);
 			}
 			else if(rxMessage->cmd == pause){

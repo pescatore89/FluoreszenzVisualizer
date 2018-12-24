@@ -246,6 +246,63 @@ static uint8_t getHighestColorValue(uint32_t color) {
 
 }
 
+#if 0
+
+static void displayText(char prefix, uint32_t color){
+
+
+
+
+
+}
+#endif
+
+static void displayLetter(char letter,uint32_t color){
+
+
+
+	if(letter == 'A'){
+
+		SetCoordinate(2,23,color);
+		SetCoordinate(3,23,color);
+		SetCoordinate(4,23,color);
+		SetCoordinate(5,23,color);
+
+		SetCoordinate(2,22,color);
+		SetCoordinate(2,21,color);
+		SetCoordinate(2,20,color);
+		SetCoordinate(2,19,color);
+
+		SetCoordinate(5,22,color);
+		SetCoordinate(5,21,color);
+		SetCoordinate(5,20,color);
+		SetCoordinate(5,19,color);
+
+		SetCoordinate(3,21,color);
+		SetCoordinate(4,21,color);
+
+
+
+	}
+	else if(letter == 'T'){
+		SetCoordinate(2,23,color);
+		SetCoordinate(3,23,color);
+		SetCoordinate(4,23,color);
+		SetCoordinate(5,23,color);
+		SetCoordinate(6,23,color);
+
+		SetCoordinate(4,22,color);
+		SetCoordinate(4,21,color);
+		SetCoordinate(4,20,color);
+		SetCoordinate(4,19,color);
+	}
+
+	NEO_TransferPixels();
+
+
+
+}
+
 static uint8_t getHighestColorValueFromLane() {
 
 	NEO_Color color;
@@ -1938,10 +1995,18 @@ static uint32_t getResolution(uint32_t lifetime1, uint32_t lifetime2,
 
 }
 
+
+#define COLOR_LETTER	0x7E7E7E
+
 static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 	uint8_t value1, value2, value3, value4, value5, nPixels1, nPixels2,
 			nPixels3, nPixels4, nPixels5;
+
+
+
+	displayLetter('A',COLOR_LETTER);
+
 
 	if (excitation == 1) {
 		value1 = characteristicValues->amplitude_266_1;
@@ -2104,6 +2169,11 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	uint32_t color3 = COLOR_PIXEL3;
 	uint32_t color4 = COLOR_PIXEL4;
 
+
+
+	displayLetter('T',COLOR_LETTER);
+
+
 	if (excitation == 1) {
 		resolution = getResolution(characteristicValues->lifetime_266_1,
 				characteristicValues->lifetime_266_2,
@@ -2166,6 +2236,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 			/ (float) (resolution);
 
 	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
+	vTaskDelay(pdMS_TO_TICKS(1000));
 
 	while (!((nPixels1 == 0) && (nPixels2 == 0) && (nPixels3 == 0)
 			&& (nPixels4 == 0))) {
@@ -2266,6 +2337,7 @@ static void NeoTask(void* pvParameters) {
 			if (pxRxDataMessage->cmd == play) {
 
 				pxMessage->cmd = play;
+				pxMessage->excitation = pxRxDataMessage->excitation;
 				pxMessage->name = pxRxDataMessage->name;
 				excitation = pxRxDataMessage->excitation;
 
@@ -2299,7 +2371,7 @@ static void NeoTask(void* pvParameters) {
 		case PLAY_SEQ3:
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
-
+			vTaskDelay(pdMS_TO_TICKS(1000)); /*enjoy*/
 			//SetCoordinate(10,10,0xff7eff);
 			//SetCoordinate(24,16,0xff7eff);
 			//SetCoordinate(24,15,0xff7eff);

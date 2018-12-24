@@ -323,7 +323,7 @@ void GUI_NEO_Create(uint8_t * name) {
 
 	/* play buttons */
 	btn_play = lv_btn_create(win, NULL);
-	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 35);
+	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 40);
 	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
 	label = lv_label_create(btn_play, NULL);
 	lv_label_set_text(label, SYMBOL_PLAY);

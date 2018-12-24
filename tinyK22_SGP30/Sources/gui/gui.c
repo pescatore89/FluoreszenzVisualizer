@@ -137,9 +137,8 @@ static void GuiTask(void *p) {
 					strcpy(text, "Anregung 355 nm\n ");
 				} else if (rxMessage->excitation == 3) {
 					strcpy(text, "Anregung 405 nm\n ");
-
-					strcat(text, rxMessage->name);
 				}
+				strcat(text, rxMessage->name);
 			} else if (rxMessage->cmd == pause) {
 				strcpy(text, "paused: ");
 				strcat(text, rxMessage->name);

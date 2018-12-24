@@ -223,6 +223,152 @@ uint8_t ClearCoordinate(int x, int y) {
 
 }
 
+
+static void displayLetter(char letter, uint32_t color) {
+
+	if (letter == 'A') {
+
+		SetCoordinate(2, 23, color);
+		SetCoordinate(3, 23, color);
+		SetCoordinate(4, 23, color);
+		SetCoordinate(5, 23, color);
+
+		SetCoordinate(2, 22, color);
+		SetCoordinate(2, 21, color);
+		SetCoordinate(2, 20, color);
+		SetCoordinate(2, 19, color);
+
+		SetCoordinate(5, 22, color);
+		SetCoordinate(5, 21, color);
+		SetCoordinate(5, 20, color);
+		SetCoordinate(5, 19, color);
+
+		SetCoordinate(3, 21, color);
+		SetCoordinate(4, 21, color);
+
+	} else if (letter == 'T') {
+		SetCoordinate(2, 23, color);
+		SetCoordinate(3, 23, color);
+		SetCoordinate(4, 23, color);
+		SetCoordinate(5, 23, color);
+		SetCoordinate(6, 23, color);
+
+		SetCoordinate(4, 22, color);
+		SetCoordinate(4, 21, color);
+		SetCoordinate(4, 20, color);
+		SetCoordinate(4, 19, color);
+	}
+
+	NEO_TransferPixels();
+
+}
+
+
+#define COORDINATE_X_PIXEL1	8
+#define COORDINATE_X_PIXEL2	12
+#define COORDINATE_X_PIXEL3	16
+#define COORDINATE_X_PIXEL4	20
+
+#define COLOR_PIXEL1	0xff00ff
+#define COLOR_PIXEL2	0x00ffff
+#define COLOR_PIXEL3	0x00ff00
+#define COLOR_PIXEL4	0xff0000
+
+static void updateLetterColor(uint8_t nPixels1,uint8_t nPixels2,uint8_t nPixels3,uint8_t nPixels4 ){
+
+
+	uint32_t color1,color2,color3,color4,sum1,sum2,sum3,sum4,sumRed,sumGreen,sumBlue = 0;
+	uint8_t red1,green1,blue1,red2,green2,blue2,red3,green3,blue3,red4,green4,blue4 , red,green,blue= 0;
+	uint32_t color = 0;
+
+
+
+	float percent1, percent2,percent3,percent4;
+
+
+	sum1 = 10 * nPixels1;
+	sum2 = 10 * nPixels2;
+	sum3 = 10 * nPixels3;
+	sum4 = 10 * nPixels4;
+
+	percent1 =(((float)sum1)/((float)0xff));
+	percent2 =(((float)sum2)/((float)0xff));
+	percent3 =(((float)sum3)/((float)0xff));
+	percent4 =(((float)sum4)/((float)0xff));
+
+
+
+
+
+	red1 = NEO_GET_COLOR_RED(COLOR_PIXEL1);
+	green1 = NEO_GET_COLOR_GREEN(COLOR_PIXEL1);
+	blue1 = NEO_GET_COLOR_BLUE(COLOR_PIXEL1);
+
+	red1 = rint((float)percent1 * (float)red1);
+	green1 = rint((float)percent1 * (float)green1);
+	blue1 = rint((float)percent1 * (float)blue1);
+
+
+	red2 = NEO_GET_COLOR_RED(COLOR_PIXEL2);
+	green2 = NEO_GET_COLOR_GREEN(COLOR_PIXEL2);
+	blue2 = NEO_GET_COLOR_BLUE(COLOR_PIXEL2);
+
+	red2 = rint((float)percent2 * (float)red2);
+	green2 = rint((float)percent2 * (float)green2);
+	blue2 = rint((float)percent2 * (float)blue2);
+
+
+	red3 = NEO_GET_COLOR_RED(COLOR_PIXEL3);
+	green3 = NEO_GET_COLOR_GREEN(COLOR_PIXEL3);
+	blue3 = NEO_GET_COLOR_BLUE(COLOR_PIXEL3);
+
+	red3 = rint((float)percent3 * (float)red3);
+	green3 = rint((float)percent3 * (float)green3);
+	blue3 = rint((float)percent3 * (float)blue3);
+
+
+	red4 = NEO_GET_COLOR_RED(COLOR_PIXEL4);
+	green4 = NEO_GET_COLOR_GREEN(COLOR_PIXEL4);
+	blue4 = NEO_GET_COLOR_BLUE(COLOR_PIXEL4);
+
+	red4 = rint((float)percent4 * (float)red4);
+	green4 = rint((float)percent4 * (float)green4);
+	blue4 = rint((float)percent4 * (float)blue4);
+
+
+
+	sumRed = red1 + red2 + red3 + red4;
+	sumGreen = green1 + green2 + green3 + green4;
+	sumBlue = blue1 + blue2 + blue3 + blue4;
+
+	if(sumRed>0xff){
+		red = 0xff;
+	}
+	else {
+		red = sumRed;
+	}
+
+	if(sumGreen>0xff){
+		green = 0xff;
+	}
+	else {
+		green = sumGreen;
+	}
+
+	if(sumBlue>0xff){
+		blue = 0xff;
+	}
+	else {
+		blue = sumBlue;
+	}
+
+
+	color = NEO_MAKE_COLOR_RGB(red,green,blue);
+
+	displayLetter('T',color);
+
+}
+
 static uint8_t getHighestColorValue(uint32_t color) {
 
 	uint32_t red, green, blue;
@@ -248,60 +394,12 @@ static uint8_t getHighestColorValue(uint32_t color) {
 
 #if 0
 
-static void displayText(char prefix, uint32_t color){
-
-
-
-
+static void displayText(char prefix, uint32_t color) {
 
 }
 #endif
 
-static void displayLetter(char letter,uint32_t color){
 
-
-
-	if(letter == 'A'){
-
-		SetCoordinate(2,23,color);
-		SetCoordinate(3,23,color);
-		SetCoordinate(4,23,color);
-		SetCoordinate(5,23,color);
-
-		SetCoordinate(2,22,color);
-		SetCoordinate(2,21,color);
-		SetCoordinate(2,20,color);
-		SetCoordinate(2,19,color);
-
-		SetCoordinate(5,22,color);
-		SetCoordinate(5,21,color);
-		SetCoordinate(5,20,color);
-		SetCoordinate(5,19,color);
-
-		SetCoordinate(3,21,color);
-		SetCoordinate(4,21,color);
-
-
-
-	}
-	else if(letter == 'T'){
-		SetCoordinate(2,23,color);
-		SetCoordinate(3,23,color);
-		SetCoordinate(4,23,color);
-		SetCoordinate(5,23,color);
-		SetCoordinate(6,23,color);
-
-		SetCoordinate(4,22,color);
-		SetCoordinate(4,21,color);
-		SetCoordinate(4,20,color);
-		SetCoordinate(4,19,color);
-	}
-
-	NEO_TransferPixels();
-
-
-
-}
 
 static uint8_t getHighestColorValueFromLane() {
 
@@ -1856,85 +1954,6 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 }
 #endif /* NEOA_CONFIG_PARSE_COMMAND_ENABLED */
 
-#define DELAY_MS 1
-#define nRINGS	12
-#define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
-#define STARTING_DEGRADATION		3
-
-static void playSeq1(DATA_t * characteristicValues, char* colorData,
-		unsigned short farbtiefe, uint8_t excitation) {
-
-	uint8_t delay = (DELAY_MS) + (NEO_PROCESSING_TIME);
-	uint8_t percente = 0;
-	if(excitation==1){
-		SetTrail(characteristicValues->color_266, 13, 5, 50, 100);
-	}
-	else if(excitation == 2){
-		SetTrail(characteristicValues->color_355, 13, 5, 50, 100);
-	}
-	else if(excitation ==3){
-		SetTrail(characteristicValues->color_405, 13, 5, 50, 100);
-	}
-
-	NEOA_Display_Image(colorData, farbtiefe);
-	uint8_t highestColVal = 0xff;
-
-	highestColVal = getHighestColorValueFromLane();
-	//uint32_t fadeout = characteristicValues->fadeout_266;
-
-	uint32_t fadeout = 8000;
-
-	for (int i = 1; i < 13; i++) {
-		DimmPercentRing(i, (percente));
-		percente = percente + STARTING_DEGRADATION;
-	}
-	NEO_TransferPixels();
-
-
-
-	uint32_t nTicks = rint((float) (fadeout) / (delay));
-
-	uint32_t nCycles = ceil((float) ((nTicks) / (nRINGS)));
-
-	uint32_t decrementStep = ceil((float) (highestColVal) / (float) nCycles);
-
-	for (int i = 0; i < nCycles; i++) {
-		for (int z = 1; z <= nRINGS; z++) {
-			decrementRingData(z, decrementStep);
-			NEO_TransferPixels();
-			vTaskDelay(pdMS_TO_TICKS(DELAY_MS));
-		}
-	}
-
-#if 0
-
-	SetTrail(0xff00ff, 13, 5, 50, 100);
-	NEOA_Display_Image(colorData, farbtiefe);
-	uint8_t percente = 0;
-	//vTaskDelay(pdMS_TO_TICKS(1000));
-
-	uint32_t fadeout = characteristicValues->fadeout_266;
-
-	for (int i = 1; i < 13; i++) {
-		DimmPercentRing(i, (percente));
-		percente = percente + 8;
-	}
-	NEO_TransferPixels();
-	//vTaskDelay(pdMS_TO_TICKS(1000));
-
-	percente = 5;
-	for (int i = 0; i < 60; i++) {
-		for (int ring = 1; ring < 13; ring++) {
-			DimmPercentRing(ring, (percente));
-			NEO_TransferPixels();
-			//vTaskDelay(pdMS_TO_TICKS(2));
-		}
-
-	}
-
-#endif
-}
-
 #define COLOR300 0xff00ff
 #define COLOR430 0x1b18c9
 #define COLOR480 0x21f2ee
@@ -1996,6 +2015,89 @@ static uint32_t getResolution(uint32_t lifetime1, uint32_t lifetime2,
 }
 
 
+
+static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
+		uint8_t nPixels4) {
+
+	int i;
+	for (i = 1; i <= nPixels1; i++) {
+		SetCoordinate(COORDINATE_X_PIXEL1, i, COLOR_PIXEL1);
+		SetCoordinate(COORDINATE_X_PIXEL1 + 1, i, COLOR_PIXEL1);
+	}
+
+	for (i = 1; i <= nPixels2; i++) {
+		SetCoordinate(COORDINATE_X_PIXEL2, i, COLOR_PIXEL2);
+		SetCoordinate(COORDINATE_X_PIXEL2 + 1, i, COLOR_PIXEL2);
+	}
+
+	for (i = 1; i <= nPixels3; i++) {
+		SetCoordinate(COORDINATE_X_PIXEL3, i, COLOR_PIXEL3);
+		SetCoordinate(COORDINATE_X_PIXEL3 + 1, i, COLOR_PIXEL3);
+	}
+
+	for (i = 1; i <= nPixels4; i++) {
+		SetCoordinate(COORDINATE_X_PIXEL4, i, COLOR_PIXEL4);
+		SetCoordinate(COORDINATE_X_PIXEL4 + 1, i, COLOR_PIXEL4);
+	}
+
+	NEO_TransferPixels();
+
+}
+
+#define DELAY_MS 1
+#define nRINGS	12
+#define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
+#define STARTING_DEGRADATION		3
+
+
+
+static void playSeq1(DATA_t * characteristicValues, char* colorData,
+		unsigned short farbtiefe, uint8_t excitation) {
+
+	uint8_t delay = (DELAY_MS) + (NEO_PROCESSING_TIME);
+	uint8_t percente = 0;
+	uint32_t fadeout = 0;
+	if (excitation == 1) {
+		SetTrail(characteristicValues->color_266, 13, 5, 50, 100);
+		fadeout  = characteristicValues->fadeout_266;
+	} else if (excitation == 2) {
+		SetTrail(characteristicValues->color_355, 13, 5, 50, 100);
+		fadeout  = characteristicValues->fadeout_355;
+	} else if (excitation == 3) {
+		SetTrail(characteristicValues->color_405, 13, 5, 50, 100);
+		fadeout  = characteristicValues->fadeout_405;
+	}
+
+	NEOA_Display_Image(colorData, farbtiefe);
+	uint8_t highestColVal = 0xff;
+
+	highestColVal = getHighestColorValueFromLane();
+
+
+	//uint32_t fadeout = 8000;
+
+	for (int i = 1; i < 13; i++) {
+		DimmPercentRing(i, (percente));
+		percente = percente + STARTING_DEGRADATION;
+	}
+	NEO_TransferPixels();
+
+	uint32_t nTicks = rint((float) (fadeout) / (delay));
+
+	uint32_t nCycles = ceil((float) ((nTicks) / (nRINGS)));
+
+	uint32_t decrementStep = ceil((float) (highestColVal) / (float) nCycles);
+
+	for (int i = 0; i < nCycles; i++) {
+		for (int z = 1; z <= nRINGS; z++) {
+			decrementRingData(z, decrementStep);
+			NEO_TransferPixels();
+			vTaskDelay(pdMS_TO_TICKS(DELAY_MS));
+		}
+	}
+
+}
+
 #define COLOR_LETTER	0x7E7E7E
 
 static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
@@ -2003,10 +2105,7 @@ static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	uint8_t value1, value2, value3, value4, value5, nPixels1, nPixels2,
 			nPixels3, nPixels4, nPixels5;
 
-
-
-	displayLetter('A',COLOR_LETTER);
-
+	displayLetter('A', COLOR_LETTER);
 
 	if (excitation == 1) {
 		value1 = characteristicValues->amplitude_266_1;
@@ -2114,44 +2213,6 @@ static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 }
 
-#define COORDINATE_X_PIXEL1	8
-#define COORDINATE_X_PIXEL2	12
-#define COORDINATE_X_PIXEL3	16
-#define COORDINATE_X_PIXEL4	20
-
-#define COLOR_PIXEL1	0xff00ff
-#define COLOR_PIXEL2	0x00ffff
-#define COLOR_PIXEL3	0x00ff00
-#define COLOR_PIXEL4	0xff0000
-
-static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
-		uint8_t nPixels4) {
-
-	int i;
-	for (i = 1; i <= nPixels1; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL1, i, COLOR_PIXEL1);
-		SetCoordinate(COORDINATE_X_PIXEL1 + 1, i, COLOR_PIXEL1);
-	}
-
-	for (i = 1; i <= nPixels2; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL2, i, COLOR_PIXEL2);
-		SetCoordinate(COORDINATE_X_PIXEL2 + 1, i, COLOR_PIXEL2);
-	}
-
-	for (i = 1; i <= nPixels3; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL3, i, COLOR_PIXEL3);
-		SetCoordinate(COORDINATE_X_PIXEL3 + 1, i, COLOR_PIXEL3);
-	}
-
-	for (i = 1; i <= nPixels4; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL4, i, COLOR_PIXEL4);
-		SetCoordinate(COORDINATE_X_PIXEL4 + 1, i, COLOR_PIXEL4);
-	}
-
-	NEO_TransferPixels();
-
-}
-
 #define DELAY_TIME 					5		/*5ms */
 #define DECR_DELAY_AT_DELAY_TIME 	((255*5)*((NEO_PROCESSING_TIME)+(DELAY_TIME))/5)
 
@@ -2171,8 +2232,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 
 
 
-	displayLetter('T',COLOR_LETTER);
-
+	displayLetter('T', COLOR_LETTER);
 
 	if (excitation == 1) {
 		resolution = getResolution(characteristicValues->lifetime_266_1,
@@ -2193,8 +2253,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 						/ ((float) (resolution))));
 
 	} else if (excitation == 2) {
-		 resolution = getResolution(
-				characteristicValues->lifetime_355_1,
+		resolution = getResolution(characteristicValues->lifetime_355_1,
 				characteristicValues->lifetime_355_2,
 				characteristicValues->lifetime_355_3,
 				characteristicValues->lifetime_355_4);
@@ -2213,8 +2272,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	else if (excitation == 3) {
-		 resolution = getResolution(
-				characteristicValues->lifetime_405_1,
+		resolution = getResolution(characteristicValues->lifetime_405_1,
 				characteristicValues->lifetime_405_2,
 				characteristicValues->lifetime_405_3,
 				characteristicValues->lifetime_405_4);
@@ -2238,15 +2296,20 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
 	vTaskDelay(pdMS_TO_TICKS(1000));
 
+
+
+
+
 	while (!((nPixels1 == 0) && (nPixels2 == 0) && (nPixels3 == 0)
 			&& (nPixels4 == 0))) {
 
 		if (nPixels1 != 0) {
 			color1 = decrementValue(color1, decrementStep);
-			if (color1 == 0x000000) {
-				nPixels1--;
+			if (color1 == 0) {
+
 				ClearCoordinate(COORDINATE_X_PIXEL1, nPixels1);
 				ClearCoordinate(COORDINATE_X_PIXEL1 + 1, nPixels1);
+				nPixels1--;
 				color1 = COLOR_PIXEL1;
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL1, nPixels1, color1);
@@ -2256,10 +2319,11 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 
 		if (nPixels2 != 0) {
 			color2 = decrementValue(color2, decrementStep);
-			if (color2 == 0x000000) {
-				nPixels2--;
+			if (color2 == 0) {
+
 				ClearCoordinate(COORDINATE_X_PIXEL2, nPixels2);
 				ClearCoordinate(COORDINATE_X_PIXEL2 + 1, nPixels2);
+				nPixels2--;
 				color2 = COLOR_PIXEL2;
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL2, nPixels2, color2);
@@ -2269,10 +2333,11 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 
 		if (nPixels3 != 0) {
 			color3 = decrementValue(color3, decrementStep);
-			if (color3 == 0x000000) {
-				nPixels3--;
+			if (color3 == 0) {
+
 				ClearCoordinate(COORDINATE_X_PIXEL3, nPixels3);
 				ClearCoordinate(COORDINATE_X_PIXEL3 + 1, nPixels3);
+				nPixels3--;
 				color3 = COLOR_PIXEL3;
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL3, nPixels3, color3);
@@ -2282,16 +2347,20 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 
 		if (nPixels4 != 0) {
 			color4 = decrementValue(color4, decrementStep);
-			if (color4 == 0x000000) {
-				nPixels4--;
+			if (color4 == 0) {
+
 				ClearCoordinate(COORDINATE_X_PIXEL4, nPixels4);
 				ClearCoordinate(COORDINATE_X_PIXEL4 + 1, nPixels4);
+				nPixels4--;
 				color4 = COLOR_PIXEL4;
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL4, nPixels4, color4);
 				SetCoordinate(COORDINATE_X_PIXEL4 + 1, nPixels4, color4);
 			}
 		}
+
+
+		updateLetterColor(nPixels1,nPixels2,nPixels3,nPixels4);
 
 		NEO_TransferPixels();
 		vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
@@ -2321,7 +2390,7 @@ static void NeoTask(void* pvParameters) {
 					== QUEUE_EMPTY) {
 				vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 
-				pxMessage->cmd=stop ;
+				pxMessage->cmd = stop;
 				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
 						!= QUEUE_OK) {
 					/*Queue is somehow full*/

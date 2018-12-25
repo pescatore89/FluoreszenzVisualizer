@@ -223,7 +223,6 @@ uint8_t ClearCoordinate(int x, int y) {
 
 }
 
-
 static void displayLetter(char letter, uint32_t color) {
 
 	if (letter == 'A') {
@@ -263,7 +262,6 @@ static void displayLetter(char letter, uint32_t color) {
 
 }
 
-
 #define COORDINATE_X_PIXEL1	8
 #define COORDINATE_X_PIXEL2	12
 #define COORDINATE_X_PIXEL3	16
@@ -274,98 +272,84 @@ static void displayLetter(char letter, uint32_t color) {
 #define COLOR_PIXEL3	0x00ff00
 #define COLOR_PIXEL4	0xff0000
 
-static void updateLetterColor(uint8_t nPixels1,uint8_t nPixels2,uint8_t nPixels3,uint8_t nPixels4 ){
+static void updateLetterColor(uint8_t nPixels1, uint8_t nPixels2,
+		uint8_t nPixels3, uint8_t nPixels4) {
 
-
-	uint32_t color1,color2,color3,color4,sum1,sum2,sum3,sum4,sumRed,sumGreen,sumBlue = 0;
-	uint8_t red1,green1,blue1,red2,green2,blue2,red3,green3,blue3,red4,green4,blue4 , red,green,blue= 0;
+	uint32_t color1, color2, color3, color4, sum1, sum2, sum3, sum4, sumRed,
+			sumGreen, sumBlue = 0;
+	uint8_t red1, green1, blue1, red2, green2, blue2, red3, green3, blue3, red4,
+			green4, blue4, red, green, blue = 0;
 	uint32_t color = 0;
 
-
-
-	float percent1, percent2,percent3,percent4;
-
+	float percent1, percent2, percent3, percent4;
 
 	sum1 = 10 * nPixels1;
 	sum2 = 10 * nPixels2;
 	sum3 = 10 * nPixels3;
 	sum4 = 10 * nPixels4;
 
-	percent1 =(((float)sum1)/((float)0xff));
-	percent2 =(((float)sum2)/((float)0xff));
-	percent3 =(((float)sum3)/((float)0xff));
-	percent4 =(((float)sum4)/((float)0xff));
-
-
-
-
+	percent1 = (((float) sum1) / ((float) 0xff));
+	percent2 = (((float) sum2) / ((float) 0xff));
+	percent3 = (((float) sum3) / ((float) 0xff));
+	percent4 = (((float) sum4) / ((float) 0xff));
 
 	red1 = NEO_GET_COLOR_RED(COLOR_PIXEL1);
 	green1 = NEO_GET_COLOR_GREEN(COLOR_PIXEL1);
 	blue1 = NEO_GET_COLOR_BLUE(COLOR_PIXEL1);
 
-	red1 = rint((float)percent1 * (float)red1);
-	green1 = rint((float)percent1 * (float)green1);
-	blue1 = rint((float)percent1 * (float)blue1);
-
+	red1 = rint((float) percent1 * (float) red1);
+	green1 = rint((float) percent1 * (float) green1);
+	blue1 = rint((float) percent1 * (float) blue1);
 
 	red2 = NEO_GET_COLOR_RED(COLOR_PIXEL2);
 	green2 = NEO_GET_COLOR_GREEN(COLOR_PIXEL2);
 	blue2 = NEO_GET_COLOR_BLUE(COLOR_PIXEL2);
 
-	red2 = rint((float)percent2 * (float)red2);
-	green2 = rint((float)percent2 * (float)green2);
-	blue2 = rint((float)percent2 * (float)blue2);
-
+	red2 = rint((float) percent2 * (float) red2);
+	green2 = rint((float) percent2 * (float) green2);
+	blue2 = rint((float) percent2 * (float) blue2);
 
 	red3 = NEO_GET_COLOR_RED(COLOR_PIXEL3);
 	green3 = NEO_GET_COLOR_GREEN(COLOR_PIXEL3);
 	blue3 = NEO_GET_COLOR_BLUE(COLOR_PIXEL3);
 
-	red3 = rint((float)percent3 * (float)red3);
-	green3 = rint((float)percent3 * (float)green3);
-	blue3 = rint((float)percent3 * (float)blue3);
-
+	red3 = rint((float) percent3 * (float) red3);
+	green3 = rint((float) percent3 * (float) green3);
+	blue3 = rint((float) percent3 * (float) blue3);
 
 	red4 = NEO_GET_COLOR_RED(COLOR_PIXEL4);
 	green4 = NEO_GET_COLOR_GREEN(COLOR_PIXEL4);
 	blue4 = NEO_GET_COLOR_BLUE(COLOR_PIXEL4);
 
-	red4 = rint((float)percent4 * (float)red4);
-	green4 = rint((float)percent4 * (float)green4);
-	blue4 = rint((float)percent4 * (float)blue4);
-
-
+	red4 = rint((float) percent4 * (float) red4);
+	green4 = rint((float) percent4 * (float) green4);
+	blue4 = rint((float) percent4 * (float) blue4);
 
 	sumRed = red1 + red2 + red3 + red4;
 	sumGreen = green1 + green2 + green3 + green4;
 	sumBlue = blue1 + blue2 + blue3 + blue4;
 
-	if(sumRed>0xff){
+	if (sumRed > 0xff) {
 		red = 0xff;
-	}
-	else {
+	} else {
 		red = sumRed;
 	}
 
-	if(sumGreen>0xff){
+	if (sumGreen > 0xff) {
 		green = 0xff;
-	}
-	else {
+	} else {
 		green = sumGreen;
 	}
 
-	if(sumBlue>0xff){
+	if (sumBlue > 0xff) {
 		blue = 0xff;
-	}
-	else {
+	} else {
 		blue = sumBlue;
 	}
 
+	color = NEO_MAKE_COLOR_RGB(red, green, blue);
 
-	color = NEO_MAKE_COLOR_RGB(red,green,blue);
-
-	displayLetter('T',color);
+	displayLetter('T', color);
 
 }
 
@@ -399,7 +383,32 @@ static void displayText(char prefix, uint32_t color) {
 }
 #endif
 
+static uint8_t getHighestColorValueFromMatrix() {
 
+	NEO_Color color;
+	uint8_t temp = 0;
+	uint8_t highscore = 0;
+	uint32_t color_val = 0;
+
+	int i = 0;
+
+	for (int i = 0; i < 3; i++) {
+		for (int l = 0; l < 192; l++) {
+			NEO_GetPixelColor(i, l, &color);
+
+			temp = getHighestColorValue(color);
+			if (temp >= highscore) {
+				highscore = temp;
+				color_val = color;
+			}
+
+		}
+
+	}
+
+	return highscore;
+
+}
 
 static uint8_t getHighestColorValueFromLane() {
 
@@ -2014,8 +2023,6 @@ static uint32_t getResolution(uint32_t lifetime1, uint32_t lifetime2,
 
 }
 
-
-
 static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 		uint8_t nPixels4) {
 
@@ -2049,8 +2056,6 @@ static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 #define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
 #define STARTING_DEGRADATION		3
 
-
-
 static void playSeq1(DATA_t * characteristicValues, char* colorData,
 		unsigned short farbtiefe, uint8_t excitation) {
 
@@ -2059,28 +2064,25 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	uint32_t fadeout = 0;
 	if (excitation == 1) {
 		SetTrail(characteristicValues->color_266, 13, 5, 50, 100);
-		fadeout  = characteristicValues->fadeout_266;
+		fadeout = characteristicValues->fadeout_266;
 	} else if (excitation == 2) {
 		SetTrail(characteristicValues->color_355, 13, 5, 50, 100);
-		fadeout  = characteristicValues->fadeout_355;
+		fadeout = characteristicValues->fadeout_355;
 	} else if (excitation == 3) {
 		SetTrail(characteristicValues->color_405, 13, 5, 50, 100);
-		fadeout  = characteristicValues->fadeout_405;
+		fadeout = characteristicValues->fadeout_405;
 	}
 
 	NEOA_Display_Image(colorData, farbtiefe);
 	uint8_t highestColVal = 0xff;
-
-	highestColVal = getHighestColorValueFromLane();
-
-
-	//uint32_t fadeout = 8000;
 
 	for (int i = 1; i < 13; i++) {
 		DimmPercentRing(i, (percente));
 		percente = percente + STARTING_DEGRADATION;
 	}
 	NEO_TransferPixels();
+
+	highestColVal = getHighestColorValueFromLane();
 
 	uint32_t nTicks = rint((float) (fadeout) / (delay));
 
@@ -2094,6 +2096,11 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 			NEO_TransferPixels();
 			vTaskDelay(pdMS_TO_TICKS(DELAY_MS));
 		}
+		highestColVal = getHighestColorValueFromMatrix();
+		if (highestColVal == 0) {
+			break;
+		}
+
 	}
 
 }
@@ -2230,8 +2237,6 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	uint32_t color3 = COLOR_PIXEL3;
 	uint32_t color4 = COLOR_PIXEL4;
 
-
-
 	displayLetter('T', COLOR_LETTER);
 
 	if (excitation == 1) {
@@ -2296,10 +2301,6 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
 	vTaskDelay(pdMS_TO_TICKS(1000));
 
-
-
-
-
 	while (!((nPixels1 == 0) && (nPixels2 == 0) && (nPixels3 == 0)
 			&& (nPixels4 == 0))) {
 
@@ -2359,8 +2360,7 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 			}
 		}
 
-
-		updateLetterColor(nPixels1,nPixels2,nPixels3,nPixels4);
+		updateLetterColor(nPixels1, nPixels2, nPixels3, nPixels4);
 
 		NEO_TransferPixels();
 		vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));

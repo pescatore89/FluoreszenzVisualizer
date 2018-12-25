@@ -25,6 +25,7 @@ typedef enum {
 	READ_NEW, /* read new Message from playlistQueue  */
 	UPDATE_PLAYLIST, /*  */
 	PLAY_LIST, /* */
+	DISPLAY_IMAGE,
 
 } PLAYER_STATE;
 
@@ -130,12 +131,21 @@ static void PlayerTask(void *pvParameters) {
 				/*Do something*/
 			} else if ((pxPlaylistMessage->state) == newData) {
 				state = UPDATE_PLAYLIST;
-				break;
 			} else if ((pxPlaylistMessage->state) == newImage) {
-				/*Do something*/
+				state = DISPLAY_IMAGE;
 			}
 
 			break;
+
+		case DISPLAY_IMAGE:
+
+
+			/*Stop playing the Playlist*/
+
+
+
+			break;
+
 
 		case UPDATE_PLAYLIST:
 

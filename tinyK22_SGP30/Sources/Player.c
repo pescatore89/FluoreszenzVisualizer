@@ -159,6 +159,7 @@ static void PlayerTask(void *pvParameters) {
 				}
 				/*Do something*/
 			} else if ((pxPlaylistMessage->state) == newData) {
+				pxDataMessage->cmd = play;
 				state = UPDATE_PLAYLIST;
 			} else if ((pxPlaylistMessage->state) == newImage) {
 				state = DISPLAY_IMAGE;

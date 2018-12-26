@@ -50,7 +50,7 @@ typedef enum {
 	PLAY_SEQ1, /*  */
 	PLAY_SEQ2, /* */
 	PLAY_SEQ3, /* */
-	ERROR_STATE,
+	ERROR_STATE, STOPPED,
 
 } NEO_STATUS;
 
@@ -395,7 +395,6 @@ static uint8_t getHighestColorValueFromMatrix() {
 	for (int i = 0; i < 3; i++) {
 		for (int l = 0; l < 192; l++) {
 			NEO_GetPixelColor(i, l, &color);
-
 
 			temp = getHighestColorValue(color);
 			if (temp >= highscore) {
@@ -2107,13 +2106,9 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	}
 	NEO_TransferPixels();
 
-
-
 	matrixColorValue = getMatrixColorValue();
 
-
 	highestColVal = getHighestColorValueFromLane(); /*possibility to reduce the Power consumption here*/
-
 
 	uint32_t nTicks = rint((float) (fadeout) / (delay));
 
@@ -2455,8 +2450,23 @@ static void NeoTask(void* pvParameters) {
 				}
 
 				state = PLAY_SEQ1;
-				break;
+
+			} else if (pxRxDataMessage->cmd == pause) {
+				/*sollte eigendlich kein pause kommando hier bekommen*/
+				state = IDLE_STATE;
 			}
+
+			else if (pxRxDataMessage->cmd == stop) {
+				pxMessage->cmd = stop;
+				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+						!= QUEUE_OK) {
+					/*Queue is somehow full*/
+				} else {
+					state = STOPPED;
+				}
+
+			}
+			break;
 
 		case PLAY_SEQ1:
 			NEO_ClearAllPixel();
@@ -2464,14 +2474,15 @@ static void NeoTask(void* pvParameters) {
 
 			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data,
 					pxRxDataMessage->image->biBitCount, excitation);
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
 			vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
 
 			state = PLAY_SEQ2;
 			break;
 
 		case PLAY_SEQ2:
-			NEO_ClearAllPixel();
-			NEO_TransferPixels();
+
 			playSeq2(pxRxDataMessage->char_data, excitation);
 			vTaskDelay(pdMS_TO_TICKS(getTiming(1)));
 			state = PLAY_SEQ3;
@@ -2493,6 +2504,19 @@ static void NeoTask(void* pvParameters) {
 				vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
 				state = IDLE_STATE;
 			}
+			break;
+
+		case STOPPED:
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
+			excitation = 0;
+			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+				/*could not give back the semaphore, maybe because its already given back*/
+			} else {
+			//	vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
+				state = IDLE_STATE;
+			}
+			state = IDLE_STATE;
 			break;
 
 		case ERROR_STATE:

@@ -28,13 +28,17 @@ static lv_obj_t *label_slider_level; /* label for level value */
 xQueueHandle queue_handler_playlist;
 
 static uint8_t guiIsActive;
-
+static bool isPaused = false;
 static lv_obj_t *btn_play;
 static lv_obj_t *btn_pause;
 static lv_obj_t *btn_stop;
 static lv_obj_t *btn_next;
 static lv_obj_t *btn_prev;
 static lv_obj_t *btn_loop;
+
+static lv_btn_state_t play_buttonState = LV_BTN_STATE_REL;
+static lv_btn_state_t pause_buttonState = LV_BTN_STATE_INA;
+static lv_btn_state_t stop_buttonState = LV_BTN_STATE_INA;
 
 static lv_obj_t *polle_label;
 static char* pollenLabel;
@@ -134,14 +138,28 @@ static uint8_t* getNamesActiv(void) {
 }
 
 static lv_res_t btn_play_click_action(lv_obj_t *btn) {
+
+	uint8_t res;
 	PlaylistMessage_t *pxPlaylistMessage;
 	pxPlaylistMessage = &xPlaylistMessage;
-	uint8_t res;
-	pxPlaylistMessage->playlist = namesActive;
-	pxPlaylistMessage->cmd = play;
-	pxPlaylistMessage->state = newData;
+
+	if(isPaused){
+		pxPlaylistMessage->cmd = play;
+		pxPlaylistMessage->state = newCMD;
+	}
+	else{
+		pxPlaylistMessage->playlist = namesActive;
+		pxPlaylistMessage->cmd = play;
+		pxPlaylistMessage->state = newData;
+	}
+
 	res = AddMessageToPlaylistQueue(queue_handler_playlist, pxPlaylistMessage);
 	lv_btn_set_state(btn, LV_BTN_STATE_INA);
+	lv_btn_set_state(btn_pause, LV_BTN_STATE_REL);
+	lv_btn_set_state(btn_stop, LV_BTN_STATE_REL);
+	play_buttonState = LV_BTN_STATE_INA;
+	pause_buttonState = LV_BTN_STATE_REL;
+	stop_buttonState = LV_BTN_STATE_REL;
 
 
 	return LV_RES_OK; /* Return OK if the button is not deleted */
@@ -149,11 +167,46 @@ static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 
 static lv_res_t btn_pause_click_action(lv_obj_t *btn) {
 
+	uint8_t res;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
+	pxPlaylistMessage->cmd = pause;
+	pxPlaylistMessage->state = newCMD;
+	res = AddMessageToPlaylistQueue(queue_handler_playlist, pxPlaylistMessage);
+
+
+	isPaused = true;
 	lv_btn_set_state(btn_play, LV_BTN_STATE_REL);
+	lv_btn_set_state(btn, LV_BTN_STATE_INA);
+	lv_btn_set_state(btn_stop, LV_BTN_STATE_REL);
+
+	play_buttonState = LV_BTN_STATE_REL;
+	pause_buttonState = LV_BTN_STATE_INA;
+	stop_buttonState = LV_BTN_STATE_REL;
+
+
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
 static lv_res_t btn_stop_click_action(lv_obj_t *btn) {
+
+	uint8_t res;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
+
+	pxPlaylistMessage->cmd = stop;
+	pxPlaylistMessage->state = newCMD;
+	res = AddMessageToPlaylistQueue(queue_handler_playlist, pxPlaylistMessage);
+	lv_btn_set_state(btn_play, LV_BTN_STATE_REL);
+	lv_btn_set_state(btn_pause, LV_BTN_STATE_INA);
+	lv_btn_set_state(btn, LV_BTN_STATE_INA);
+	isPaused = false;
+
+	play_buttonState = LV_BTN_STATE_REL;
+	pause_buttonState = LV_BTN_STATE_INA;
+	stop_buttonState = LV_BTN_STATE_INA;
+
+
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
@@ -326,6 +379,7 @@ void GUI_NEO_Create(uint8_t * name) {
 	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 40);
 	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
 	label = lv_label_create(btn_play, NULL);
+	lv_btn_set_state(btn_play,play_buttonState);
 	lv_label_set_text(label, SYMBOL_PLAY);
 	GUI_AddObjToGroup(btn_play);
 	/* pause button */
@@ -333,17 +387,20 @@ void GUI_NEO_Create(uint8_t * name) {
 	lv_obj_align(btn_pause, btn_play, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 	lv_btn_set_action(btn_pause, LV_BTN_ACTION_CLICK, btn_pause_click_action);
 	label = lv_label_create(btn_pause, NULL);
+	lv_btn_set_state(btn_pause,pause_buttonState);
 	lv_label_set_text(label, SYMBOL_PAUSE);
 	GUI_AddObjToGroup(btn_pause);
 	/* stop button */
-
 
 	btn_stop = lv_btn_create(win, NULL);
 	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 	lv_btn_set_action(btn_stop, LV_BTN_ACTION_CLICK, btn_stop_click_action);
 	label = lv_label_create(btn_stop, NULL);
+	lv_btn_set_state(btn_stop,stop_buttonState);
 	lv_label_set_text(label, SYMBOL_STOP);
 	GUI_AddObjToGroup(btn_stop);
+
+
 
 
 

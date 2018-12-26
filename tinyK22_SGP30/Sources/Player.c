@@ -128,6 +128,35 @@ static void PlayerTask(void *pvParameters) {
 
 		case READ_NEW:
 			if ((pxPlaylistMessage->state) == newCMD) {
+				if ((pxPlaylistMessage->cmd) == pause) {
+					pxDataMessage->cmd = pause;
+					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+							!= QUEUE_OK) {
+						/*Queue is full*/
+					} else {
+						state = PLAY_LIST;
+					}
+				}
+				else if ((pxPlaylistMessage->cmd) == stop) {
+					pxDataMessage->cmd = stop;
+					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+							!= QUEUE_OK) {
+						/*Queue is full*/
+					} else {
+						excitation = 1;
+						state = IDLE;
+					}
+
+				}
+				else if ((pxPlaylistMessage->cmd) == play) {			/*the play CMD after an pause occured*/
+					pxDataMessage->cmd = play;
+					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+							!= QUEUE_OK) {
+						/*Queue is full*/
+					} else {
+						state = PLAY_LIST;
+					}
+				}
 				/*Do something*/
 			} else if ((pxPlaylistMessage->state) == newData) {
 				state = UPDATE_PLAYLIST;
@@ -139,13 +168,9 @@ static void PlayerTask(void *pvParameters) {
 
 		case DISPLAY_IMAGE:
 
-
 			/*Stop playing the Playlist*/
 
-
-
 			break;
-
 
 		case UPDATE_PLAYLIST:
 
@@ -172,14 +197,13 @@ static void PlayerTask(void *pvParameters) {
 			else {
 
 				if ((PeekDataQueue(queue_handler_data, pxDataMessage)
-						!= QUEUE_EMPTY)) {
-					/*NEO Task is busy*/
-					vTaskDelay(pdMS_TO_TICKS(10)); /*LED Task is busy playing*/
+						!= QUEUE_EMPTY)) { /*Has Element in the Data Queue, Neo Task hasnt taken it out yet*/
+					vTaskDelay(pdMS_TO_TICKS(10));
 
 				} else {
-
+					/*make sure the NEO Task is waiting for a new Element */
 					if ((FRTOS1_xSemaphoreTake(mutex,0) != pdTRUE)) {
-						vTaskDelay(pdMS_TO_TICKS(10)); /*LED Task is busy playing*/
+						vTaskDelay(pdMS_TO_TICKS(10)); /*NEO Task is busy playing*/
 						break;
 					} else {
 
@@ -215,6 +239,7 @@ static void PlayerTask(void *pvParameters) {
 
 			}
 			break;
+
 		}
 	}
 }

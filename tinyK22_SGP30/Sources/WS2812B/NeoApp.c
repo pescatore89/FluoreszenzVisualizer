@@ -2098,6 +2098,8 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 		}
 		highestColVal = getHighestColorValueFromMatrix();
 		if (highestColVal == 0) {
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
 			break;
 		}
 
@@ -2431,6 +2433,7 @@ static void NeoTask(void* pvParameters) {
 
 			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data,
 					pxRxDataMessage->image->biBitCount, excitation);
+			vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
 
 			state = PLAY_SEQ2;
 			break;
@@ -2439,19 +2442,14 @@ static void NeoTask(void* pvParameters) {
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 			playSeq2(pxRxDataMessage->char_data, excitation);
-			vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
+			vTaskDelay(pdMS_TO_TICKS(getTiming(1)));
 			state = PLAY_SEQ3;
 			break;
 
 		case PLAY_SEQ3:
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
-			vTaskDelay(pdMS_TO_TICKS(1000)); /*enjoy*/
-			//SetCoordinate(10,10,0xff7eff);
-			//SetCoordinate(24,16,0xff7eff);
-			//SetCoordinate(24,15,0xff7eff);
-			//NEO_TransferPixels();
-			//vTaskDelay(pdMS_TO_TICKS(5000)); /*enjoy*/
+			vTaskDelay(pdMS_TO_TICKS(getTiming(2)));
 
 			playSeq3(pxRxDataMessage->char_data, excitation);
 
@@ -2461,6 +2459,7 @@ static void NeoTask(void* pvParameters) {
 			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 				state = ERROR_STATE;
 			} else {
+				vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
 				state = IDLE_STATE;
 			}
 			break;

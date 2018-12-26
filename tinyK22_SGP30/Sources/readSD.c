@@ -153,8 +153,6 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 		pxDATA->color_266 = getRealValue(buff8);
 
 
-
-
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
 		pxDATA->fadeout_266 = getRealValue(buff8);

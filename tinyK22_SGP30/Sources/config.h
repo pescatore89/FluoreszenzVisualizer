@@ -30,4 +30,20 @@ char** namelist;	// Platzhalter für die namen der Pollen
 void setPowerConnected(uint8_t);
 uint8_t getPowerConnected(void);
 bool lightSensor;
+
+
+
+/*
+ * Function to get the Timing Setup
+ *
+ * Return :
+ * pos 0 --> timingDelayBetweenSeq1_2;
+ * pos 1 --> timingDisplaySeq2
+ * pos 2 --> timingDelayBetweenSeq2_3
+ * pos 3 --> timingDelayBetweenSeq3_1
+ *
+ * */
+uint32_t getTiming(uint8_t pos);
+
+
 #endif /* SOURCES_CONFIG_H_ */

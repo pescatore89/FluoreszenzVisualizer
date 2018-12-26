@@ -17,6 +17,7 @@
 #define INI_FILE_NAME			"Config.txt"
 #define INI_FILE_NAME_POLLEN	"Pollen.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
+#define INI_SECTION_NAME_TIMING	"TIMING"
 #define INI_SECTION_NAME_SENSOR "LIGHTSENSOR"
 #define INI_SECTION_NAME		"names"
 #define INI_SECTION_NAME_LED	"LED"
@@ -24,6 +25,13 @@
 
 //#endif
 static uint8_t powerEnabled;
+static uint32_t timing [100];		/*0 --> timingDelayBetweenSeq1_2;
+ 	 	 	 	 	 	 	 	  	  1 --> timingDisplaySeq2
+ 	 	 	 	 	 	 	 	  	  2 --> timingDelayBetweenSeq2_3
+ 	 	 	 	 	 	 	 	  	  ...	*/
+
+
+
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "CONFIG",
 			(unsigned char*) "Configurations on the SD-Card\r\n", io->stdOut);
@@ -34,6 +42,24 @@ static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 			io->stdOut);
 	return ERR_OK;
 }
+
+
+
+
+static void setTiming (uint32_t * value){
+
+	timing[0] = value[0];
+	timing[1] = value[1];
+	timing[2] = value[2];
+	timing[3] = value[3];
+
+}
+
+uint32_t getTiming(uint8_t pos){
+	return timing[pos];
+
+}
+
 
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io) {
@@ -116,6 +142,32 @@ uint8_t Config_Setup(void) {
 	int power = -1;
 	int lines = -1;
 	uint8_t buf[32];
+	uint32_t Tbuf[32];
+
+
+
+	/*read and Setup Timing*/
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq1_2", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getRealValue(buf);
+
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeDisplaySeq2", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[1] = getRealValue(buf);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq2_3", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[2] = getRealValue(buf);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq3_1", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[3] = getRealValue(buf);
+
+	setTiming(Tbuf);
+
+
+	/*read and Setup other values*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	setPowerConnected(buf[0] - (char) '0');

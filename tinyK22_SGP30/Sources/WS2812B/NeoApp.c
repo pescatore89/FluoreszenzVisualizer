@@ -2078,9 +2078,12 @@ static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 #define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
 #define STARTING_DEGRADATION		3
 
-static void playSeq1(DATA_t * characteristicValues, char* colorData,
+static bool playSeq1(DATA_t * characteristicValues, char* colorData,
 		unsigned short farbtiefe, uint8_t excitation) {
 
+	bool aborted = FALSE;
+	DataMessage_t * pxRxDataMessage;
+	pxRxDataMessage = &xDataMessage;
 	uint8_t delay = (DELAY_MS) + (NEO_PROCESSING_TIME);
 	uint8_t percente = 0;
 	uint32_t fadeout = 0;
@@ -2120,8 +2123,34 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 		for (int z = 1; z <= nRINGS; z++) {
 			decrementRingData(z, decrementStep);
 			NEO_TransferPixels();
+
+			if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
+					!= QUEUE_EMPTY) {
+				if (pxRxDataMessage->cmd == stop) {
+					return TRUE;
+				}
+
+				else if (pxRxDataMessage->cmd == pause) {
+					for (;;) {
+						if (TakeMessageFromDataQueue(queue_handler_data,
+								pxRxDataMessage) != QUEUE_EMPTY) {
+							if (pxRxDataMessage->cmd == play) {
+								break;
+							} else if (pxRxDataMessage->cmd == stop) {
+								return TRUE;
+
+							}
+						} else {
+							vTaskDelay(pdMS_TO_TICKS(20));
+						}
+					}
+				}
+
+			}
+
 			vTaskDelay(pdMS_TO_TICKS(DELAY_MS));
 		}
+
 		highestColVal = getHighestColorValueFromMatrix();
 		if (highestColVal == 0) {
 			NEO_ClearAllPixel();
@@ -2131,11 +2160,13 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 
 	}
 
+	return aborted;
+
 }
 
 #define COLOR_LETTER	0x7E7E7E
 
-static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
+static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 	uint8_t value1, value2, value3, value4, value5, nPixels1, nPixels2,
 			nPixels3, nPixels4, nPixels5;
@@ -2251,7 +2282,10 @@ static void playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 #define DELAY_TIME 					5		/*5ms */
 #define DECR_DELAY_AT_DELAY_TIME 	((255*5)*((NEO_PROCESSING_TIME)+(DELAY_TIME))/5)
 
-static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
+static bool playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
+
+	DataMessage_t * pxRxDataMessage;
+	pxRxDataMessage = &xDataMessage;
 
 	uint32_t resolution = 0;
 	uint16_t decrementStep = 0;
@@ -2332,6 +2366,30 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	while (!((nPixels1 == 0) && (nPixels2 == 0) && (nPixels3 == 0)
 			&& (nPixels4 == 0))) {
 
+		if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
+				!= QUEUE_EMPTY) {
+			if (pxRxDataMessage->cmd == stop) {
+
+				return TRUE; /*Session was aborted*/
+			}
+
+			else if (pxRxDataMessage->cmd == pause) {
+				for (;;) {
+					if (TakeMessageFromDataQueue(queue_handler_data,
+							pxRxDataMessage) != QUEUE_EMPTY) {
+						if (pxRxDataMessage->cmd == play) {
+							break;
+						} else if (pxRxDataMessage->cmd == stop) {
+
+							return TRUE; /*Session was aborted*/
+						}
+					} else {
+						vTaskDelay(pdMS_TO_TICKS(20));
+					}
+				}
+			}
+		}
+
 		if (nPixels1 != 0) {
 			color1 = decrementValue(color1, decrementStep);
 			if (color1 == 0) {
@@ -2396,17 +2454,22 @@ static void playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 }
 
+#define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
 static void NeoTask(void* pvParameters) {
 
 	//queue_handler = pvParameters;
 	int value = -1;
 	QUEUE_RESULT res = QUEUE_OK;
 	uint8_t excitation = 0;
+	bool sequenzAborted = 0; /*return value from sequenz, 0--> if not aborted(not stopped), 1--> if aborted(stoped)*/
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 	uint8_t highestColorValue;
 	UpdateMessage_t * pxMessage;
 	pxMessage = &xUpdateMessage;
+	bool wasPaused = FALSE;
+
+	uint32_t delayCNT = 0;
 
 	NEO_STATUS state = IDLE_STATE;
 	for (;;) {
@@ -2472,20 +2535,59 @@ static void NeoTask(void* pvParameters) {
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 
-			playSeq1(pxRxDataMessage->char_data, pxRxDataMessage->color_data,
-					pxRxDataMessage->image->biBitCount, excitation);
+			if (!(playSeq1(pxRxDataMessage->char_data,
+					pxRxDataMessage->color_data,
+					pxRxDataMessage->image->biBitCount, excitation))) {
+				vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
+
+				state = PLAY_SEQ2;
+			} else {
+				state = STOPPED;
+			}
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
-			vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
 
-			state = PLAY_SEQ2;
 			break;
 
 		case PLAY_SEQ2:
 
 			playSeq2(pxRxDataMessage->char_data, excitation);
-			vTaskDelay(pdMS_TO_TICKS(getTiming(1)));
+
+			delayCNT = rint((float) getTiming(1) / (DELAY_PER_TICK_SEQ_2));
+
 			state = PLAY_SEQ3;
+			for (int i = 0; i < delayCNT; i++) {
+
+				if (TakeMessageFromDataQueue(queue_handler_data,
+						pxRxDataMessage) != QUEUE_EMPTY) {
+					if (pxRxDataMessage->cmd == stop) {
+						state = STOPPED;
+						break;
+					}
+
+					else if (pxRxDataMessage->cmd == pause) {
+						for (;;) {
+							if (TakeMessageFromDataQueue(queue_handler_data,
+									pxRxDataMessage) != QUEUE_EMPTY) {
+								if (pxRxDataMessage->cmd == play) {
+									break;
+								} else if (pxRxDataMessage->cmd == stop) {
+									state = STOPPED;
+									wasPaused = TRUE;
+									break;
+								}
+							} else {
+								vTaskDelay(pdMS_TO_TICKS(20));
+							}
+						}
+					}
+				}
+				if (wasPaused) {
+					break;
+				}
+				vTaskDelay(pdMS_TO_TICKS(DELAY_PER_TICK_SEQ_2));
+			}
+
 			break;
 
 		case PLAY_SEQ3:
@@ -2493,17 +2595,22 @@ static void NeoTask(void* pvParameters) {
 			NEO_TransferPixels();
 			vTaskDelay(pdMS_TO_TICKS(getTiming(2)));
 
-			playSeq3(pxRxDataMessage->char_data, excitation);
+			if(!(playSeq3(pxRxDataMessage->char_data, excitation))){
+				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+					state = ERROR_STATE;
+				} else {
+					vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
+					state = IDLE_STATE;
+				}
+			}
+			else {
+				state = STOPPED;
+			}
 
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 
-			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
-				state = ERROR_STATE;
-			} else {
-				vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
-				state = IDLE_STATE;
-			}
+
 			break;
 
 		case STOPPED:
@@ -2513,7 +2620,7 @@ static void NeoTask(void* pvParameters) {
 			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 				/*could not give back the semaphore, maybe because its already given back*/
 			} else {
-			//	vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
+				//	vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
 				state = IDLE_STATE;
 			}
 			state = IDLE_STATE;

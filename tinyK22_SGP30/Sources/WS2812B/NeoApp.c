@@ -396,6 +396,7 @@ static uint8_t getHighestColorValueFromMatrix() {
 		for (int l = 0; l < 192; l++) {
 			NEO_GetPixelColor(i, l, &color);
 
+
 			temp = getHighestColorValue(color);
 			if (temp >= highscore) {
 				highscore = temp;
@@ -408,6 +409,28 @@ static uint8_t getHighestColorValueFromMatrix() {
 
 	return highscore;
 
+}
+
+static uint32_t getMatrixColorValue() {
+
+	uint32_t value = 0;
+	NEO_Color color;
+	uint32_t red, green, blue = 0;
+
+	int i = 0;
+
+	for (int i = 0; i < 3; i++) {
+		for (int l = 0; l < 192; l++) {
+			NEO_GetPixelColor(i, l, &color);
+
+			red = NEO_GET_COLOR_RED(color);
+			green = NEO_GET_COLOR_GREEN(color);
+			blue = NEO_GET_COLOR_BLUE(color);
+
+			value = value + red + green + blue;
+		}
+	}
+	return value;
 }
 
 static uint8_t getHighestColorValueFromLane() {
@@ -2062,6 +2085,8 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	uint8_t delay = (DELAY_MS) + (NEO_PROCESSING_TIME);
 	uint8_t percente = 0;
 	uint32_t fadeout = 0;
+	uint32_t matrixColorValue = 0;
+
 	if (excitation == 1) {
 		SetTrail(characteristicValues->color_266, 13, 5, 50, 100);
 		fadeout = characteristicValues->fadeout_266;
@@ -2082,7 +2107,13 @@ static void playSeq1(DATA_t * characteristicValues, char* colorData,
 	}
 	NEO_TransferPixels();
 
-	highestColVal = getHighestColorValueFromLane();
+
+
+	matrixColorValue = getMatrixColorValue();
+
+
+	highestColVal = getHighestColorValueFromLane(); /*possibility to reduce the Power consumption here*/
+
 
 	uint32_t nTicks = rint((float) (fadeout) / (delay));
 

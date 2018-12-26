@@ -68,6 +68,19 @@ static lv_res_t cb_release_action(lv_obj_t * cb) {
 	return LV_RES_OK;
 }
 
+static void updateCheckbox(lv_obj_t * cb, uint8_t pos){
+
+
+	bool checked = false;
+
+	checked = namesSet[pos];
+
+
+	lv_cb_set_checked(cb,checked);
+
+
+}
+
 void GUI_POLLEN_Create(void) {
 
 
@@ -126,6 +139,7 @@ void GUI_POLLEN_Create(void) {
 	uint16_t posX = 0;
 	uint16_t posY = 0;
 	lv_obj_t * cb;
+	uint8_t counter = 0;
 
 	while (x < nOFnames) {
 		if(x>4){
@@ -134,6 +148,7 @@ void GUI_POLLEN_Create(void) {
 			GUI_AddObjToGroup(cb);
 			lv_cb_set_text(cb, (name[x]));
 			lv_cb_set_action(cb, cb_release_action);
+			updateCheckbox(cb,counter);
 			x++;
 			posX = 50;
 			posY = posY + 20;
@@ -144,7 +159,8 @@ void GUI_POLLEN_Create(void) {
 		GUI_AddObjToGroup(cb);
 		lv_cb_set_text(cb, (name[x]));
 		lv_cb_set_action(cb, cb_release_action);
-
+		updateCheckbox(cb,counter);
+		counter++;
 		if(x == 4){
 			posY = 0;
 		}
@@ -163,6 +179,9 @@ void GUI_POLLEN_Create(void) {
 	label = lv_label_create(btn_play, NULL);
 	lv_label_set_text(label, SYMBOL_PLAY);
 	GUI_AddObjToGroup(btn_play);
+
+
+
 
 	/*Align the container to the middle*/
 	//lv_obj_align(cont, NULL, LV_ALIGN_CENTER, 0, 0);

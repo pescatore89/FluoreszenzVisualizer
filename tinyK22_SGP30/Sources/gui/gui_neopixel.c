@@ -192,7 +192,7 @@ void GUI_NEO_Create(uint8_t * name) {
 
 	/* Create the window */
 	win = lv_win_create(lv_scr_act(), NULL);
-	lv_win_set_title(win, "NeoPixel");
+	lv_win_set_title(win, "Nav");
 	closeBtn = lv_win_add_btn(win, SYMBOL_CLOSE, win_close_action);
 	GUI_GroupPush();
 	GUI_AddObjToGroup(closeBtn);

@@ -26,15 +26,15 @@
 
 //#endif
 static uint8_t powerEnabled;
-static uint32_t timing [100];		/*0 --> timingDelayBetweenSeq1_2;
- 	 	 	 	 	 	 	 	  	  1 --> timingDisplaySeq2
- 	 	 	 	 	 	 	 	  	  2 --> timingDelayBetweenSeq2_3
- 	 	 	 	 	 	 	 	  	  ...	*/
-
+static uint32_t currentPowerSupply;
+static uint8_t maxCurrentPerLEDPixel;
+static uint32_t timing[100]; /*0 --> timingDelayBetweenSeq1_2;
+ 1 --> timingDisplaySeq2
+ 2 --> timingDelayBetweenSeq2_3
+ ...	*/
 
 static char** namelist;	// Platzhalter für die namen der Pollen
 static char** imageslist; //Namen der Bilder
-
 
 static int quantity;		// Anzahl der gespeicherten Pollen
 static int quantityimages;	// Anzahl der gespeicherten Bilder
@@ -50,10 +50,7 @@ static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	return ERR_OK;
 }
 
-
-
-
-static void setTiming (uint32_t * value){
+static void setTiming(uint32_t * value) {
 
 	timing[0] = value[0];
 	timing[1] = value[1];
@@ -62,11 +59,10 @@ static void setTiming (uint32_t * value){
 
 }
 
-uint32_t getTiming(uint8_t pos){
+uint32_t getTiming(uint8_t pos) {
 	return timing[pos];
 
 }
-
 
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io) {
@@ -125,24 +121,76 @@ void initConfigData(void) {
 }
 
 void setPowerConnected(uint8_t val) {
-	CS1_CriticalVariable();
-	CS1_EnterCritical();
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
 	powerEnabled = val;
-	CS1_ExitCritical();
+	CS1_ExitCritical()
+	;
 
 }
 uint8_t getPowerConnected(void) {
 
 	uint8_t res;
-	CS1_CriticalVariable();
-	CS1_EnterCritical();
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
 	res = powerEnabled;
-	CS1_ExitCritical();
+	CS1_ExitCritical()
+	;
 
 	return res;
 }
 
+uint32_t getPowerSupplyCurrent(void) {
+	uint32_t res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = currentPowerSupply;
+	CS1_ExitCritical()
+	;
 
+	return res;
+}
+
+void setPowerSupplyCurrent(uint32_t val) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	currentPowerSupply = val;
+	CS1_ExitCritical()
+	;
+
+}
+
+uint8_t getCurrentPerPixel(void) {
+	uint8_t res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = maxCurrentPerLEDPixel;
+	CS1_ExitCritical()
+	;
+
+	return res;
+}
+
+void setCurrentPerPixel(uint8_t val) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	maxCurrentPerLEDPixel = val;
+	CS1_ExitCritical()
+	;
+
+}
 
 uint8_t Config_Setup(void) {
 
@@ -152,13 +200,10 @@ uint8_t Config_Setup(void) {
 	uint8_t buf[32];
 	uint32_t Tbuf[32];
 
-
-
 	/*read and Setup Timing*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq1_2", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getRealValue(buf);
-
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeDisplaySeq2", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
@@ -174,11 +219,19 @@ uint8_t Config_Setup(void) {
 
 	setTiming(Tbuf);
 
-
 	/*read and Setup other values*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	setPowerConnected(buf[0] - (char) '0');
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Max_LED_Current", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	setCurrentPerPixel(getRealValue(buf));
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Supply_Current", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	setPowerSupplyCurrent(getRealValue(buf));
+
 	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
 	if (buf[0]) {
@@ -246,10 +299,6 @@ uint8_t Config_ReadPollen(void) {
 
 }
 
-
-
-
-
 uint8_t Config_ReadImages(void) {
 
 	int val;
@@ -298,7 +347,8 @@ uint8_t Config_ReadImages(void) {
 
 		strcpy(imageslist[i - 1], buf);
 		CLS1_SendStr((unsigned char*) "-", CLS1_GetStdio()->stdOut);
-		CLS1_SendStr((unsigned char*) imageslist[i - 1], CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) imageslist[i - 1],
+				CLS1_GetStdio()->stdOut);
 		CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
 
 	}
@@ -306,12 +356,6 @@ uint8_t Config_ReadImages(void) {
 	return ERR_OK;
 
 }
-
-
-
-
-
-
 
 bool getSensorEnabled(void) {
 
@@ -340,33 +384,34 @@ void setSensorEnabled(bool enabled) {
 
 char** getNamelist(void) {
 	char** res;
-	CS1_CriticalVariable();
-	CS1_EnterCritical();
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
 	res = namelist;
-	CS1_ExitCritical();
+	CS1_ExitCritical()
+	;
 
 	return res;
 }
-
 
 int getQuantity(void) {
 	return quantity;
 }
 
-char** getImagesList(void){
+char** getImagesList(void) {
 	char** res;
-	CS1_CriticalVariable();
-	CS1_EnterCritical();
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
 	res = imageslist;
-	CS1_ExitCritical();
+	CS1_ExitCritical()
+	;
 
 	return res;
 }
-int getQuantityOfImages(void){
+int getQuantityOfImages(void) {
 	return quantityimages;
 }
-
-
-
-
 

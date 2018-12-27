@@ -25,7 +25,9 @@ char** getNamelist(void);
 char** getImagesList(void);
 int getQuantityOfImages(void);
 
-
+void setPowerSupplyCurrent(uint32_t val);
+uint8_t getCurrentPerPixel(void);
+uint32_t getPowerSupplyCurrent(void);
 int getQuantity(void);
 void initConfigData(void);
 bool getSensorEnabled(void);

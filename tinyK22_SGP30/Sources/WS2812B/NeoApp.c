@@ -50,9 +50,13 @@ typedef enum {
 	PLAY_SEQ1, /*  */
 	PLAY_SEQ2, /* */
 	PLAY_SEQ3, /* */
-	ERROR_STATE, STOPPED,
+	ERROR_STATE, STOPPED, DISPLAY_IMAGE,
 
 } NEO_STATUS;
+
+typedef enum {
+	notAborted, stopAborted, playImageAborted,
+} RETURN_STATUS;
 
 xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
 xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
@@ -1912,7 +1916,7 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 	NEO_ClearAllPixel();
 	NEO_TransferPixels();
 #if 0
-	/*Der Farbwert entspricht dem gesamten Farbwert des Bildes*/
+	/*Der Farbwert entspricht dem gesamten Farbwert des Bildes, kann zur softwarestrombegrenzung genutzt werden*/
 	for (int z = 0; z < 1728; z++) {
 		val = (image[z]);
 		Farbwert = Farbwert + val;
@@ -2078,10 +2082,10 @@ static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 #define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
 #define STARTING_DEGRADATION		3
 
-static bool playSeq1(DATA_t * characteristicValues, char* colorData,
+static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 		unsigned short farbtiefe, uint8_t excitation) {
 
-	bool aborted = FALSE;
+	RETURN_STATUS aborted = notAborted;
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 	uint8_t delay = (DELAY_MS) + (NEO_PROCESSING_TIME);
@@ -2127,7 +2131,9 @@ static bool playSeq1(DATA_t * characteristicValues, char* colorData,
 			if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
 					!= QUEUE_EMPTY) {
 				if (pxRxDataMessage->cmd == stop) {
-					return TRUE;
+					return stopAborted;
+				} else if (pxRxDataMessage->cmd == playImage) {
+					return playImageAborted; /*Session was aborted*/
 				}
 
 				else if (pxRxDataMessage->cmd == pause) {
@@ -2137,8 +2143,9 @@ static bool playSeq1(DATA_t * characteristicValues, char* colorData,
 							if (pxRxDataMessage->cmd == play) {
 								break;
 							} else if (pxRxDataMessage->cmd == stop) {
-								return TRUE;
-
+								return stopAborted;
+							} else if (pxRxDataMessage->cmd == playImage) {
+								return playImageAborted;
 							}
 						} else {
 							vTaskDelay(pdMS_TO_TICKS(20));
@@ -2282,8 +2289,9 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 #define DELAY_TIME 					5		/*5ms */
 #define DECR_DELAY_AT_DELAY_TIME 	((255*5)*((NEO_PROCESSING_TIME)+(DELAY_TIME))/5)
 
-static bool playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
+static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 
+	RETURN_STATUS aborted = notAborted;
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 
@@ -2370,7 +2378,11 @@ static bool playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 				!= QUEUE_EMPTY) {
 			if (pxRxDataMessage->cmd == stop) {
 
-				return TRUE; /*Session was aborted*/
+				return stopAborted; /*Session was aborted*/
+			}
+
+			else if (pxRxDataMessage->cmd == playImage) {
+				return playImageAborted; /*Session was aborted*/
 			}
 
 			else if (pxRxDataMessage->cmd == pause) {
@@ -2381,8 +2393,13 @@ static bool playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 							break;
 						} else if (pxRxDataMessage->cmd == stop) {
 
-							return TRUE; /*Session was aborted*/
+							return stopAborted; /*Session was aborted*/
 						}
+
+						else if (pxRxDataMessage->cmd == playImage) {
+							return playImageAborted;
+						}
+
 					} else {
 						vTaskDelay(pdMS_TO_TICKS(20));
 					}
@@ -2452,6 +2469,8 @@ static bool playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
 		vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
 
 	}
+
+	return aborted;
 }
 
 #define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
@@ -2471,6 +2490,8 @@ static void NeoTask(void* pvParameters) {
 
 	uint32_t delayCNT = 0;
 
+	RETURN_STATUS ret_value;
+
 	NEO_STATUS state = IDLE_STATE;
 	for (;;) {
 		switch (state) {
@@ -2486,6 +2507,7 @@ static void NeoTask(void* pvParameters) {
 						!= QUEUE_OK) {
 					/*Queue is somehow full*/
 				}
+
 
 			} else {
 				if (FRTOS1_xSemaphoreTake(mutex,100) != pdTRUE) {
@@ -2529,23 +2551,68 @@ static void NeoTask(void* pvParameters) {
 				}
 
 			}
+			/*Commandos for Images*/
+			else if (pxRxDataMessage->cmd == playImage) {
+
+				state = DISPLAY_IMAGE;
+			}
+
+			else if (pxRxDataMessage->cmd == clearImage) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+				state = IDLE_STATE;
+				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+					/*could not give back the semaphore, maybe because its already given back*/
+				}
+				pxMessage->cmd = stop;
+				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+						!= QUEUE_OK) {
+					/*Queue is somehow full*/
+				}
+
+			}
+
+			break;
+
+		case DISPLAY_IMAGE:
+
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
+			excitation = 0;
+			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+				/*could not give back the semaphore, maybe because its already given back*/
+			}
+
+			pxMessage->cmd = readyForImage;
+			if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+					!= QUEUE_OK) {
+				/*Queue is somehow full*/
+			}
+
+			NEOA_Display_Image(pxRxDataMessage->color_data,
+					pxRxDataMessage->image->biBitCount);
+
+			state = IDLE_STATE;
 			break;
 
 		case PLAY_SEQ1:
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 
-			if (!(playSeq1(pxRxDataMessage->char_data,
+			ret_value = playSeq1(pxRxDataMessage->char_data,
 					pxRxDataMessage->color_data,
-					pxRxDataMessage->image->biBitCount, excitation))) {
-				vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
+					pxRxDataMessage->image->biBitCount, excitation);
 
+			if (ret_value == notAborted) {
+				vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
 				state = PLAY_SEQ2;
-			} else {
+			} else if (ret_value == stopAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
 				state = STOPPED;
+			} else if (ret_value == playImageAborted) {
+				state = DISPLAY_IMAGE;
 			}
-			NEO_ClearAllPixel();
-			NEO_TransferPixels();
 
 			break;
 
@@ -2565,6 +2632,11 @@ static void NeoTask(void* pvParameters) {
 						break;
 					}
 
+					else if (pxRxDataMessage->cmd == playImage) {
+						state = DISPLAY_IMAGE;
+						break;
+					}
+
 					else if (pxRxDataMessage->cmd == pause) {
 						for (;;) {
 							if (TakeMessageFromDataQueue(queue_handler_data,
@@ -2575,6 +2647,11 @@ static void NeoTask(void* pvParameters) {
 									state = STOPPED;
 									wasPaused = TRUE;
 									break;
+								}
+
+								else if (pxRxDataMessage->cmd == playImage) {
+									state = DISPLAY_IMAGE;
+									wasPaused = TRUE;
 								}
 							} else {
 								vTaskDelay(pdMS_TO_TICKS(20));
@@ -2591,25 +2668,34 @@ static void NeoTask(void* pvParameters) {
 			break;
 
 		case PLAY_SEQ3:
+
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 			vTaskDelay(pdMS_TO_TICKS(getTiming(2)));
 
-			if(!(playSeq3(pxRxDataMessage->char_data, excitation))){
+			ret_value = playSeq3(pxRxDataMessage->char_data, excitation);
+
+			if (ret_value == notAborted) {
 				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 					state = ERROR_STATE;
 				} else {
+					pxMessage->cmd = stop;
+					if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+							!= QUEUE_OK) {
+						/*Queue is somehow full*/
+					}
 					vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
 					state = IDLE_STATE;
 				}
-			}
-			else {
+			} else if (ret_value == stopAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
 				state = STOPPED;
 			}
 
-			NEO_ClearAllPixel();
-			NEO_TransferPixels();
-
+			else if (ret_value == playImageAborted) {
+				state = DISPLAY_IMAGE;
+			}
 
 			break;
 
@@ -2620,6 +2706,11 @@ static void NeoTask(void* pvParameters) {
 			if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 				/*could not give back the semaphore, maybe because its already given back*/
 			} else {
+				pxMessage->cmd = stop;
+				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+						!= QUEUE_OK) {
+					/*Queue is somehow full*/
+				}
 				//	vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
 				state = IDLE_STATE;
 			}

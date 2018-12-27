@@ -16,6 +16,7 @@
 #include "UTIL1.h"
 #include "gui_neopixel.h"
 #include "config.h"
+#include "Message.h"
 
 static lv_obj_t *win; /* object for window */
 static lv_obj_t** cbList;
@@ -24,10 +25,55 @@ static uint8_t imagesChecked[100];
 static lv_obj_t *label_play;
 static lv_obj_t *btn_play;
 
+static uint8_t guiIsActive;
+
 static lv_obj_t *label_clear;
 static lv_obj_t *btn_clear;
 
 static bool displaying = FALSE;
+
+static bool playingPollen = FALSE;
+
+void setPlayingPollen(uint8_t val) {
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	playingPollen = val;
+	CS1_ExitCritical()
+	;
+
+}
+
+static uint8_t getPlayingPollen(void) {
+
+	uint8_t result;
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	result = playingPollen;
+	CS1_ExitCritical()
+	;
+	return result;
+}
+
+
+
+static void setImageGuiIsActive(uint8_t val){
+
+	CS1_CriticalVariable();
+
+
+	CS1_EnterCritical();
+
+	guiIsActive = val;
+
+	CS1_ExitCritical();
+
+}
 
 static bool hasElementSelected(void) {
 
@@ -42,6 +88,19 @@ static bool hasElementSelected(void) {
 
 }
 
+static char* getNameSelected(void) {
+	char* name;
+	char ** names = getImagesList();
+
+	for (int i = 0; i < getQuantityOfImages(); i++) { /*store the state*/
+		if (lv_cb_is_checked(cbList[i])) {
+			name = names[i];
+		}
+
+	}
+	return name;
+}
+
 static lv_res_t win_close_action(lv_obj_t *btn) {
 
 	for (int i = 0; i < getQuantityOfImages(); i++) { /*store the state*/
@@ -49,7 +108,7 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
 		imagesChecked[i] = lv_cb_is_checked(cbList[i]);
 
 	}
-
+	setImageGuiIsActive(false);
 	FRTOS1_vPortFree(cbList);
 	GUI_GroupPull();
 	lv_obj_del(win);
@@ -121,16 +180,27 @@ static void update(void) {
 
 static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 
+	uint8_t res;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
+	char *name;
+
 	if (displaying) {
 		lv_label_set_text(label_play, SYMBOL_OK);
-		/*send Image clear to queue*/
+		pxPlaylistMessage->state = clrImage;
+		res = AddMessageToPlaylistQueue(queue_handler_playlist,
+				pxPlaylistMessage);
 		if (!hasElementSelected()) {
 			lv_btn_set_state(btn_play, LV_BTN_STATE_INA);
 		}
 		displaying = FALSE;
 	} else {
+		name = getNameSelected();
+		pxPlaylistMessage->state = newImage;
+		pxPlaylistMessage->imageName = name;
 
-		/*send newImage to queue mit dem Namen*/
+		res = AddMessageToPlaylistQueue(queue_handler_playlist,
+				pxPlaylistMessage);
 		lv_label_set_text(label_play, SYMBOL_CLOSE);
 		displaying = TRUE;
 	}
@@ -138,7 +208,33 @@ static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
+
+
+
+uint8_t getImageGuiIsActive(void){
+
+	uint8_t res;
+	CS1_CriticalVariable();
+
+
+	CS1_EnterCritical();
+
+		res = guiIsActive;
+
+	CS1_ExitCritical();
+
+
+
+	return res;
+}
+
+
+
+
+
 void GUI_Images_Create(void) {
+
+	setImageGuiIsActive(true);
 	win = lv_win_create(lv_scr_act(), NULL);
 	lv_win_set_title(win, "Bilder");
 
@@ -200,7 +296,9 @@ void GUI_Images_Create(void) {
 		label_play = lv_label_create(btn_play, NULL);
 		lv_label_set_text(label_play, SYMBOL_OK);
 		GUI_AddObjToGroup(btn_play);
+
 		update();
+
 	}
 
 	else {

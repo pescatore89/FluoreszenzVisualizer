@@ -24,6 +24,7 @@
 #define SECTION_NAME_MODE_1		"MODUS1"
 #define SECTION_NAME_MODE_2		"MODUS2"
 #define SECTION_NAME_MODE_3		"MODUS3"
+#define IMAGES_FOLDER_NAME		"Bilder"
 #define NUMBER_OF_LEDS					(576)
 //static BMPImage* image = NULL;
 static BMPImage* image2 = NULL;
@@ -130,6 +131,65 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 
 }
 
+uint8_t readImageFromSD(DataMessage_t * pxData) {
+
+	//BMPImage* image;
+	pxData->image = &xBMPImage;
+	DATA_t* charData = NULL;
+	char* filename = pxData->name;
+	char* polle = NULL;
+	DATA_t * pointerData;
+	pointerData = &xDATA;
+	char nameArray[100];
+
+	strcpy(nameArray, filename);
+
+	char cd[4] = { "\\.." };
+	char * cd_back = cd;
+
+	uint8_t result;
+	FRESULT res = FR_OK;
+
+	CLS1_StdIOType *io = stdout;
+	if (FAT1_ChangeDirectory(IMAGES_FOLDER_NAME, io) != ERR_OK) {
+		/*something wnet wrong*/
+	}
+
+	else {
+
+		uint8_t length = 0;
+		bool has_suffix = FALSE;
+		const char ch = '.';
+
+		char * ret = nameArray;
+
+		char * suffix = ".bmp";
+		char * temp = ret;
+		strcat(temp, suffix);
+
+
+		res = BMPImageLoadData(temp, pxData->image, pxData->color_data);
+		if (res != FR_OK) {
+			CLS1_SendStr((unsigned char*) "ERROR loading File  ",
+					CLS1_GetStdio()->stdOut);
+			return ERR_FAILED;
+		} else {
+
+			//	pxData->color_data = image->data;
+			//	res = AddMessageToQueue(queue_handler, pxMessage);
+
+		}
+
+	}
+
+	//FRTOS1_vPortFree(polle);
+
+	if (FAT1_ChangeDirectory(cd_back, io) != ERR_OK) {
+		/*something wnet wrong*/
+	}
+
+}
+
 uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 		uint8_t excitation) {
 //	uint8_t readCharacteristicValues(TCHAR *fileName, Message_t * pxDATA) {
@@ -147,11 +207,9 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 
 	if (excitation == 1) {
 
-
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color266", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
 		pxDATA->color_266 = getRealValue(buff8);
-
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "fadeout266", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
@@ -189,7 +247,6 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 	}
 
 	else if (excitation == 2) { /*Read out all values beeing part of Excitation 2*/
-
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_1, "color355", "0",
 				(char* ) buff8, sizeof(buff8), fileName);

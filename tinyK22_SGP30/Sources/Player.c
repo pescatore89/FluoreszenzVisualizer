@@ -25,7 +25,7 @@ typedef enum {
 	READ_NEW, /* read new Message from playlistQueue  */
 	UPDATE_PLAYLIST, /*  */
 	PLAY_LIST, /* */
-	DISPLAY_IMAGE,
+	DISPLAY_IMAGE, CLEAR_IMAGE,
 
 } PLAYER_STATE;
 
@@ -136,8 +136,7 @@ static void PlayerTask(void *pvParameters) {
 					} else {
 						state = PLAY_LIST;
 					}
-				}
-				else if ((pxPlaylistMessage->cmd) == stop) {
+				} else if ((pxPlaylistMessage->cmd) == stop) {
 					pxDataMessage->cmd = stop;
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
 							!= QUEUE_OK) {
@@ -147,8 +146,7 @@ static void PlayerTask(void *pvParameters) {
 						state = IDLE;
 					}
 
-				}
-				else if ((pxPlaylistMessage->cmd) == play) {			/*the play CMD after an pause occured*/
+				} else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
 					pxDataMessage->cmd = play;
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
 							!= QUEUE_OK) {
@@ -163,13 +161,49 @@ static void PlayerTask(void *pvParameters) {
 				state = UPDATE_PLAYLIST;
 			} else if ((pxPlaylistMessage->state) == newImage) {
 				state = DISPLAY_IMAGE;
+			} else if ((pxPlaylistMessage->state) == clrImage) {
+				state = CLEAR_IMAGE;
 			}
 
 			break;
 
 		case DISPLAY_IMAGE:
 
-			/*Stop playing the Playlist*/
+			excitation = 1;
+
+			if (!getMemory(pxDataMessage)) {
+				/*problem allocating memory*/
+			} else {
+
+				pxDataMessage->name = pxPlaylistMessage->imageName;
+				res = readImageFromSD(pxDataMessage);
+
+				pxDataMessage->cmd = playImage;
+
+				if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+						!= QUEUE_OK) {
+					/*Queue is full*/
+				}
+
+				freeMemory(pxDataMessage);
+
+			}
+			state = IDLE;
+
+			break;
+
+		case CLEAR_IMAGE:
+
+			excitation = 1;
+
+			pxDataMessage->cmd = clearImage;
+
+			if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+					!= QUEUE_OK) {
+				/*Queue is full*/
+			}
+
+			state = IDLE;
 
 			break;
 

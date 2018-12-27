@@ -15,7 +15,7 @@ void NEO_GUI_SetLightLevel(uint8_t val);
 void GUI_NEO_Create(uint8_t* name);
 void updatePollenLabel(char* text);
 
-
-void setGuiIsActive(uint8_t);
-uint8_t getGuiIsActive(void);
+void updatePlayBtn(uint8_t val);
+void setNavGuiIsActive(uint8_t);
+uint8_t getNavGuiIsActive(void);
 #endif /* GUI_AIR_H_ */

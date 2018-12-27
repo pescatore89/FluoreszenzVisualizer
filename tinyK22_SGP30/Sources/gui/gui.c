@@ -19,6 +19,7 @@
 #include "gui_mainmenu.h"
 #include "gui_neopixel.h"
 #include "Message.h"
+#include "Images.h"
 
 #include "CS1.h"
 
@@ -113,6 +114,8 @@ static void GuiTask(void *p) {
 	UpdateMessage_t* rxMessage;
 	rxMessage = &xUpdateMessage;
 
+	bool isPlayingPollen = FALSE;
+
 //  GDisp1_DrawBox(0, 0, 50, 20, 2, GDisp1_COLOR_RED);
 //  GDisp1_UpdateFull();
 
@@ -129,7 +132,9 @@ static void GuiTask(void *p) {
 
 			if (rxMessage->cmd == stop) { /*Keine Polle ausgewählt zum abspielen*/
 				strcpy(text, "Push play to start");
+				isPlayingPollen = FALSE;
 			} else if (rxMessage->cmd == play) {
+				isPlayingPollen = TRUE;
 
 				if (rxMessage->excitation == 1) {
 					strcpy(text, "Anregung 266 nm\n ");
@@ -142,12 +147,15 @@ static void GuiTask(void *p) {
 			} else if (rxMessage->cmd == pause) {
 				strcpy(text, "paused: ");
 				strcat(text, rxMessage->name);
+			} else if (rxMessage->cmd == readyForImage) {
+				isPlayingPollen = FALSE;
 			}
 
 		}
 
-		if (getGuiIsActive()) {
+		if (getNavGuiIsActive()) {
 			updatePollenLabel(text);
+//			updatePlayBtn(isPlayingPollen);
 		}
 
 		LV_Task(); /* call this every 1-20 ms */

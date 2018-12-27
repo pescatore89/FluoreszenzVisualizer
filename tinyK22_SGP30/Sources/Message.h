@@ -58,13 +58,17 @@ typedef enum {
 	pause,
 	stop,
 	skipF,
-	skipR
+	skipR,
+	playImage,
+	clearImage,
+	readyForImage,
 }COMMAND;
 
 typedef enum {
 	newData,		/*Update Playlist*/
 	newCMD,			/*updated Commando*/
-	newImage		/*Display an Image*/
+	newImage,		/*Display an Image*/
+	clrImage,	/*clear the Image*/
 } STATE;
 
 
@@ -73,6 +77,7 @@ struct PlaylistMessage {
 	uint8_t* playlist;
 	STATE state;
 	BMPImage* image;
+	char* imageName;
 } xPlaylistMessage;
 
 typedef struct PlaylistMessage PlaylistMessage_t;

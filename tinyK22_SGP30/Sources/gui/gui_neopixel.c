@@ -54,7 +54,7 @@ static void SetLabelValue(lv_obj_t *label, int32_t val) {
 }
 
 
-void setGuiIsActive(uint8_t val){
+void setNavGuiIsActive(uint8_t val){
 
 	CS1_CriticalVariable();
 
@@ -67,7 +67,7 @@ void setGuiIsActive(uint8_t val){
 
 }
 
-uint8_t getGuiIsActive(void){
+uint8_t getNavGuiIsActive(void){
 
 	uint8_t res;
 	CS1_CriticalVariable();
@@ -120,7 +120,7 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
 	GUI_GroupPull();
 	lv_obj_del(win);
 	win = NULL;
-	setGuiIsActive(false);
+	setNavGuiIsActive(false);
 	return LV_RES_INV;
 }
 
@@ -228,13 +228,27 @@ void updatePollenLabel(char* text){
 }
 
 
+void updatePlayBtn(uint8_t val){
+
+	if(val == TRUE){
+		lv_btn_set_state(btn_play, LV_BTN_STATE_INA);
+		lv_btn_set_state(btn_pause, LV_BTN_STATE_REL);
+		lv_btn_set_state(btn_stop, LV_BTN_STATE_REL);
+	}
+	else{
+		lv_btn_set_state(btn_play, LV_BTN_STATE_REL);
+		lv_btn_set_state(btn_pause, LV_BTN_STATE_INA);
+		lv_btn_set_state(btn_stop, LV_BTN_STATE_INA);
+	}
+
+}
 
 
 
 void GUI_NEO_Create(uint8_t * name) {
 
 
-	setGuiIsActive(true);
+	setNavGuiIsActive(true);
 
 	namesActive = name;	// schreibt die Namen der aktiven pollen auf den globalen pointer
 

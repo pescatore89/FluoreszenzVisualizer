@@ -18,14 +18,20 @@ uint8_t Config_ReadIni(const CLS1_StdIOType *io);
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
 uint8_t Config_ReadPollen(void);
+uint8_t Config_ReadImages(void);
 uint8_t Config_Setup(void);
 char** getNamelist(void);
-int quantity;
+
+char** getImagesList(void);
+int getQuantityOfImages(void);
+
+
 int getQuantity(void);
 void initConfigData(void);
 bool getSensorEnabled(void);
 void setSensorEnabled(bool enabled);
-char** namelist;	// Platzhalter für die namen der Pollen
+
+
 
 void setPowerConnected(uint8_t);
 uint8_t getPowerConnected(void);

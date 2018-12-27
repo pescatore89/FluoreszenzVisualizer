@@ -29,7 +29,7 @@
 #if PL_CONFIG_HAS_NEO_PIXEL
 #include "gui_neopixel.h"
 #endif
-
+#include "More.h"
 #include "gui_pollen.h"
 #include "gui_power.h"
 
@@ -112,10 +112,9 @@ static lv_res_t Btn_Power_click_action(struct _lv_obj_t *obj) {
 }
 
 static lv_res_t Btn_More_click_action(struct _lv_obj_t *obj) {
-
+	GUI_More_Create();
 	return LV_RES_OK;
 }
-
 
 static lv_res_t Btn_Pollen_click_action(struct _lv_obj_t *obj) {
 	GUI_POLLEN_Create();
@@ -171,7 +170,6 @@ void GUI_MainMenuCreate(void) {
 	gui_win = lv_win_create(lv_scr_act(), NULL);
 	lv_win_set_title(gui_win, "Menu");
 
-
 	/* Make the window content responsive */
 	//lv_win_set_layout(gui_win, LV_LAYOUT_PRETTY); /* this will arrange the buttons */
 #if 0
@@ -222,13 +220,11 @@ void GUI_MainMenuCreate(void) {
 	obj = lv_list_add(list1, NULL, "Pollen", Btn_Pollen_click_action);
 	GUI_AddObjToGroup(obj);
 
-
 #endif
 #if PL_CONFIG_HAS_NEO_PIXEL
 	//obj = lv_list_add(list1, SYMBOL_CLOSE, "Pollen", Btn_NeoPixel_click_action);
 	obj = lv_list_add(list1, NULL, "Power", Btn_Power_click_action);
 	GUI_AddObjToGroup(obj);
-
 
 #endif
 
@@ -244,10 +240,9 @@ void GUI_MainMenuCreate(void) {
 	GUI_AddObjToGroup(obj);
 #endif
 
-
 	lv_obj_set_size(list1, 80, 100); /* fixed size */
 
-	lv_obj_align(list1,gui_win,LV_ALIGN_CENTER,0, 0);
+	lv_obj_align(list1, gui_win, LV_ALIGN_CENTER, 0, 0);
 
 }
 

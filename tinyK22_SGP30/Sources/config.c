@@ -16,6 +16,7 @@
 #include <stdlib.h>     // Header file for malloc/free.
 #define INI_FILE_NAME			"Config.txt"
 #define INI_FILE_NAME_POLLEN	"Pollen.txt"
+#define INI_FILE_NAME_IMAGES	"Images.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
 #define INI_SECTION_NAME_TIMING	"TIMING"
 #define INI_SECTION_NAME_SENSOR "LIGHTSENSOR"
@@ -31,6 +32,12 @@ static uint32_t timing [100];		/*0 --> timingDelayBetweenSeq1_2;
  	 	 	 	 	 	 	 	  	  ...	*/
 
 
+static char** namelist;	// Platzhalter für die namen der Pollen
+static char** imageslist; //Namen der Bilder
+
+
+static int quantity;		// Anzahl der gespeicherten Pollen
+static int quantityimages;	// Anzahl der gespeicherten Bilder
 
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "CONFIG",
@@ -114,6 +121,7 @@ void initConfigData(void) {
 
 	Config_Setup();			// sets up all the Configurations
 	Config_ReadPollen();	// reads/stores all the names of the pollen
+	Config_ReadImages();	// reads/stores all the names of the Images
 }
 
 void setPowerConnected(uint8_t val) {
@@ -238,6 +246,73 @@ uint8_t Config_ReadPollen(void) {
 
 }
 
+
+
+
+
+uint8_t Config_ReadImages(void) {
+
+	int val;
+	int power = -1;
+	int lines = -1;
+	int nLEDsPerLine = -1;
+	uint8_t buf[100];
+
+	char key[2];
+	char *key_p;
+	key_p = key;
+	int l = 1;
+
+	CLS1_SendStr(
+			(unsigned char*) "Loading Images from " INI_FILE_NAME_IMAGES "\r\n",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets("quantity", "n", "0", (char* ) buf, sizeof(buf),
+			INI_FILE_NAME_IMAGES);
+	quantityimages = buf[0] - '0';
+	CLS1_SendStr((unsigned char*) "Anzahl Bilder: ", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendCh(quantityimages, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
+
+	imageslist = (char **) malloc(quantityimages * sizeof(char*));
+	if (imageslist == NULL) {
+		// ups
+		return ERR_FAULT;
+	}
+
+	for (int z = 0; z < quantityimages; z++) {
+		imageslist[z] = (char*) malloc(MAX_NAME_LENGTH * sizeof(char));
+		if (imageslist[z] == NULL) {
+			/*ups*/
+			return ERR_FAULT;
+		}
+	}
+
+	for (int i = 1; i <= quantityimages; i++) {
+
+		key[0] = i + '0';
+		key[1] = '\0';
+
+		MINI1_ini_gets("names", key_p, "-", (char* ) buf, sizeof(buf),
+				INI_FILE_NAME_IMAGES);
+
+		strcpy(imageslist[i - 1], buf);
+		CLS1_SendStr((unsigned char*) "-", CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) imageslist[i - 1], CLS1_GetStdio()->stdOut);
+		CLS1_SendStr((unsigned char*) "\n\r", CLS1_GetStdio()->stdOut);
+
+	}
+
+	return ERR_OK;
+
+}
+
+
+
+
+
+
+
 bool getSensorEnabled(void) {
 
 	CS1_CriticalVariable()
@@ -273,7 +348,25 @@ char** getNamelist(void) {
 	return res;
 }
 
+
 int getQuantity(void) {
 	return quantity;
 }
+
+char** getImagesList(void){
+	char** res;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	res = imageslist;
+	CS1_ExitCritical();
+
+	return res;
+}
+int getQuantityOfImages(void){
+	return quantityimages;
+}
+
+
+
+
 

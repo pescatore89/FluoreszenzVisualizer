@@ -47,7 +47,7 @@ static uint16_t getPosInNamelist(char* name) {
 	int nOFnames = getQuantity();
 	uint16_t pos = 0;
 	for (i; i < nOFnames; i++) {
-		if (strcmp(name, namelist[i]) == 0) {
+		if (strcmp(name, getNamelist()[i]) == 0) {
 			return pos;
 		} else {
 			pos++;

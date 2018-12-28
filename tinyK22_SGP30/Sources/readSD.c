@@ -65,11 +65,11 @@ static void removeSuffixBMP(char* filename, uint8_t excitation) {
 		nExcitation = '3';
 	}
 
-	char * ret;
+	char * ret = filename;
 
-	ret = strtok(filename, &nExcitation);
+	filename = strtok(ret, &nExcitation);
 
-	filename = ret;
+	//filename = ret;
 }
 
 uint8_t getDataArray(uint8_t* px) {

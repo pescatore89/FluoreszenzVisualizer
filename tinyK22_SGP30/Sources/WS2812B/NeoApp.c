@@ -1322,7 +1322,7 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 	NEO_TransferPixels();
 
 	/*Softwarestrombegrenzung*/
-#if 0
+#if 1
 	bool isLimited = SoftwareCurrentLimit(image, farbtiefe);
 
 //	size = ((image->biWidth) * (image->biHeight));

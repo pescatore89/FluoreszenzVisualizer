@@ -246,7 +246,8 @@ static void PlayerTask(void *pvParameters) {
 							/*make sure the NEO Task is waiting for a new Element */
 							if ((FRTOS1_xSemaphoreTake(mutex,0) != pdTRUE)) {
 								vTaskDelay(pdMS_TO_TICKS(10)); /*NEO Task is busy playing*/
-								break;
+								continue;
+								//break;
 							} else {
 
 								if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {

@@ -223,61 +223,69 @@ static void PlayerTask(void *pvParameters) {
 			break;
 
 		case PLAY_LIST:
-			if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
-					pxPlaylistMessage) != QUEUE_EMPTY) {
-				state = READ_NEW; /*new Element in the Playlist Queue*/
-				break;
-			}
 
-			else {
+			if (!getMemory(pxDataMessage)) {
+				/*problem allocating memory*/
+			} else {
 
-				if ((PeekDataQueue(queue_handler_data, pxDataMessage)
-						!= QUEUE_EMPTY)) { /*Has Element in the Data Queue, Neo Task hasnt taken it out yet*/
-					vTaskDelay(pdMS_TO_TICKS(10));
+				for (;;) {
 
-				} else {
-					/*make sure the NEO Task is waiting for a new Element */
-					if ((FRTOS1_xSemaphoreTake(mutex,0) != pdTRUE)) {
-						vTaskDelay(pdMS_TO_TICKS(10)); /*NEO Task is busy playing*/
+					if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
+							pxPlaylistMessage) != QUEUE_EMPTY) {
+						state = READ_NEW; /*new Element in the Playlist Queue*/
 						break;
-					} else {
+					}
 
-						if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
-							/*error giving back the semaphore*/
-						}
+					else {
 
-						if (!getMemory(pxDataMessage)) {
-							/*problem allocating memory*/
+						if ((PeekDataQueue(queue_handler_data, pxDataMessage)
+								!= QUEUE_EMPTY)) { /*Has Element in the Data Queue, Neo Task hasnt taken it out yet*/
+							vTaskDelay(pdMS_TO_TICKS(10));
+
 						} else {
+							/*make sure the NEO Task is waiting for a new Element */
+							if ((FRTOS1_xSemaphoreTake(mutex,0) != pdTRUE)) {
+								vTaskDelay(pdMS_TO_TICKS(10)); /*NEO Task is busy playing*/
+								break;
+							} else {
 
-							if (excitation == 1) {
-								pxDataMessage->name = getName();
+								if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+									/*error giving back the semaphore*/
+								} else {
+
+									if (excitation == 1) {
+										pxDataMessage->name = getName();
+									}
+
+									res = readDataFromSD(excitation,
+											pxDataMessage);
+									pxDataMessage->excitation = excitation;
+
+									if (AddMessageToDataQueue(
+											queue_handler_data, pxDataMessage)
+											!= QUEUE_OK) {
+										/*Queue is full*/
+									}
+
+									excitation++;
+									if (excitation == 4) {
+										excitation = 1;
+									}
+
+								}
+
 							}
-
-							res = readDataFromSD(excitation, pxDataMessage);
-							pxDataMessage->excitation = excitation;
-
-							if (AddMessageToDataQueue(queue_handler_data,
-									pxDataMessage) != QUEUE_OK) {
-								/*Queue is full*/
-							}
-
-							excitation++;
-							if (excitation == 4) {
-								excitation = 1;
-							}
-							freeMemory(pxDataMessage);
-
 						}
 					}
+
 				}
-
 			}
+			freeMemory(pxDataMessage);
 			break;
-
 		}
 	}
 }
+
 void PLAYER_Init(void) {
 //	CLS1_SetStdio(ios[0].stdio); /* using the first one as the default channel */
 	if (xTaskCreate(PlayerTask, "Player", 6000 / sizeof(StackType_t),

@@ -1296,6 +1296,7 @@ static bool SoftwareCurrentLimit(char* data, uint8_t farbtiefe) {
 		}
 
 	}
+	return isLimited;
 
 }
 
@@ -1321,11 +1322,11 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 	NEO_TransferPixels();
 
 	/*Softwarestrombegrenzung*/
-
+#if 0
 	bool isLimited = SoftwareCurrentLimit(image, farbtiefe);
 
 //	size = ((image->biWidth) * (image->biHeight));
-
+#endif
 	for (j = 0; j < NEOC_NOF_LANES; j++) {
 		for (k = 0; k < SINGLE_MATRIX_SIDE_LENGTH; k++) {
 			for (i = 0; i < MATRIX_RES; i++) {
@@ -1336,6 +1337,7 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
 				cnt = cnt + ((farbtiefe) / 8);
+
 
 			}
 		}
@@ -1512,6 +1514,7 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 		DimmPercentRing(i, (percente));
 		percente = percente + STARTING_DEGRADATION;
 	}
+//	vTaskDelay(pdMS_TO_TICKS(20));
 	NEO_TransferPixels();
 
 	matrixColorValue = getMatrixColorValue();
@@ -2004,6 +2007,8 @@ static void NeoTask(void* pvParameters) {
 					pxRxDataMessage->image->biBitCount, excitation);
 
 			if (ret_value == notAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
 				vTaskDelay(pdMS_TO_TICKS(getTiming(0)));
 				state = PLAY_SEQ2;
 			} else if (ret_value == stopAborted) {
@@ -2017,6 +2022,7 @@ static void NeoTask(void* pvParameters) {
 			break;
 
 		case PLAY_SEQ2:
+
 
 			playSeq2(pxRxDataMessage->char_data, excitation);
 

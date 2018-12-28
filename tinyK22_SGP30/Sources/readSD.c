@@ -335,6 +335,12 @@ int getRawInt(char c) {
 	return c - '0';
 }
 
+
+
+
+
+
+
 uint32_t getRealValue(const char *value) {
 	uint32_t result = 0;
 	int dec = 0;

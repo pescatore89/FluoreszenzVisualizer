@@ -33,8 +33,10 @@ void initConfigData(void);
 bool getSensorEnabled(void);
 void setSensorEnabled(bool enabled);
 
+uint32_t getSequenzColor(uint8_t sequenz, uint8_t pos);
 
-
+uint8_t getLetterEnabled(char letter);
+uint32_t getTrailSpeed(void);
 void setPowerConnected(uint8_t);
 uint8_t getPowerConnected(void);
 bool lightSensor;

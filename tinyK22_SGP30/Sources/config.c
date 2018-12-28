@@ -19,6 +19,8 @@
 #define INI_FILE_NAME_IMAGES	"Images.txt"
 #define INI_SECTION_NAME_POWER	"POWER"
 #define INI_SECTION_NAME_TIMING	"TIMING"
+#define INI_SECTION_NAME_COLOR	"COLOR"
+#define INI_SECTION_NAME_LETTER	"LETTER"
 #define INI_SECTION_NAME_SENSOR "LIGHTSENSOR"
 #define INI_SECTION_NAME		"names"
 #define INI_SECTION_NAME_LED	"LED"
@@ -26,8 +28,13 @@
 
 //#endif
 static uint8_t powerEnabled;
+static uint8_t letter_A;
+static uint8_t letter_T;
+static uint32_t trailSpeed;
 static uint32_t currentPowerSupply;
 static uint8_t maxCurrentPerLEDPixel;
+static uint32_t seq2_color[10]; /*Color for the sequence 2*/
+static uint32_t seq3_color[10]; /*Color for the sequence 3*/
 static uint32_t timing[100]; /*0 --> timingDelayBetweenSeq1_2;
  1 --> timingDisplaySeq2
  2 --> timingDelayBetweenSeq2_3
@@ -58,6 +65,27 @@ static void setTiming(uint32_t * value) {
 	timing[3] = value[3];
 
 }
+
+uint32_t getSequenzColor(uint8_t sequenz, uint8_t pos) {
+
+	if (sequenz == 2) {
+		return seq2_color[pos - 1];
+	} else if (sequenz == 3) {
+		return seq3_color[pos - 1];
+	}
+
+}
+
+static void setSequenzColor(uint8_t sequenz, uint8_t pos, uint32_t color){
+
+	if (sequenz == 2) {
+		seq2_color[pos] = color;
+	} else if (sequenz == 3) {
+		seq3_color[pos] = color;
+	}
+
+}
+
 
 uint32_t getTiming(uint8_t pos) {
 	return timing[pos];
@@ -130,6 +158,19 @@ void setPowerConnected(uint8_t val) {
 	;
 
 }
+
+
+
+uint8_t getLetterEnabled(char letter){
+	if(letter == 'A'){
+		return letter_A;
+	}
+	else if(letter == 'T'){
+		return letter_T;
+	}
+
+}
+
 uint8_t getPowerConnected(void) {
 
 	uint8_t res;
@@ -192,6 +233,34 @@ void setCurrentPerPixel(uint8_t val) {
 
 }
 
+
+
+uint32_t getTrailSpeed(void){
+	return trailSpeed;
+}
+
+static void setTrailSpeed(uint32_t speed){
+	trailSpeed = speed;
+}
+
+
+
+
+static uint32_t getColorValue(char* value){
+
+
+	uint8_t nDig = strlen(value);
+	uint32_t color;
+	color = getRealValue(value);
+
+	return color;
+
+
+}
+
+
+
+
 uint8_t Config_Setup(void) {
 
 	int val;
@@ -219,6 +288,13 @@ uint8_t Config_Setup(void) {
 
 	setTiming(Tbuf);
 
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "Trail_Speed", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	setTrailSpeed(getRealValue(buf));
+
+
+
+
 	/*read and Setup other values*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
@@ -234,11 +310,90 @@ uint8_t Config_Setup(void) {
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
-	if (buf[0]) {
+	if ((buf[0]-'0')) {
 		lightSensor = TRUE;
 	} else {
 		lightSensor = FALSE;
 	}
+
+	/*COLOR Values for Sequenz 2*/
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR1", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(2,0,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR2", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(2,1,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR3", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(2,2,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR4", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(2,3,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR5", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(2,4,Tbuf[0]);
+
+
+
+
+
+	/*COLOR Values for Sequenz 3*/
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR1", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(3,0,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR2", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(3,1,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR3", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(3,2,Tbuf[0]);
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR4", "-1",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	Tbuf[0] = getColorValue(buf);
+	setSequenzColor(3,3,Tbuf[0]);
+
+
+
+
+
+	/*Configuration fpr the Letters*/
+
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_LETTER, "A", "-1", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	if ((buf[0]-'0')) {
+		letter_A = TRUE;
+	} else {
+		letter_A = FALSE;
+	}
+
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_LETTER, "T", "-1", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	if ((buf[0]-'0')) {
+		letter_T = TRUE;
+	} else {
+		letter_T = FALSE;
+	}
+
+
+
+
 	return ERR_OK;
 }
 

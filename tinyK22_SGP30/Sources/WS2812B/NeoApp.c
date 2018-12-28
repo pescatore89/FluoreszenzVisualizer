@@ -271,10 +271,12 @@ static void displayLetter(char letter, uint32_t color) {
 #define COORDINATE_X_PIXEL3	16
 #define COORDINATE_X_PIXEL4	20
 
+#if 0
 #define COLOR_PIXEL1	0xff00ff
 #define COLOR_PIXEL2	0x00ffff
 #define COLOR_PIXEL3	0x00ff00
 #define COLOR_PIXEL4	0xff0000
+#endif
 
 static void updateLetterColor(uint8_t nPixels1, uint8_t nPixels2,
 		uint8_t nPixels3, uint8_t nPixels4) {
@@ -297,33 +299,33 @@ static void updateLetterColor(uint8_t nPixels1, uint8_t nPixels2,
 	percent3 = (((float) sum3) / ((float) 0xff));
 	percent4 = (((float) sum4) / ((float) 0xff));
 
-	red1 = NEO_GET_COLOR_RED(COLOR_PIXEL1);
-	green1 = NEO_GET_COLOR_GREEN(COLOR_PIXEL1);
-	blue1 = NEO_GET_COLOR_BLUE(COLOR_PIXEL1);
+	red1 = NEO_GET_COLOR_RED(getSequenzColor(3, 1));
+	green1 = NEO_GET_COLOR_GREEN(getSequenzColor(3, 1));
+	blue1 = NEO_GET_COLOR_BLUE(getSequenzColor(3, 1));
 
 	red1 = rint((float) percent1 * (float) red1);
 	green1 = rint((float) percent1 * (float) green1);
 	blue1 = rint((float) percent1 * (float) blue1);
 
-	red2 = NEO_GET_COLOR_RED(COLOR_PIXEL2);
-	green2 = NEO_GET_COLOR_GREEN(COLOR_PIXEL2);
-	blue2 = NEO_GET_COLOR_BLUE(COLOR_PIXEL2);
+	red2 = NEO_GET_COLOR_RED(getSequenzColor(3, 2));
+	green2 = NEO_GET_COLOR_GREEN(getSequenzColor(3, 2));
+	blue2 = NEO_GET_COLOR_BLUE(getSequenzColor(3, 2));
 
 	red2 = rint((float) percent2 * (float) red2);
 	green2 = rint((float) percent2 * (float) green2);
 	blue2 = rint((float) percent2 * (float) blue2);
 
-	red3 = NEO_GET_COLOR_RED(COLOR_PIXEL3);
-	green3 = NEO_GET_COLOR_GREEN(COLOR_PIXEL3);
-	blue3 = NEO_GET_COLOR_BLUE(COLOR_PIXEL3);
+	red3 = NEO_GET_COLOR_RED(getSequenzColor(3, 3));
+	green3 = NEO_GET_COLOR_GREEN(getSequenzColor(3, 3));
+	blue3 = NEO_GET_COLOR_BLUE(getSequenzColor(3, 3));
 
 	red3 = rint((float) percent3 * (float) red3);
 	green3 = rint((float) percent3 * (float) green3);
 	blue3 = rint((float) percent3 * (float) blue3);
 
-	red4 = NEO_GET_COLOR_RED(COLOR_PIXEL4);
-	green4 = NEO_GET_COLOR_GREEN(COLOR_PIXEL4);
-	blue4 = NEO_GET_COLOR_BLUE(COLOR_PIXEL4);
+	red4 = NEO_GET_COLOR_RED(getSequenzColor(3, 4));
+	green4 = NEO_GET_COLOR_GREEN(getSequenzColor(3, 4));
+	blue4 = NEO_GET_COLOR_BLUE(getSequenzColor(3, 4));
 
 	red4 = rint((float) percent4 * (float) red4);
 	green4 = rint((float) percent4 * (float) green4);
@@ -1338,7 +1340,6 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 				NEO_SetPixelColor(j, position, colorValue);
 				cnt = cnt + ((farbtiefe) / 8);
 
-
 			}
 		}
 
@@ -1391,12 +1392,6 @@ uint8_t NEOA_ParseCommand(const unsigned char* cmd, bool *handled,
 	return res;
 }
 #endif /* NEOA_CONFIG_PARSE_COMMAND_ENABLED */
-
-#define COLOR300 0xff00ff
-#define COLOR430 0x1b18c9
-#define COLOR480 0x21f2ee
-#define COLOR550 0x20f135
-#define COLOR700 0xf0341f
 
 static uint32_t getColorDimmedWithGamma(uint32_t color, uint8_t percent) {
 	uint32_t red, green, blue;
@@ -1457,23 +1452,23 @@ static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 
 	int i;
 	for (i = 1; i <= nPixels1; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL1, i, COLOR_PIXEL1);
-		SetCoordinate(COORDINATE_X_PIXEL1 + 1, i, COLOR_PIXEL1);
+		SetCoordinate(COORDINATE_X_PIXEL1, i, getSequenzColor(3, 1));
+		SetCoordinate(COORDINATE_X_PIXEL1 + 1, i, getSequenzColor(3, 1));
 	}
 
 	for (i = 1; i <= nPixels2; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL2, i, COLOR_PIXEL2);
-		SetCoordinate(COORDINATE_X_PIXEL2 + 1, i, COLOR_PIXEL2);
+		SetCoordinate(COORDINATE_X_PIXEL2, i, getSequenzColor(3, 2));
+		SetCoordinate(COORDINATE_X_PIXEL2 + 1, i, getSequenzColor(3, 2));
 	}
 
 	for (i = 1; i <= nPixels3; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL3, i, COLOR_PIXEL3);
-		SetCoordinate(COORDINATE_X_PIXEL3 + 1, i, COLOR_PIXEL3);
+		SetCoordinate(COORDINATE_X_PIXEL3, i, getSequenzColor(3, 3));
+		SetCoordinate(COORDINATE_X_PIXEL3 + 1, i, getSequenzColor(3, 3));
 	}
 
 	for (i = 1; i <= nPixels4; i++) {
-		SetCoordinate(COORDINATE_X_PIXEL4, i, COLOR_PIXEL4);
-		SetCoordinate(COORDINATE_X_PIXEL4 + 1, i, COLOR_PIXEL4);
+		SetCoordinate(COORDINATE_X_PIXEL4, i, getSequenzColor(3, 4));
+		SetCoordinate(COORDINATE_X_PIXEL4 + 1, i, getSequenzColor(3, 4));
 	}
 
 	NEO_TransferPixels();
@@ -1497,13 +1492,13 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 	uint32_t matrixColorValue = 0;
 
 	if (excitation == 1) {
-		SetTrail(characteristicValues->color_266, 13, 5, 50, 100);
+		SetTrail(characteristicValues->color_266, 13, 5, 50, getTrailSpeed());
 		fadeout = characteristicValues->fadeout_266;
 	} else if (excitation == 2) {
-		SetTrail(characteristicValues->color_355, 13, 5, 50, 100);
+		SetTrail(characteristicValues->color_355, 13, 5, 50, getTrailSpeed());
 		fadeout = characteristicValues->fadeout_355;
 	} else if (excitation == 3) {
-		SetTrail(characteristicValues->color_405, 13, 5, 50, 100);
+		SetTrail(characteristicValues->color_405, 13, 5, 50, getTrailSpeed());
 		fadeout = characteristicValues->fadeout_405;
 	}
 
@@ -1582,7 +1577,9 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	uint8_t value1, value2, value3, value4, value5, nPixels1, nPixels2,
 			nPixels3, nPixels4, nPixels5;
 
-	displayLetter('A', COLOR_LETTER);
+	if (getLetterEnabled('A')) { /*check if enabled in Config.txt*/
+		displayLetter('A', COLOR_LETTER);
+	}
 
 	if (excitation == 1) {
 		value1 = characteristicValues->amplitude_266_1;
@@ -1620,8 +1617,8 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	for (int i = 1; i <= nPixels1; i++) {
-		SetCoordinate(4, i, COLOR300);
-		SetCoordinate(5, i, COLOR300);
+		SetCoordinate(4, i, getSequenzColor(2, 1));
+		SetCoordinate(5, i, getSequenzColor(2, 1));
 
 	}
 
@@ -1636,8 +1633,8 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	for (int i = 1; i <= nPixels2; i++) {
-		SetCoordinate(8, i, COLOR430);
-		SetCoordinate(9, i, COLOR430);
+		SetCoordinate(8, i, getSequenzColor(2, 2));
+		SetCoordinate(9, i, getSequenzColor(2, 2));
 
 	}
 	if (value3 < 4) {
@@ -1651,8 +1648,8 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	for (int i = 1; i <= nPixels3; i++) {
-		SetCoordinate(12, i, COLOR480);
-		SetCoordinate(13, i, COLOR480);
+		SetCoordinate(12, i, getSequenzColor(2, 3));
+		SetCoordinate(13, i, getSequenzColor(2, 3));
 
 	}
 	if (value4 < 4) {
@@ -1666,8 +1663,8 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	for (int i = 1; i <= nPixels4; i++) {
-		SetCoordinate(16, i, COLOR550);
-		SetCoordinate(17, i, COLOR550);
+		SetCoordinate(16, i, getSequenzColor(2, 4));
+		SetCoordinate(17, i, getSequenzColor(2, 4));
 
 	}
 	if (value5 < 4) {
@@ -1681,8 +1678,8 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	for (int i = 1; i <= nPixels5; i++) {
-		SetCoordinate(20, i, COLOR700);
-		SetCoordinate(21, i, COLOR700);
+		SetCoordinate(20, i, getSequenzColor(2, 5));
+		SetCoordinate(21, i, getSequenzColor(2, 5));
 
 	}
 
@@ -1706,12 +1703,14 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 	uint8_t nPixels3 = 0;
 	uint8_t nPixels4 = 0;
 
-	uint32_t color1 = COLOR_PIXEL1;
-	uint32_t color2 = COLOR_PIXEL2;
-	uint32_t color3 = COLOR_PIXEL3;
-	uint32_t color4 = COLOR_PIXEL4;
+	uint32_t color1 = getSequenzColor(3, 1);
+	uint32_t color2 = getSequenzColor(3, 2);
+	uint32_t color3 = getSequenzColor(3, 3);
+	uint32_t color4 = getSequenzColor(3, 4);
 
-	displayLetter('T', COLOR_LETTER);
+	if (getLetterEnabled('T')) { /*Check if enabled in Config.txt*/
+		displayLetter('T', COLOR_LETTER);
+	}
 
 	if (excitation == 1) {
 		resolution = getResolution(characteristicValues->lifetime_266_1,
@@ -1818,7 +1817,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 				ClearCoordinate(COORDINATE_X_PIXEL1, nPixels1);
 				ClearCoordinate(COORDINATE_X_PIXEL1 + 1, nPixels1);
 				nPixels1--;
-				color1 = COLOR_PIXEL1;
+				color1 = getSequenzColor(3, 1);
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL1, nPixels1, color1);
 				SetCoordinate(COORDINATE_X_PIXEL1 + 1, nPixels1, color1);
@@ -1832,7 +1831,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 				ClearCoordinate(COORDINATE_X_PIXEL2, nPixels2);
 				ClearCoordinate(COORDINATE_X_PIXEL2 + 1, nPixels2);
 				nPixels2--;
-				color2 = COLOR_PIXEL2;
+				color2 = getSequenzColor(3, 2);
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL2, nPixels2, color2);
 				SetCoordinate(COORDINATE_X_PIXEL2 + 1, nPixels2, color2);
@@ -1846,7 +1845,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 				ClearCoordinate(COORDINATE_X_PIXEL3, nPixels3);
 				ClearCoordinate(COORDINATE_X_PIXEL3 + 1, nPixels3);
 				nPixels3--;
-				color3 = COLOR_PIXEL3;
+				color3 = getSequenzColor(3, 3);
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL3, nPixels3, color3);
 				SetCoordinate(COORDINATE_X_PIXEL3 + 1, nPixels3, color3);
@@ -1860,14 +1859,16 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 				ClearCoordinate(COORDINATE_X_PIXEL4, nPixels4);
 				ClearCoordinate(COORDINATE_X_PIXEL4 + 1, nPixels4);
 				nPixels4--;
-				color4 = COLOR_PIXEL4;
+				color4 = getSequenzColor(3, 4);
 			} else {
 				SetCoordinate(COORDINATE_X_PIXEL4, nPixels4, color4);
 				SetCoordinate(COORDINATE_X_PIXEL4 + 1, nPixels4, color4);
 			}
 		}
 
-		updateLetterColor(nPixels1, nPixels2, nPixels3, nPixels4);
+		if (getLetterEnabled('T')) {		/*only needs to be updatet when enabled*/
+			updateLetterColor(nPixels1, nPixels2, nPixels3, nPixels4);
+		}
 
 		NEO_TransferPixels();
 		vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
@@ -2022,7 +2023,6 @@ static void NeoTask(void* pvParameters) {
 			break;
 
 		case PLAY_SEQ2:
-
 
 			playSeq2(pxRxDataMessage->char_data, excitation);
 

@@ -142,18 +142,7 @@ void GUI_POLLEN_Create(void) {
 	uint8_t counter = 0;
 
 	while (x < nOFnames) {
-		if(x>4){
-			cb = lv_cb_create(win, NULL);
-			lv_obj_set_pos(cb, posX, posY);
-			GUI_AddObjToGroup(cb);
-			lv_cb_set_text(cb, (name[x]));
-			lv_cb_set_action(cb, cb_release_action);
-			updateCheckbox(cb,counter);
-			x++;
-			posX = 50;
-			posY = posY + 20;
-		}
-		else{
+
 		cb = lv_cb_create(win, NULL);
 		lv_obj_set_pos(cb, posX, posY);
 		GUI_AddObjToGroup(cb);
@@ -161,13 +150,11 @@ void GUI_POLLEN_Create(void) {
 		lv_cb_set_action(cb, cb_release_action);
 		updateCheckbox(cb,counter);
 		counter++;
-		if(x == 4){
-			posY = 0;
-		}
+
 
 		x++;
 		posY = posY + 20;
-		}
+
 	}
 
 	lv_obj_t *label;

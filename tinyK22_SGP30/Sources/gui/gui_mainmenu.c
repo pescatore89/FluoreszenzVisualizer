@@ -235,7 +235,7 @@ void GUI_MainMenuCreate(void) {
 #endif
 
 #if PL_CONFIG_HAS_TSL2561
-	obj = lv_list_add(list1, NULL, "More", Btn_More_click_action);
+	obj = lv_list_add(list1, NULL, "Weiteres", Btn_More_click_action);
 
 	GUI_AddObjToGroup(obj);
 #endif

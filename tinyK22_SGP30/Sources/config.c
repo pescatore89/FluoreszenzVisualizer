@@ -49,11 +49,18 @@ static int quantityimages;	// Anzahl der gespeicherten Bilder
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "CONFIG",
 			(unsigned char*) "Configurations on the SD-Card\r\n", io->stdOut);
-	CLS1_SendHelpStr((unsigned char*) "  printConfig",
-			(unsigned char*) "Prints the specific config File\r\n", io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  printConfig original",
+			(unsigned char*) "Prints the specific config File on the SD-Card\r\n",
+			io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  load original",
+			(unsigned char*) "load original values from Config.txt\r\n",
+			io->stdOut);
 	CLS1_SendHelpStr((unsigned char*) "  help",
 			(unsigned char*) "Print help or status information\r\n",
 			io->stdOut);
+	CLS1_SendHelpStr((unsigned char*) "  set <Section> <key> <value>",
+			(unsigned char*) "Possibility to set new values\r\n", io->stdOut);
+
 	return ERR_OK;
 }
 
@@ -63,6 +70,206 @@ static void setTiming(uint32_t * value) {
 	timing[1] = value[1];
 	timing[2] = value[2];
 	timing[3] = value[3];
+
+}
+
+static void setLetterEnabled(char letter, uint8_t enabled) {
+	if (letter == 'A') {
+		letter_A = enabled;
+	} else if (letter == 'T') {
+		letter_T = enabled;
+	}
+}
+
+void setPowerConnected(uint8_t val) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	powerEnabled = val;
+	CS1_ExitCritical()
+	;
+
+}
+
+void setPowerSupplyCurrent(uint32_t val) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	currentPowerSupply = val;
+	CS1_ExitCritical()
+	;
+
+}
+
+void setCurrentPerPixel(uint8_t val) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	maxCurrentPerLEDPixel = val;
+	CS1_ExitCritical()
+	;
+
+}
+
+static void setTrailSpeed(uint32_t speed) {
+	trailSpeed = speed;
+}
+
+static void setSequenzColor(uint8_t sequenz, uint8_t pos, uint32_t color) {
+
+	if (sequenz == 2) {
+		seq2_color[pos] = color;
+	} else if (sequenz == 3) {
+		seq3_color[pos] = color;
+	}
+
+}
+
+static uint8_t setNewValue(char *section, char* key, char* value) {
+
+	uint32_t Tbuf[32];
+	uint8_t res = ERR_OK;
+	if (!(strcmp(INI_SECTION_NAME_POWER, section))) {
+		if (!(strcmp("Power_Connected", key))) {
+			setPowerConnected(getRealValue(value));
+		} else if (!(strcmp("Max_LED_Current", key))) {
+			setCurrentPerPixel(getRealValue(value));
+		} else if (!(strcmp("Power_Supply_Current", key))) {
+			setPowerSupplyCurrent(getRealValue(value));
+		} else {
+			res = ERR_FAILED;
+		}
+#if 0
+	} else if (!(strcmp(INI_SECTION_NAME_LED, section))) {
+#endif
+	} else if (!(strcmp(INI_SECTION_NAME_SENSOR, section))) {
+		if (!(strcmp("enabled", key))) {
+			setSensorEnabled(getRealValue(value));
+		} else {
+			res = ERR_FAILED;
+		}
+
+	} else if (!(strcmp(INI_SECTION_NAME_TIMING, section))) {
+		if (!(strcmp("timeBetweenSeq1_2", key))) {
+			timing[0] = getRealValue(value);
+		} else if (!(strcmp("timeDisplaySeq2", key))) {
+			timing[1] = getRealValue(value);
+		} else if (!(strcmp("timeBetweenSeq2_3", key))) {
+			timing[2] = getRealValue(value);
+		} else if (!(strcmp("timeBetweenSeq3_1", key))) {
+			timing[3] = getRealValue(value);
+		} else if (!(strcmp("Trail_Speed", key))) {
+			setTrailSpeed(getRealValue(value));
+		}
+
+		else {
+			res = ERR_FAILED;
+		}
+
+	} else if (!(strcmp(INI_SECTION_NAME_COLOR, section))) {
+
+		if (!(strcmp("SEQ2_COLOR1", key))) {
+			setSequenzColor(2, 0, getRealValue(value));
+		} else if (!(strcmp("SEQ2_COLOR2", key))) {
+			setSequenzColor(2, 1, getRealValue(value));
+		} else if (!(strcmp("SEQ2_COLOR3", key))) {
+			setSequenzColor(2, 2, getRealValue(value));
+		} else if (!(strcmp("SEQ2_COLOR4", key))) {
+			setSequenzColor(2, 3, getRealValue(value));
+		} else if (!(strcmp("SEQ2_COLOR5", key))) {
+			setSequenzColor(2, 4, getRealValue(value));
+		}
+
+		else if (!(strcmp("SEQ3_COLOR1", key))) {
+			setSequenzColor(3, 0, getRealValue(value));
+		} else if (!(strcmp("SEQ3_COLOR2", key))) {
+			setSequenzColor(3, 1, getRealValue(value));
+		} else if (!(strcmp("SEQ3_COLOR3", key))) {
+			setSequenzColor(3, 2, getRealValue(value));
+		} else if (!(strcmp("SEQ3_COLOR4", key))) {
+			setSequenzColor(3, 3, getRealValue(value));
+		} else {
+			res = ERR_FAILED;
+		}
+
+	} else if (!(strcmp(INI_SECTION_NAME_LETTER, section))) {
+		setLetterEnabled(key[0], getRealValue(value));
+
+	} else {
+		res = ERR_FAILED;
+	}
+
+	return res;
+
+}
+
+bool getSensorEnabled(void) {
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	bool temp = lightSensor;
+	CS1_ExitCritical()
+	;
+
+	return temp;
+
+}
+
+void setSensorEnabled(bool enabled) {
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	lightSensor = enabled;
+	CS1_ExitCritical()
+	;
+}
+
+char** getNamelist(void) {
+	char** res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = namelist;
+	CS1_ExitCritical()
+	;
+
+	return res;
+}
+
+int getQuantity(void) {
+	return quantity;
+}
+
+char** getImagesList(void) {
+	char** res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = imageslist;
+	CS1_ExitCritical()
+	;
+
+	return res;
+}
+int getQuantityOfImages(void) {
+	return quantityimages;
+}
+
+uint8_t getLetterEnabled(char letter) {
+	if (letter == 'A') {
+		return letter_A;
+	} else if (letter == 'T') {
+		return letter_T;
+	}
 
 }
 
@@ -76,17 +283,6 @@ uint32_t getSequenzColor(uint8_t sequenz, uint8_t pos) {
 
 }
 
-static void setSequenzColor(uint8_t sequenz, uint8_t pos, uint32_t color){
-
-	if (sequenz == 2) {
-		seq2_color[pos] = color;
-	} else if (sequenz == 3) {
-		seq3_color[pos] = color;
-	}
-
-}
-
-
 uint32_t getTiming(uint8_t pos) {
 	return timing[pos];
 
@@ -94,19 +290,58 @@ uint32_t getTiming(uint8_t pos) {
 
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io) {
+	const uint8_t *p;
+	int32_t tmp, lane, pos, x, y, holo;
+	char * section;
+	char* key;
+	char* value;
+
+	uint8_t res = ERR_OK;
+
+	const char space = ' ';
+
+	char val[100];
+
 	if (UTIL1_strcmp((char*) cmd, CLS1_CMD_HELP) == 0
-			|| UTIL1_strcmp((char*) cmd, "BMP help") == 0) {
+			|| UTIL1_strcmp((char*) cmd, "CONFIG help") == 0) {
 		*handled = TRUE;
 		return PrintHelp(io);
 
-	} else if (UTIL1_strncmp((char*) cmd, "CONFIG printConfig",
-			sizeof("CONFIG printConfig ") - 1) == 0) { //reads the Config file on the SD-Card
+	} else if (UTIL1_strncmp((char*) cmd, "CONFIG printConfig original",
+			sizeof("CONFIG printConfig original ") - 1) == 0) { //reads the Config file on the SD-Card
 		*handled = TRUE;
 		//return Config_ReadPollen();
 		return Config_ReadIni(io);
+
+	} else if (UTIL1_strncmp((char*) cmd, "CONFIG load original",
+			sizeof("CONFIG load original ") - 1) == 0) { //reads the Config file on the SD-Card
+		*handled = TRUE;
+		//return Config_ReadPollen();
+		return Config_Setup();
+
+
+	} else if (UTIL1_strncmp((char* )cmd, "CONFIG set",
+			sizeof("CONFIG set") - 1) == 0) {
+		p = cmd + sizeof("CONFIG set ") - 1;
+
+		strcpy(val, p);
+		section = strtok(val, &space);
+		key = strtok(NULL, &space);
+		value = strtok(NULL, &space);
+		*handled = TRUE;
+		res = setNewValue(section, key, value);
+
 	}
-	return ERR_OK;
+
+	else {
+		*handled = FALSE;
+		res = ERR_FAILED;
+	}
+
+	return res;
 }
+
+
 
 uint8_t Config_ReadIni(const CLS1_StdIOType *io) {
 
@@ -117,9 +352,191 @@ uint8_t Config_ReadIni(const CLS1_StdIOType *io) {
 	uint8_t buf[32];
 	CLS1_SendStr((unsigned char*) "Loading values from " INI_FILE_NAME "\r\n",
 			CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "[POWER]\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "Power_Connected = ",
+			CLS1_GetStdio()->stdOut);
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "Max_LED_Current = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Max_LED_Current", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "Power_Supply_Current  = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Supply_Current", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "[LED]\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "nLines  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_LED, "nLines", "0", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "nLEDs_per_Line  = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_LED, "nLEDs_per_Line", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "[LIGHTSENSOR]\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "enabled  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "-1", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "[TIMING]\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "timeBetweenSeq1_2  = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq1_2", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "timeDisplaySeq2  = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeDisplaySeq2", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "timeBetweenSeq2_3  = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq2_3", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "timeBetweenSeq3_1  = ",
+			CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "timeBetweenSeq3_1", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "Trail_Speed  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_TIMING, "Trail_Speed", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "[COLOR]\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ2_COLOR1  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR1", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ2_COLOR2  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR2", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ2_COLOR3  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR3", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ2_COLOR4  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR4", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ2_COLOR5  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR5", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ3_COLOR1  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR1", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ3_COLOR2  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR2", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ3_COLOR3  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR3", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "SEQ3_COLOR4  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR4", "0",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "[LETTER]\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "A  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_LETTER, "A", "0", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+	CLS1_SendStr((unsigned char*) "T  = ", CLS1_GetStdio()->stdOut);
+	val = MINI1_ini_gets(INI_SECTION_NAME_LETTER, "T", "0", (char* ) buf,
+			sizeof(buf), INI_FILE_NAME);
+	power = buf[0];
+	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
+
+#if 0
+
 	CLS1_SendStr((unsigned char*) "Power enabled: ", CLS1_GetStdio()->stdOut);
 	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
 	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
@@ -136,7 +553,7 @@ uint8_t Config_ReadIni(const CLS1_StdIOType *io) {
 			CLS1_GetStdio()->stdOut);
 	CLS1_SendStr(buf, CLS1_GetStdio()->stdOut);
 	CLS1_SendStr((unsigned char*) "\r\n", CLS1_GetStdio()->stdOut);
-
+#endif
 	return ERR_OK;
 
 }
@@ -146,29 +563,6 @@ void initConfigData(void) {
 	Config_Setup();			// sets up all the Configurations
 	Config_ReadPollen();	// reads/stores all the names of the pollen
 	Config_ReadImages();	// reads/stores all the names of the Images
-}
-
-void setPowerConnected(uint8_t val) {
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	powerEnabled = val;
-	CS1_ExitCritical()
-	;
-
-}
-
-
-
-uint8_t getLetterEnabled(char letter){
-	if(letter == 'A'){
-		return letter_A;
-	}
-	else if(letter == 'T'){
-		return letter_T;
-	}
-
 }
 
 uint8_t getPowerConnected(void) {
@@ -198,17 +592,6 @@ uint32_t getPowerSupplyCurrent(void) {
 	return res;
 }
 
-void setPowerSupplyCurrent(uint32_t val) {
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	currentPowerSupply = val;
-	CS1_ExitCritical()
-	;
-
-}
-
 uint8_t getCurrentPerPixel(void) {
 	uint8_t res;
 	CS1_CriticalVariable()
@@ -222,32 +605,11 @@ uint8_t getCurrentPerPixel(void) {
 	return res;
 }
 
-void setCurrentPerPixel(uint8_t val) {
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	maxCurrentPerLEDPixel = val;
-	CS1_ExitCritical()
-	;
-
-}
-
-
-
-uint32_t getTrailSpeed(void){
+uint32_t getTrailSpeed(void) {
 	return trailSpeed;
 }
 
-static void setTrailSpeed(uint32_t speed){
-	trailSpeed = speed;
-}
-
-
-
-
-static uint32_t getColorValue(char* value){
-
+static uint32_t getColorValue(char* value) {
 
 	uint8_t nDig = strlen(value);
 	uint32_t color;
@@ -255,11 +617,7 @@ static uint32_t getColorValue(char* value){
 
 	return color;
 
-
 }
-
-
-
 
 uint8_t Config_Setup(void) {
 
@@ -292,9 +650,6 @@ uint8_t Config_Setup(void) {
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	setTrailSpeed(getRealValue(buf));
 
-
-
-
 	/*read and Setup other values*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_POWER, "Power_Connected", "0",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
@@ -310,7 +665,7 @@ uint8_t Config_Setup(void) {
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_SENSOR, "enabled", "0", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
-	if ((buf[0]-'0')) {
+	if ((buf[0] - '0')) {
 		lightSensor = TRUE;
 	} else {
 		lightSensor = FALSE;
@@ -320,79 +675,66 @@ uint8_t Config_Setup(void) {
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR1", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(2,0,Tbuf[0]);
+	setSequenzColor(2, 0, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR2", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(2,1,Tbuf[0]);
+	setSequenzColor(2, 1, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR3", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(2,2,Tbuf[0]);
+	setSequenzColor(2, 2, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR4", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(2,3,Tbuf[0]);
+	setSequenzColor(2, 3, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR5", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(2,4,Tbuf[0]);
-
-
-
-
+	setSequenzColor(2, 4, Tbuf[0]);
 
 	/*COLOR Values for Sequenz 3*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR1", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(3,0,Tbuf[0]);
+	setSequenzColor(3, 0, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR2", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(3,1,Tbuf[0]);
+	setSequenzColor(3, 1, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR3", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(3,2,Tbuf[0]);
+	setSequenzColor(3, 2, Tbuf[0]);
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ3_COLOR4", "-1",
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	Tbuf[0] = getColorValue(buf);
-	setSequenzColor(3,3,Tbuf[0]);
-
-
-
-
+	setSequenzColor(3, 3, Tbuf[0]);
 
 	/*Configuration fpr the Letters*/
 
-
 	val = MINI1_ini_gets(INI_SECTION_NAME_LETTER, "A", "-1", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
-	if ((buf[0]-'0')) {
+	if ((buf[0] - '0')) {
 		letter_A = TRUE;
 	} else {
 		letter_A = FALSE;
 	}
 
-
 	val = MINI1_ini_gets(INI_SECTION_NAME_LETTER, "T", "-1", (char* ) buf,
 			sizeof(buf), INI_FILE_NAME);
-	if ((buf[0]-'0')) {
+	if ((buf[0] - '0')) {
 		letter_T = TRUE;
 	} else {
 		letter_T = FALSE;
 	}
-
-
-
 
 	return ERR_OK;
 }
@@ -510,63 +852,5 @@ uint8_t Config_ReadImages(void) {
 
 	return ERR_OK;
 
-}
-
-bool getSensorEnabled(void) {
-
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	bool temp = lightSensor;
-	CS1_ExitCritical()
-	;
-
-	return temp;
-
-}
-
-void setSensorEnabled(bool enabled) {
-
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	lightSensor = enabled;
-	CS1_ExitCritical()
-	;
-}
-
-char** getNamelist(void) {
-	char** res;
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	res = namelist;
-	CS1_ExitCritical()
-	;
-
-	return res;
-}
-
-int getQuantity(void) {
-	return quantity;
-}
-
-char** getImagesList(void) {
-	char** res;
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	res = imageslist;
-	CS1_ExitCritical()
-	;
-
-	return res;
-}
-int getQuantityOfImages(void) {
-	return quantityimages;
 }
 

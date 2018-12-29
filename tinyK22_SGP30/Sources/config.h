@@ -41,6 +41,8 @@ void setPowerConnected(uint8_t);
 uint8_t getPowerConnected(void);
 bool lightSensor;
 
+uint8_t Config_ReadIni_Local(const CLS1_StdIOType *io);
+
 
 
 /*

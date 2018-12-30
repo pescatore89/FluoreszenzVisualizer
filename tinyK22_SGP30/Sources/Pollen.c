@@ -27,7 +27,7 @@ static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 }
 
 uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
-
+#if 0
 	uint8_t result = ERR_OK;
 	QUEUE_RESULT res = QUEUE_OK;
 	Message_t *pxMessage;
@@ -52,6 +52,7 @@ uint8_t SetMode(int32_t mode, char* polle, const CLS1_StdIOType *io) {
 	}
 
 	return result;
+#endif
 
 }
 

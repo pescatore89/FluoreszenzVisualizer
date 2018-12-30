@@ -29,19 +29,11 @@ extern xQueueHandle queue_handler_update; /*Queue handler for update Queue*/
 
 /* Image type - contains height, width, and data */
 struct BMPImage {
-
-
     long biWidth;  					// [18] specifies width in pixels
     long biHeight;  				// [22] species height in pixels
-    									/*      Ist der Wert positiv, so ist die Bitmap eine sogenannte "bottom-up"-Bitmap (die Bilddaten beginnen mit der untersten und enden mit der obersten Bildzeile). Dies ist die gebräuchlichste Variante.
-        										Ist der Wert negativ, so ist die Bitmap eine "top-down"-Bitmap (die Bilddaten beginnen mit der obersten und enden mit der untersten Bildzeile).*/
     unsigned int bfOffBits;			// [10] Offset der Bilddaten in Byte vom Beginn der Datei an.
     unsigned short biBitCount; 		// [28] specifies the number of bit per pixel
     unsigned long biSizeImage;  	// [34] size of image in bytes
-
-
-  //  char *data;						// Farbwerte
-
 }xBMPImage;
 typedef struct BMPImage BMPImage;
 
@@ -202,15 +194,35 @@ QUEUE_RESULT TakeMessageFromUpdateQueue(xQueueHandle handle,UpdateMessage_t *msg
 
 
 
-
-
-
-
-
-
-
-
 extern xSemaphoreHandle mutex;
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 extern xQueueHandle queue_handler_Navigation;
 
 
@@ -267,5 +279,5 @@ QUEUE_RESULT TakeNavigationFromQueue(xQueueHandle handle, Navigation_t *msg);
 QUEUE_RESULT AddMessageToQueue(xQueueHandle handle, Message_t * msg);
 QUEUE_RESULT TakeMessageFromQueue(xQueueHandle handle, Message_t * msg);
 QUEUE_RESULT QueueHasElement(xQueueHandle handle);
-
+#endif
 #endif /* SOURCES_MESSAGE_H_ */

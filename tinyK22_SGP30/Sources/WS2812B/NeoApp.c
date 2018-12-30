@@ -262,7 +262,7 @@ static void displayLetter(char letter, uint32_t color) {
 		SetCoordinate(4, 19, color);
 	}
 
-	NEO_TransferPixels();
+
 
 }
 
@@ -1509,12 +1509,12 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 		DimmPercentRing(i, (percente));
 		percente = percente + STARTING_DEGRADATION;
 	}
-//	vTaskDelay(pdMS_TO_TICKS(20));
+
 	NEO_TransferPixels();
 
-	matrixColorValue = getMatrixColorValue();
+	//matrixColorValue = getMatrixColorValue();
 
-	highestColVal = getHighestColorValueFromLane(); /*possibility to reduce the Power consumption here*/
+	highestColVal = getHighestColorValueFromLane();
 
 	uint32_t nTicks = rint((float) (fadeout) / (delay));
 
@@ -1526,6 +1526,7 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 		for (int z = 1; z <= nRINGS; z++) {
 			decrementRingData(z, decrementStep);
 			NEO_TransferPixels();
+			vTaskDelay(pdMS_TO_TICKS(DELAY_MS));
 
 			if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
 					!= QUEUE_EMPTY) {
@@ -1554,7 +1555,7 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 
 			}
 
-			vTaskDelay(pdMS_TO_TICKS(DELAY_MS));
+
 		}
 
 		highestColVal = getHighestColorValueFromMatrix();
@@ -1588,7 +1589,6 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		value4 = characteristicValues->amplitude_266_4;
 		value5 = characteristicValues->amplitude_266_5;
 	}
-
 	else if (excitation == 2) {
 		value1 = characteristicValues->amplitude_355_1;
 		value2 = characteristicValues->amplitude_355_2;
@@ -1596,6 +1596,7 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		value4 = characteristicValues->amplitude_355_4;
 		value5 = characteristicValues->amplitude_355_5;
 	} else if (excitation == 3) {
+
 		value1 = characteristicValues->amplitude_405_1;
 		value2 = characteristicValues->amplitude_405_2;
 		value3 = characteristicValues->amplitude_405_3;
@@ -1606,11 +1607,13 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 	float n1, n2, n3, n4, n5;
 
+	float divisor = 100 / 24;
+
 	if ((value1) < 4) {
-		nPixels1 = value1;
+		nPixels1 = 0;
 	} else {
-		n1 = (value1 / 4);
-		nPixels1 = (unsigned int) n1;
+		n1 = (value1 / divisor);
+		nPixels1 = floor( n1);
 		if (nPixels1 >= 0x19) {
 			nPixels1 = 0x18;
 		}
@@ -1623,10 +1626,10 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	if (value2 < 4) {
-		nPixels2 = value2;
+		nPixels2 = 0;
 	} else {
-		n2 = (value2 / 4);
-		nPixels2 = (unsigned int) n2;
+		n2 = (value2 / divisor);
+		nPixels2 = floor (n2);
 		if (nPixels2 >= 0x19) {
 			nPixels2 = 0x18;
 		}
@@ -1638,10 +1641,10 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 	}
 	if (value3 < 4) {
-		nPixels3 = value3;
+		nPixels3 = 0;
 	} else {
-		n3 = (value3 / 4);
-		nPixels3 = (unsigned int) n3;
+		n3 = (value3 / divisor);
+		nPixels3 = floor (n3);
 		if (nPixels3 >= 0x19) {
 			nPixels3 = 0x18;
 		}
@@ -1653,10 +1656,10 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 	}
 	if (value4 < 4) {
-		nPixels4 = value4;
+		nPixels4 = 0;
 	} else {
-		n4 = (value4 / 4);
-		nPixels4 = (unsigned int) n4;
+		n4 = (value4 / divisor);
+		nPixels4 = floor (n4);
 		if (nPixels4 >= 0x19) {
 			nPixels4 = 0x18;
 		}
@@ -1668,10 +1671,10 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 	}
 	if (value5 < 4) {
-		nPixels5 = value5;
+		nPixels5 = 0;
 	} else {
-		n5 = (value5 / 4);
-		nPixels5 = (unsigned int) n5;
+		n5 = (value5 / divisor);
+		nPixels5 = floor (n5);
 		if (nPixels5 >= 0x19) {
 			nPixels5 = 0x18;
 		}
@@ -1687,7 +1690,7 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 
 }
 
-#define DELAY_TIME 					5		/*5ms */
+#define DELAY_TIME 					0		/*0ms */
 #define DECR_DELAY_AT_DELAY_TIME 	((255*5)*((NEO_PROCESSING_TIME)+(DELAY_TIME))/5)
 
 static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation) {
@@ -1768,8 +1771,8 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 						/ ((float) (resolution))));
 	}
 
-	decrementStep = round((float) DECR_DELAY_AT_DELAY_TIME)
-			/ (float) (resolution);
+	decrementStep = round(((float) (DECR_DELAY_AT_DELAY_TIME))
+			/ ((float) (resolution)));
 
 	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
 	vTaskDelay(pdMS_TO_TICKS(1000));
@@ -1871,7 +1874,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 		}
 
 		NEO_TransferPixels();
-		vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
+	//	vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
 
 	}
 

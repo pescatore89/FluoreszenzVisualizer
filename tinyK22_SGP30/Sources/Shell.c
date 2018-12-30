@@ -78,9 +78,9 @@ static const CLS1_ParseCommandCallback CmdParserTable[] = { CLS1_ParseCommand,
 		TmDt1_ParseCommand,
 #if PL_CONFIG_HAS_SD_CARD
 		FAT1_ParseCommand,
-		BMP_ParseCommand,
+	//	BMP_ParseCommand,
 		CONFIG_ParseCommand,
-		POLLEN_ParseCommand,
+	//	POLLEN_ParseCommand,
 #endif
 #if PL_CONFIG_HAS_SHT31
 		SHT31_ParseCommand,

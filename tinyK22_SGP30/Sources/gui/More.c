@@ -24,8 +24,6 @@ static lv_obj_t *images;
 static lv_obj_t *lauflicht;
 static bool isPlayingLauflicht = false;
 
-
-
 static lv_res_t win_close_action(lv_obj_t *btn) {
 	GUI_GroupPull();
 	lv_obj_del(win);
@@ -33,31 +31,23 @@ static lv_res_t win_close_action(lv_obj_t *btn) {
 	return LV_RES_INV;
 }
 
-
-
-bool getPlayingLauflicht (void){
+bool getPlayingLauflicht(void) {
 	return isPlayingLauflicht;
 }
 
-
-
-
-
-
 static lv_res_t Btn_Images_click_action(lv_obj_t *btn) {
 
-	GUI_Images_Create();
-	return LV_RES_OK;
+	if (getQuantityOfImages() >= 1) {
+		GUI_Images_Create();
 
+	}
+	return LV_RES_OK;
 
 }
 
+static lv_res_t Btn_Lauflicht_click_action(lv_obj_t *btn) {
 
-
-static lv_res_t Btn_Lauflicht_click_action(lv_obj_t *btn){
-
-
-	if(isPlayingLauflicht){
+	if (isPlayingLauflicht) {
 
 	}
 
@@ -84,7 +74,6 @@ void GUI_More_Create() {
 
 	list1 = lv_list_create(win, NULL);
 	/*Add list elements*/
-
 
 	//obj = lv_list_add(list1, SYMBOL_CLOSE, "Pollen", Btn_NeoPixel_click_action);
 	images = lv_list_add(list1, NULL, "Bilder", Btn_Images_click_action);

@@ -44,7 +44,7 @@ static char** namelist;	// Platzhalter für die namen der Pollen
 static char** imageslist; //Namen der Bilder
 
 static int quantity;		// Anzahl der gespeicherten Pollen
-static int quantityimages;	// Anzahl der gespeicherten Bilder
+static int quantityimages = 0;	// Anzahl der gespeicherten Bilder
 
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
 	CLS1_SendHelpStr((unsigned char*) "CONFIG",

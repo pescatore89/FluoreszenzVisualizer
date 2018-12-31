@@ -298,7 +298,7 @@ uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 
 	uint8_t res = ERR_OK;
 
-	const char space = ' ';
+	const char space[] = "\x20 ";
 
 	char val[100];
 

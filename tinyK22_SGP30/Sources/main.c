@@ -124,6 +124,8 @@ int main(void)
   size = sizeof(buf);
   size = sizeof(values);
 
+
+  uint8_t zagadai = 12;
   APP_Run();		// this is where it all begins...
   /* For example: for(;;) { } */
 

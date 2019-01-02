@@ -114,6 +114,16 @@ int main(void)
   /* Write your code here */
   WAIT1_Waitms(100);
 
+
+
+  uint16_t abcd [16];
+  uint8_t buf [10];
+  static uint16_t values [3];
+
+  uint8_t size = sizeof("abcd");
+  size = sizeof(buf);
+  size = sizeof(values);
+
   APP_Run();		// this is where it all begins...
   /* For example: for(;;) { } */
 

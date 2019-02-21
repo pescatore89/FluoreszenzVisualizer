@@ -11,7 +11,7 @@
 
 
 
-
+extern int mySuperFancyVar;
 
 
 #endif /* SOURCES_NAVIGATION_H_ */

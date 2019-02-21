@@ -67,7 +67,7 @@ static void AppTask(void *pv) {
 #endif
 
 	for (;;) {
-			LED1_Neg();
+	//		LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }

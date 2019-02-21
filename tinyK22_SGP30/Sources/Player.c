@@ -10,6 +10,7 @@
 #include "FRTOS1.h"
 #include "readSD.h"
 #include "config.h"
+#include "LCD1.h"
 #include <stdio.h>      // Header file for standard file i/o.
 #include <stdlib.h>     // Header file for malloc/free.
 #include <ctype.h>
@@ -109,7 +110,7 @@ static void PlayerTask(void *pvParameters) {
 	PLAYER_STATE state = IDLE;
 	uint8_t excitation = 1;
 	uint8_t res;
-
+	LCD1_DisplayOnOff(0);
 	int k = 12;
 	for (;;) {
 

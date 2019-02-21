@@ -1,31 +1,30 @@
 /* ###################################################################
-**     Filename    : main.c
-**     Project     : tinyK22_SGP30
-**     Processor   : MK22FN512VLH12
-**     Version     : Driver 01.01
-**     Compiler    : GNU C Compiler
-**     Date/Time   : 2018-09-30, 18:31, # CodeGen: 0
-**     Abstract    :
-**         Main module.
-**         This module contains user's application code.
-**     Settings    :
-**     Contents    :
-**         No public methods
-**
-** ###################################################################*/
+ **     Filename    : main.c
+ **     Project     : tinyK22_SGP30
+ **     Processor   : MK22FN512VLH12
+ **     Version     : Driver 01.01
+ **     Compiler    : GNU C Compiler
+ **     Date/Time   : 2018-09-30, 18:31, # CodeGen: 0
+ **     Abstract    :
+ **         Main module.
+ **         This module contains user's application code.
+ **     Settings    :
+ **     Contents    :
+ **         No public methods
+ **
+ ** ###################################################################*/
 /*!
-** @file main.c
-** @version 01.01
-** @brief
-**         Main module.
-**         This module contains user's application code.
-*/         
+ ** @file main.c
+ ** @version 01.01
+ ** @brief
+ **         Main module.
+ **         This module contains user's application code.
+ */
 /*!
-**  @addtogroup main_module main module documentation
-**  @{
-*/         
+ **  @addtogroup main_module main module documentation
+ **  @{
+ */
 /* MODULE main */
-
 
 /* Including needed modules to compile this module/procedure */
 #include "Cpu.h"
@@ -101,54 +100,84 @@
 /* User includes (#include below this line is not maintained by Processor Expert) */
 #include "Application.h"
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
+
+typedef enum {
+	LED_0 = (1 << 0), LED_1 = (1 << 1), LED_2 = (1 << 2), LED_3 = (1 << 3)
+} LED_Set;
+
+uint8_t* p1;
+uint8_t* p2;
+
+#define LED (*((uint32_t*)0x1fffffe4))
+#define LED_On(leds) ((LED)|=leds)
+#define DEC(i) { b = 0;\
+	i--;}
+
+void (*trg)(uint8_t);
+
+uint8_t n = 3;
+
+void test1(uint8_t* data) {
+
+	*(data) = *(data) - 1;
+
+	return;
+
+}
+void test(void *data) {
+
+	uint8_t duration = *((uint8_t*) data);
+
+	if (duration == 0) {
+
+		int z = 13;
+
+	} else {
+
+		*((uint8_t*) data) = 0;
+
+	}
+
+}
+
+typedef void (*TRG_Callback)(void*);
+
 int main(void)
 /*lint -restore Enable MISRA rule (6.3) checking. */
 {
-  /* Write your local variable definition here */
+	/* Write your local variable definition here */
 
-  /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
-  PE_low_level_init();
-  /*** End of Processor Expert internal initialization.                    ***/
+	/*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
+	PE_low_level_init();
+	/*** End of Processor Expert internal initialization.                    ***/
 
+	/* Write your code here */
+	WAIT1_Waitms(100);
 
-  /* Write your code here */
-  WAIT1_Waitms(100);
+	APP_Run();		// this is where it all begins...
+	/* For example: for(;;) { } */
 
-
-
-  uint16_t abcd [16];
-  uint8_t buf [10];
-  static uint16_t values [3];
-
-  uint8_t size = sizeof("abcd");
-  size = sizeof(buf);
-  size = sizeof(values);
-
-
-  uint8_t zagadai = 12;
-  APP_Run();		// this is where it all begins...
-  /* For example: for(;;) { } */
-
-  /*** Don't write any code pass this line, or it will be deleted during code generation. ***/
-  /*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
-  #ifdef PEX_RTOS_START
-    PEX_RTOS_START();                  /* Startup of the selected RTOS. Macro is defined by the RTOS component. */
-  #endif
-  /*** End of RTOS startup code.  ***/
-  /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
-  for(;;){}
-  /*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
+	/*** Don't write any code pass this line, or it will be deleted during code generation. ***/
+	/*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
+#ifdef PEX_RTOS_START
+	PEX_RTOS_START(); /* Startup of the selected RTOS. Macro is defined by the RTOS component. */
+#endif
+	/*** End of RTOS startup code.  ***/
+	/*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
+	for (;;) {
+	}
+	/*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
 } /*** End of main routine. DO NOT MODIFY THIS TEXT!!! ***/
 
 /* END main */
 /*!
-** @}
-*/
+ ** @}
+ */
 /*
-** ###################################################################
-**
-**     This file was created by Processor Expert 10.5 [05.21]
-**     for the Freescale Kinetis series of microcontrollers.
-**
-** ###################################################################
-*/
+ ** ###################################################################
+ **
+ **     This file was created by Processor Expert 10.5 [05.21]
+ **     for the Freescale Kinetis series of microcontrollers.
+ **
+ ** ###################################################################
+ */

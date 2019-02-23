@@ -17,6 +17,7 @@
 #include "TmDt1.h"
 #include  "Message.h"
 #include "config.h"
+#include "LCD1.h"
 #include "Player.h"
 #if PL_CONFIG_HAS_NEO_PIXEL
 #include "WS2812B/NeoApp.h"
@@ -60,15 +61,19 @@ static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 static void AppTask(void *pv) {
 	(void) pv;
 
-	vTaskDelay(pdMS_TO_TICKS(1000));
+	vTaskDelay(pdMS_TO_TICKS(500));
 	initConfigData();
 #if PL_CONFIG_HAS_GUI
 	GUI_Init();
 #endif
-
+	bool val = TRUE;
+	//vTaskDelay(pdMS_TO_TICKS(5000));
+	//LCD1_DisplayOnOff(!val);
 	for (;;) {
 	//		LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
+		//LCD1_DisplayOnOff(!val);
+		//val = !val;
 	}
 }
 

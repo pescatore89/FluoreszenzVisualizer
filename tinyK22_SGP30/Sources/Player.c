@@ -110,7 +110,7 @@ static void PlayerTask(void *pvParameters) {
 	PLAYER_STATE state = IDLE;
 	uint8_t excitation = 1;
 	uint8_t res;
-	LCD1_DisplayOnOff(0);
+
 	int k = 12;
 	for (;;) {
 

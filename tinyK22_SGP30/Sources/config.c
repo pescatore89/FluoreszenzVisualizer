@@ -24,6 +24,7 @@
 #define INI_SECTION_NAME_SENSOR "LIGHTSENSOR"
 #define INI_SECTION_NAME		"names"
 #define INI_SECTION_NAME_LED	"LED"
+#define INI_SECTION_NAME_LCD	"turnOfTime"
 #define MAX_NAME_LENGTH			 100
 
 //#endif
@@ -32,6 +33,7 @@ static uint8_t letter_A;
 static uint8_t letter_T;
 static uint32_t trailSpeed;
 static uint32_t currentPowerSupply;
+static uint32_t LCD_turn_off_time;
 static uint8_t maxCurrentPerLEDPixel;
 static uint32_t seq2_color[10]; /*Color for the sequence 2*/
 static uint32_t seq3_color[10]; /*Color for the sequence 3*/
@@ -102,6 +104,19 @@ void setPowerSupplyCurrent(uint32_t val) {
 	;
 
 }
+
+
+
+void setLCDturnOffTime(uint32_t val){
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	LCD_turn_off_time = val;
+	CS1_ExitCritical()
+	;
+}
+
 
 void setCurrentPerPixel(uint8_t val) {
 	CS1_CriticalVariable()
@@ -592,6 +607,21 @@ uint32_t getPowerSupplyCurrent(void) {
 	return res;
 }
 
+
+uint32_t getLCDTurnOffTime(void) {
+	uint32_t res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = LCD_turn_off_time;
+	CS1_ExitCritical()
+	;
+
+	return res;
+}
+
+
 uint8_t getCurrentPerPixel(void) {
 	uint8_t res;
 	CS1_CriticalVariable()
@@ -670,6 +700,14 @@ uint8_t Config_Setup(void) {
 	} else {
 		lightSensor = FALSE;
 	}
+
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_LCD, "LCD_turn_off_time", "1D4C0",		// default wert bei 2 min
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	setLCDturnOffTime(getRealValue(buf));
+
+
+
 
 	/*COLOR Values for Sequenz 2*/
 	val = MINI1_ini_gets(INI_SECTION_NAME_COLOR, "SEQ2_COLOR1", "-1",

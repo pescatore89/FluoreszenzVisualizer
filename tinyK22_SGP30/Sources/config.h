@@ -28,6 +28,7 @@ int getQuantityOfImages(void);
 void setPowerSupplyCurrent(uint32_t val);
 uint8_t getCurrentPerPixel(void);
 uint32_t getPowerSupplyCurrent(void);
+uint32_t getLCDTurnOffTime(void);
 int getQuantity(void);
 void initConfigData(void);
 bool getSensorEnabled(void);

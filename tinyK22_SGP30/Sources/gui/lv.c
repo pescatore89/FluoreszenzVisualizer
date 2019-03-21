@@ -9,9 +9,12 @@
 #include "lv.h"
 #include "lvgl/lvgl.h"
 #include "GDisp1.h"
+#include "FDisp1.h"
 #include "RNG1.h"
 #include <string.h> /* for memset() */
 #include "CLS1.h"
+#include "Application.h"
+
 
 static lv_indev_t *inputDevicePtr;
 
@@ -130,6 +133,11 @@ void LV_Task(void) {
 /* called for push button events from Events.c */
 void LV_ButtonEvent(uint8_t keys, uint16_t eventMask) {
   uint16_t buttonInfo;
+
+
+
+
+
 
   if (keys&(1<<0)) {
     buttonInfo = LV_BUTTON_CENTER | eventMask;

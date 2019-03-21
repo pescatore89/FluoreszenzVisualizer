@@ -41,6 +41,7 @@ extern "C" {
 #include "gui/lv.h"
 #if PL_CONFIG_HAS_SPI
 #include "SPI.h"
+#include "Application.h"
 #endif
 
 /*
@@ -112,9 +113,6 @@ void FRTOS1_vApplicationIdleHook(void) {
 	/* Called whenever the RTOS is idle (from the IDLE task).
 	 Here would be a good place to put the CPU into low power mode. */
 	/* Write your code here ... */
-
-
-
 	LED1_Neg();
 
 
@@ -176,6 +174,7 @@ void SM1_OnBlockSent(LDD_TUserData *UserDataPtr) {
  ** ===================================================================
  */
 void KEY1_OnKeyPressed(uint8_t keys) {
+	resetLCD_Counter();
 	LV_ButtonEvent(keys, LV_MASK_PRESSED);
 }
 

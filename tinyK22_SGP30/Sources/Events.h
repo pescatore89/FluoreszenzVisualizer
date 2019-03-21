@@ -69,6 +69,8 @@
 #include "BitIoLdd4.h"
 #include "SM1.h"
 #include "RNG1.h"
+#include "GFont1.h"
+#include "FDisp1.h"
 #include "TRG1.h"
 #include "GDisp1.h"
 #include "KEY1.h"

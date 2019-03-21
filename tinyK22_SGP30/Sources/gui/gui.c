@@ -125,6 +125,10 @@ static void GuiTask(void *p) {
 	//GUI_CreateGroup();
 #endif
 	GUI_MainMenuCreate();
+
+
+
+
 	for (;;) {
 
 		if (TakeMessageFromUpdateQueue(queue_handler_update, rxMessage)

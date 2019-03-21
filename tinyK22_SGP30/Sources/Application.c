@@ -31,6 +31,7 @@
 #endif
 
 #define APP_PERIODIC_TIMER_PERIOD_MS   10
+#define LCD_PERIODIC_TIMER_MS	100
 #if TmDt1_TICK_TIME_MS!=APP_PERIODIC_TIMER_PERIOD_MS
 #error "Software RTC tick time has to match timer time"
 #endif
@@ -40,7 +41,11 @@
 #if TMOUT1_TICK_PERIOD_MS!=APP_PERIODIC_TIMER_PERIOD_MS
 #error "Timeout tick time has to match timer time"
 #endif
+static xTimerHandle timerHndl_LCD;
 static xTimerHandle timerHndl;
+static int counter_LCD;
+static bool display_state = TRUE;
+static bool LCD_Init = TRUE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 
@@ -49,6 +54,12 @@ xQueueHandle queue_handler_data;
 xQueueHandle queue_handler_update;
 
 xSemaphoreHandle mutex; /*SemaphoreHandler declared in Message.h*/
+
+typedef enum {
+	INIT = 0, ON, OFF, RESET,
+} LCD_state;
+static LCD_state state = INIT;
+
 static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 #if PL_CONFIG_HAS_GUI
 	lv_tick_inc(APP_PERIODIC_TIMER_PERIOD_MS);
@@ -56,6 +67,98 @@ static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 	TRG1_AddTick();
 	TMOUT1_AddTick();
 	TmDt1_AddTick();
+}
+
+static bool LCDisInit() {
+
+	bool temp = false;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	temp = LCD_Init;
+	CS1_ExitCritical()
+	;
+	return temp;
+}
+
+static void setLCDinitState(bool isInit) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	LCD_Init = isInit;
+	CS1_ExitCritical()
+	;
+
+}
+
+static bool decrementLCD_CNT() {
+	bool res = TRUE;	//not reached 0 yet
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	counter_LCD--;
+	res = counter_LCD;
+	CS1_ExitCritical()
+	;
+	return res;
+
+}
+
+static void setTimerLCD(void) {
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	counter_LCD = getLCDTurnOffTime() / LCD_PERIODIC_TIMER_MS;
+	CS1_ExitCritical()
+	;
+
+}
+static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
+
+	int tempCnt = 0;
+
+	switch (state) {
+	case INIT:
+		if (!LCDisInit()) {
+			setTimerLCD();
+			state = ON;
+		}
+		break;
+	case ON:
+
+		if (display_state) {
+			if (!decrementLCD_CNT()) {
+				LCD1_DisplayOnOff(FALSE);	// turn off display
+				display_state = FALSE;
+			}
+		} else {
+			// do nothing
+		}
+
+		break;
+
+	}
+}
+
+void resetLCD_Counter(void) {
+
+	LCD1_DisplayOnOff(TRUE);	// swich on Display
+	setTimerLCD();
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	display_state = TRUE;
+	CS1_ExitCritical()
+	;
+
 }
 
 static void AppTask(void *pv) {
@@ -66,11 +169,12 @@ static void AppTask(void *pv) {
 #if PL_CONFIG_HAS_GUI
 	GUI_Init();
 #endif
+	setLCDinitState(FALSE);		//LCD ready;
 	bool val = TRUE;
 	//vTaskDelay(pdMS_TO_TICKS(5000));
 	//LCD1_DisplayOnOff(!val);
 	for (;;) {
-	//		LED1_Neg();
+		//		LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
 		//LCD1_DisplayOnOff(!val);
 		//val = !val;
@@ -91,7 +195,6 @@ uint8_t createQueues(void) {
 		vQueueAddToRegistry(queue_handler_playlist, "Playlist Queue");
 	}
 
-
 	/*Initialize Data Queue*/
 	queue_handler_data = FRTOS1_xQueueCreate(QUEUE_DATA_LENGTH,
 			sizeof(struct DataMessage_t*));
@@ -101,7 +204,6 @@ uint8_t createQueues(void) {
 	} else {
 		vQueueAddToRegistry(queue_handler_data, "Data Queue");
 	}
-
 
 	/*Initialize Update Queue*/
 	queue_handler_update = FRTOS1_xQueueCreate(QUEUE_UPDATE_LENGTH,
@@ -113,17 +215,13 @@ uint8_t createQueues(void) {
 		vQueueAddToRegistry(queue_handler_update, "Update Queue");
 	}
 
-
-
 	return res;
 }
 
 void APP_Run(void) {
 
-
-
 	uint8_t res = createQueues();
-	if(res != ERR_OK){
+	if (res != ERR_OK) {
 		/*error initializing queues*/
 	}
 	mutex = FRTOS1_xSemaphoreCreateMutex();
@@ -157,6 +255,8 @@ void APP_Run(void) {
 		}; /* error! probably out of memory */
 		/*lint +e527 */
 	}
+
+	/*Timer 1*/
 	timerHndl = xTimerCreate("timer", /* name */
 	pdMS_TO_TICKS(APP_PERIODIC_TIMER_PERIOD_MS), /* period/time */
 	pdTRUE, /* auto reload */
@@ -167,6 +267,22 @@ void APP_Run(void) {
 			; /* failure! */
 	}
 	if (xTimerStart(timerHndl, 0) != pdPASS) { /* start the timer */
+		for (;;)
+			; /* failure!?! */
+	}
+
+	/*Timer 2, Turning off LCD*/
+
+	timerHndl_LCD = xTimerCreate("timer_LCD", /* name */
+	pdMS_TO_TICKS(LCD_PERIODIC_TIMER_MS), /* period/time */
+	pdTRUE, /* auto reload */
+	(void*) 0, /* timer ID */
+	vTimerCallbackExpired_LCD); /* callback */
+	if (timerHndl == NULL) {
+		for (;;)
+			; /* failure! */
+	}
+	if (xTimerStart(timerHndl_LCD, 0) != pdPASS) { /* start the timer */
 		for (;;)
 			; /* failure!?! */
 	}

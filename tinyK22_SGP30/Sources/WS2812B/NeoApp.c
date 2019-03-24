@@ -55,6 +55,7 @@ typedef struct {
 	uint8_t counterArray[nDataPoints];
 	uint8_t nPixelsArray[nDataPoints];
 	uint32_t colorArray[nDataPoints];
+	uint8_t coordinateArray[nDataPoints][2];
 } seq3;
 
 typedef enum {
@@ -326,12 +327,23 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 
 	uint8_t highest_color_value_array[nDataPoints];
 
+	result.coordinateArray[0][0] = COORDINATE_X_PIXEL1;
+	result.coordinateArray[0][1] = COORDINATE_X_PIXEL1 + 1;
+	result.coordinateArray[1][0] = COORDINATE_X_PIXEL2;
+	result.coordinateArray[1][1] = COORDINATE_X_PIXEL2 + 1;
+	result.coordinateArray[2][0] = COORDINATE_X_PIXEL3;
+	result.coordinateArray[2][1] = COORDINATE_X_PIXEL3 + 1;
+	result.coordinateArray[3][0] = COORDINATE_X_PIXEL4;
+	result.coordinateArray[3][1] = COORDINATE_X_PIXEL4 + 1;
+	result.coordinateArray[4][0] = COORDINATE_X_PIXEL5;
+	result.coordinateArray[4][1] = COORDINATE_X_PIXEL5 + 1;
+
 	/*
 	 * Load Color value from config.c
 	 */
 
 	for (int r = 0; r < nDataPoints; r++) {
-		result.colorArray[r] = getSequenzColor(2, r+1);
+		result.colorArray[r] = getSequenzColor(2, r + 1);
 		/*
 		 * Calculate the highest color value (rgb)
 		 */
@@ -470,7 +482,7 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 				> (characteristicValues->lifetime_266_5)) {
 			result.decrementArray[u] =
 					round(
-							(float)((highest_color_value_array[u]
+							(float) ((highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
 									* result.nPixelsArray[u])
 									/ (float) (characteristicValues->lifetime_266_5));
@@ -1902,93 +1914,17 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 
-	uint8_t counter1, counter2, counter3, counter4, counter5;
-	uint8_t cnt1, cnt2, cnt3, cnt4, cnt5;
-	cnt1 = cnt2 = cnt3 = cnt4 = cnt5 = 0;
+	uint8_t cntArray[nDataPoints];
 
+	for (int l = 0; l < nDataPoints; l++) {
+		cntArray[l] = 0;
+	}
+
+	/*
+	 * Calculate the characteristic values assigned to the excitation
+	 */
 	seq3 char_values_seq3 = calculateDecrementValues(characteristicValues,
 			excitation);
-
-#if 0	//Letter disabled
-
-	if (getLetterEnabled('T')) { /*Check if enabled in Config.txt*/
-		displayLetter('T', COLOR_LETTER);
-	}
-
-	if (excitation == 1) {
-		resolution = getResolution(characteristicValues->lifetime_266_1,
-				characteristicValues->lifetime_266_2,
-				characteristicValues->lifetime_266_3,
-				characteristicValues->lifetime_266_4);
-
-		nPixels1 = ceil(
-				((float) (characteristicValues->lifetime_266_1)
-						/ ((float) (resolution))));
-		nPixels2 = ceil(
-				((float) (characteristicValues->lifetime_266_2)
-						/ ((float) (resolution))));
-		nPixels3 = ceil(
-				((float) (characteristicValues->lifetime_266_3)
-						/ ((float) (resolution))));
-		nPixels4 = ceil(
-				((float) (characteristicValues->lifetime_266_4)
-						/ ((float) (resolution))));
-		nPixels5 = ceil(
-				((float) (characteristicValues->lifetime_266_5)
-						/ ((float) (resolution))));
-
-	} else if (excitation == 2) {
-		resolution = getResolution(characteristicValues->lifetime_355_1,
-				characteristicValues->lifetime_355_2,
-				characteristicValues->lifetime_355_3,
-				characteristicValues->lifetime_355_4);
-		nPixels1 = ceil(
-				((float) (characteristicValues->lifetime_355_1)
-						/ ((float) (resolution))));
-		nPixels2 = ceil(
-				((float) (characteristicValues->lifetime_355_2)
-						/ ((float) (resolution))));
-		nPixels3 = ceil(
-				((float) (characteristicValues->lifetime_355_3)
-						/ ((float) (resolution))));
-		nPixels4 = ceil(
-				((float) (characteristicValues->lifetime_355_4)
-						/ ((float) (resolution))));
-		nPixels5 = ceil(
-				((float) (characteristicValues->lifetime_355_5)
-						/ ((float) (resolution))));
-	}
-
-	else if (excitation == 3) {
-		resolution = getResolution(characteristicValues->lifetime_405_1,
-				characteristicValues->lifetime_405_2,
-				characteristicValues->lifetime_405_3,
-				characteristicValues->lifetime_405_4);
-		nPixels1 = ceil(
-				((float) (characteristicValues->lifetime_405_1)
-						/ ((float) (resolution))));
-		nPixels2 = ceil(
-				((float) (characteristicValues->lifetime_405_2)
-						/ ((float) (resolution))));
-		nPixels3 = ceil(
-				((float) (characteristicValues->lifetime_405_3)
-						/ ((float) (resolution))));
-		nPixels4 = ceil(
-				((float) (characteristicValues->lifetime_405_4)
-						/ ((float) (resolution))));
-		nPixels5 = ceil(
-				((float) (characteristicValues->lifetime_405_5)
-						/ ((float) (resolution))));
-	}
-
-	decrementStep = round(
-			((float) (DECR_DELAY_AT_DELAY_TIME)) / ((float) (resolution)));
-
-	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
-	vTaskDelay(pdMS_TO_TICKS(1000));
-
-#endif
-
 
 	int index = 0;
 
@@ -1998,7 +1934,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 			&& (char_values_seq3.nPixelsArray[3] == 0)
 			&& (char_values_seq3.nPixelsArray[4] == 0))) {
 
-		// falls eine Message empfangen wurde, zb pause, stop usw
+		// check for Message from Player
 		if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
 				!= QUEUE_EMPTY) {
 			if (pxRxDataMessage->cmd == stop) {
@@ -2034,117 +1970,41 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 
 		// Dekrementierung der Pixelwerte
 
-		if (char_values_seq3.nPixelsArray[index] != 0) {
+		for (index = 0; index < nDataPoints; index++) {
 
-			if (cnt1 == char_values_seq3.counterArray[index]) {
-				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
-						char_values_seq3.decrementArray[index]);
-				cnt1 = 0;
+			if (char_values_seq3.nPixelsArray[index] != 0) {
 
-				if (char_values_seq3.colorArray[index] == 0) {
+				if (cntArray[index] == char_values_seq3.counterArray[index]) {
+					char_values_seq3.colorArray[index] = decrementValue(
+							char_values_seq3.colorArray[index],
+							char_values_seq3.decrementArray[index]);
+					cntArray[index] = 0;
 
-					ClearCoordinate(COORDINATE_X_PIXEL1, char_values_seq3.nPixelsArray[index]);
-					ClearCoordinate(COORDINATE_X_PIXEL1 + 1, char_values_seq3.nPixelsArray[index]);
-					char_values_seq3.nPixelsArray[index]--;
-					char_values_seq3.colorArray[index] = getSequenzColor(2, 1);
-				} else {
-					SetCoordinate(COORDINATE_X_PIXEL1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-					SetCoordinate(COORDINATE_X_PIXEL1 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+					if (char_values_seq3.colorArray[index] == 0) {
+
+						ClearCoordinate(
+								char_values_seq3.coordinateArray[index][0],
+								char_values_seq3.nPixelsArray[index]);
+						ClearCoordinate(
+								char_values_seq3.coordinateArray[index][1],
+								char_values_seq3.nPixelsArray[index]);
+						char_values_seq3.nPixelsArray[index]--;
+						char_values_seq3.colorArray[index] = getSequenzColor(2,
+								index + 1);
+					} else {
+						SetCoordinate(
+								char_values_seq3.coordinateArray[index][0],
+								char_values_seq3.nPixelsArray[index],
+								char_values_seq3.colorArray[index]);
+						SetCoordinate(
+								char_values_seq3.coordinateArray[index][1],
+								char_values_seq3.nPixelsArray[index],
+								char_values_seq3.colorArray[index]);
+					}
 				}
+				cntArray[index]++;
 			}
-			cnt1++;
 		}
-
-		index++;
-
-		if (char_values_seq3.nPixelsArray[index] != 0) {
-
-			if (cnt2 == char_values_seq3.counterArray[index]) {
-				cnt2 = 0;
-				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
-						char_values_seq3.decrementArray[index]);
-				if (char_values_seq3.colorArray[index] == 0) {
-
-					ClearCoordinate(COORDINATE_X_PIXEL2, char_values_seq3.nPixelsArray[index]);
-					ClearCoordinate(COORDINATE_X_PIXEL2 + 1, char_values_seq3.nPixelsArray[index]);
-					char_values_seq3.nPixelsArray[index]--;
-					char_values_seq3.colorArray[index] = getSequenzColor(2, 2);
-				} else {
-					SetCoordinate(COORDINATE_X_PIXEL2, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-					SetCoordinate(COORDINATE_X_PIXEL2 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-				}
-
-			}
-			cnt2++;
-
-		}
-
-		index++;
-
-		if (char_values_seq3.nPixelsArray[index] != 0) {
-
-			if (cnt3 == char_values_seq3.counterArray[index]) {
-				cnt3 = 0;
-				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
-						char_values_seq3.decrementArray[index]);
-				if (char_values_seq3.colorArray[index] == 0) {
-
-					ClearCoordinate(COORDINATE_X_PIXEL3, char_values_seq3.nPixelsArray[index]);
-					ClearCoordinate(COORDINATE_X_PIXEL3 + 1, char_values_seq3.nPixelsArray[index]);
-					char_values_seq3.nPixelsArray[index]--;
-					char_values_seq3.colorArray[index] = getSequenzColor(2, 3);
-				} else {
-					SetCoordinate(COORDINATE_X_PIXEL3, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-					SetCoordinate(COORDINATE_X_PIXEL3 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-				}
-			}
-			cnt3++;
-		}
-
-		index++;
-
-		if (char_values_seq3.nPixelsArray[index] != 0) {
-
-			if (cnt4 == char_values_seq3.counterArray[index]) {
-				cnt4 = 0;
-				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
-						char_values_seq3.decrementArray[index]);
-				if (char_values_seq3.colorArray[index] == 0) {
-
-					ClearCoordinate(COORDINATE_X_PIXEL4, char_values_seq3.nPixelsArray[index]);
-					ClearCoordinate(COORDINATE_X_PIXEL4 + 1, char_values_seq3.nPixelsArray[index]);
-					char_values_seq3.nPixelsArray[index]--;
-					char_values_seq3.colorArray[index] = getSequenzColor(2, 4);
-				} else {
-					SetCoordinate(COORDINATE_X_PIXEL4, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-					SetCoordinate(COORDINATE_X_PIXEL4 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-				}
-			}
-			cnt4++;
-		}
-
-		index++;
-
-		if (char_values_seq3.nPixelsArray[index] != 0) {
-
-			if (cnt5 == char_values_seq3.counterArray[index]) {
-				cnt5 = 0;
-				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
-						char_values_seq3.decrementArray[index]);
-				if (char_values_seq3.colorArray[index] == 0) {
-
-					ClearCoordinate(COORDINATE_X_PIXEL5, char_values_seq3.nPixelsArray[index]);
-					ClearCoordinate(COORDINATE_X_PIXEL5 + 1, char_values_seq3.nPixelsArray[index]);
-					char_values_seq3.nPixelsArray[index]--;
-					char_values_seq3.colorArray[index] = getSequenzColor(2, 5);
-				} else {
-					SetCoordinate(COORDINATE_X_PIXEL5, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-					SetCoordinate(COORDINATE_X_PIXEL5 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
-				}
-			}
-			cnt5++;
-		}
-
 
 #if 0
 		if (getLetterEnabled('T')) { /*only needs to be updatet when enabled*/
@@ -2154,7 +2014,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 
 		NEO_TransferPixels();
 
-		index = 0;
+
 		//	vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
 
 	}

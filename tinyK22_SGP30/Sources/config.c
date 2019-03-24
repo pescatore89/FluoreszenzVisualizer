@@ -24,7 +24,7 @@
 #define INI_SECTION_NAME_SENSOR "LIGHTSENSOR"
 #define INI_SECTION_NAME		"names"
 #define INI_SECTION_NAME_LED	"LED"
-#define INI_SECTION_NAME_LCD	"turnOfTime"
+#define INI_SECTION_NAME_LCD	"turnOffTime"
 #define MAX_NAME_LENGTH			 100
 
 //#endif

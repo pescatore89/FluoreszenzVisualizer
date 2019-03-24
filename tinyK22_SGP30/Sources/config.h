@@ -46,6 +46,10 @@ uint8_t Config_ReadIni_Local(const CLS1_StdIOType *io);
 
 
 
+
+#define nDataPoints 5
+
+
 /*
  * Function to get the Timing Setup
  *

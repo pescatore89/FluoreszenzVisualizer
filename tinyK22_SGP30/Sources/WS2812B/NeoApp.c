@@ -35,6 +35,10 @@
 
 #endif
 
+#define DELAY_MS 1
+#define nRINGS	12
+#define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
+#define STARTING_DEGRADATION		3
 #define WIDTH_PIXELS (3*8)  /* 3 8x8 tiles */
 #define HEIGHT_PIXELS (8)   /* 1 tile */
 #define PIXEL_NOF_X   (24)
@@ -43,6 +47,15 @@
 static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
+
+static uint8_t WL_pixels[nDataPoints];
+
+typedef struct {
+	uint8_t decrementArray[nDataPoints];
+	uint8_t counterArray[nDataPoints];
+	uint8_t nPixelsArray[nDataPoints];
+	uint32_t colorArray[nDataPoints];
+} seq3;
 
 typedef enum {
 	IDLE_STATE = 0, /* */
@@ -227,6 +240,35 @@ uint8_t ClearCoordinate(int x, int y) {
 
 }
 
+static uint8_t* getPixelsWavelength() {
+
+	return WL_pixels;
+
+}
+
+static uint8_t getHighestColorValue(uint32_t color) {
+
+	uint32_t red, green, blue;
+	uint8_t result;
+
+	red = NEO_GET_COLOR_RED(color);
+	green = NEO_GET_COLOR_GREEN(color);
+	blue = NEO_GET_COLOR_BLUE(color);
+
+	if ((red >= green) && (red >= blue)) {
+		result = red;
+	}
+
+	else if (green >= blue) {
+		result = green;
+	} else {
+		result = blue;
+	}
+
+	return result;
+
+}
+
 static void displayLetter(char letter, uint32_t color) {
 
 	if (letter == 'A') {
@@ -262,14 +304,13 @@ static void displayLetter(char letter, uint32_t color) {
 		SetCoordinate(4, 19, color);
 	}
 
-
-
 }
 
-#define COORDINATE_X_PIXEL1	8
-#define COORDINATE_X_PIXEL2	12
-#define COORDINATE_X_PIXEL3	16
-#define COORDINATE_X_PIXEL4	20
+#define COORDINATE_X_PIXEL1	4
+#define COORDINATE_X_PIXEL2	8
+#define COORDINATE_X_PIXEL3	12
+#define COORDINATE_X_PIXEL4	16
+#define COORDINATE_X_PIXEL5 20
 
 #if 0
 #define COLOR_PIXEL1	0xff00ff
@@ -277,6 +318,177 @@ static void displayLetter(char letter, uint32_t color) {
 #define COLOR_PIXEL3	0x00ff00
 #define COLOR_PIXEL4	0xff0000
 #endif
+
+static seq3 calculateDecrementValues(DATA_t * characteristicValues,
+		uint8_t excitation) {
+
+	seq3 result;
+
+	uint8_t highest_color_value_array[nDataPoints];
+
+	/*
+	 * Load Color value from config.c
+	 */
+
+	for (int r = 0; r < nDataPoints; r++) {
+		result.colorArray[r] = getSequenzColor(2, r+1);
+		/*
+		 * Calculate the highest color value (rgb)
+		 */
+		highest_color_value_array[r] = getHighestColorValue(
+				result.colorArray[r]);
+	}
+
+	uint8_t* nPixelArray = getPixelsWavelength();
+
+	for (int z = 0; z < nDataPoints; z++) {
+		result.nPixelsArray[z] = nPixelArray[z];
+	}
+
+	/*
+	 * calculating dectrementstep 1
+	 */
+
+	int u = 0;
+
+	if (result.nPixelsArray[u] != 0) {
+		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
+				* result.nPixelsArray[u])
+				> (characteristicValues->lifetime_266_1)) {
+			result.decrementArray[u] =
+					round(
+							(((float) highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u])
+									/ (float) (characteristicValues->lifetime_266_1));
+			result.counterArray[u] = 1;
+		} else {
+
+			result.counterArray[u] = round(
+					(float) (characteristicValues->lifetime_266_1)
+							/ ((float) (highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u]));
+			result.decrementArray[u] = 1;
+
+		}
+	}
+
+	u++;
+
+	/*
+	 * calculating dectrementstep 2
+	 */
+
+	if (result.nPixelsArray[u] != 0) {
+		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
+				* result.nPixelsArray[u])
+				> (characteristicValues->lifetime_266_2)) {
+			result.decrementArray[u] =
+					round(
+							((float) (highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u])
+									/ (float) (characteristicValues->lifetime_266_2));
+			result.counterArray[u] = 1;
+		} else {
+
+			result.counterArray[u] = round(
+					(float) (characteristicValues->lifetime_266_2)
+							/ ((float) (highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u]));
+			result.decrementArray[u] = 1;
+		}
+	}
+
+	u++;
+
+	/*
+	 * calculating dectrementstep 3
+	 */
+
+	if (result.nPixelsArray[u] != 0) {
+		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
+				* result.nPixelsArray[u])
+				> (characteristicValues->lifetime_266_3)) {
+			result.decrementArray[u] =
+					round(
+							((float) (highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u])
+									/ (float) (characteristicValues->lifetime_266_3));
+			result.counterArray[u] = 1;
+		} else {
+
+			result.counterArray[u] = round(
+					(float) (characteristicValues->lifetime_266_3)
+							/ ((float) (highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u]));
+			result.decrementArray[u] = 1;
+		}
+	}
+
+	/*
+	 * calculating dectrementstep 4
+	 */
+
+	u++;
+
+	if (result.nPixelsArray[u] != 0) {
+		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
+				* result.nPixelsArray[u])
+				> (characteristicValues->lifetime_266_4)) {
+			result.decrementArray[u] =
+					round(
+							(float) ((highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u])
+									/ (float) (characteristicValues->lifetime_266_4));
+			result.counterArray[u] = 1;
+		} else {
+
+			result.counterArray[u] = round(
+					(float) (characteristicValues->lifetime_266_4)
+							/ (float) ((highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u]));
+			result.decrementArray[u] = 1;
+
+		}
+	}
+
+	/*
+	 * calculating dectrementstep 5
+	 */
+
+	u++;
+	if (result.nPixelsArray[u] != 0) {
+		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
+				* result.nPixelsArray[u])
+				> (characteristicValues->lifetime_266_5)) {
+			result.decrementArray[u] =
+					round(
+							(float)((highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u])
+									/ (float) (characteristicValues->lifetime_266_5));
+			result.counterArray[u] = 1;
+		} else {
+
+			result.counterArray[u] = round(
+					(float) (characteristicValues->lifetime_266_5)
+							/ ((float) (highest_color_value_array[u]
+									* NEO_PROCESSING_TIME)
+									* result.nPixelsArray[u]));
+			result.decrementArray[u] = 1;
+
+		}
+	}
+
+	return result;
+}
 
 static void updateLetterColor(uint8_t nPixels1, uint8_t nPixels2,
 		uint8_t nPixels3, uint8_t nPixels4) {
@@ -359,26 +571,11 @@ static void updateLetterColor(uint8_t nPixels1, uint8_t nPixels2,
 
 }
 
-static uint8_t getHighestColorValue(uint32_t color) {
+static void setPixelsWavelength(uint8_t* pixels) {
 
-	uint32_t red, green, blue;
-	uint8_t result;
-
-	red = NEO_GET_COLOR_RED(color);
-	green = NEO_GET_COLOR_GREEN(color);
-	blue = NEO_GET_COLOR_BLUE(color);
-
-	if ((red >= green) && (red >= blue)) {
-		result = red;
+	for (int i = 0; i < nDataPoints; i++) {
+		WL_pixels[i] = pixels[i];
 	}
-
-	else if (green >= blue) {
-		result = green;
-	} else {
-		result = blue;
-	}
-
-	return result;
 
 }
 
@@ -1475,11 +1672,6 @@ static void setupMatrix(uint8_t nPixels1, uint8_t nPixels2, uint8_t nPixels3,
 
 }
 
-#define DELAY_MS 1
-#define nRINGS	12
-#define NEO_PROCESSING_TIME			5		/*it takes about 5ms to transmit all the pixelValues in a lane*/
-#define STARTING_DEGRADATION		3
-
 static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 		unsigned short farbtiefe, uint8_t excitation) {
 
@@ -1512,7 +1704,7 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 
 	NEO_TransferPixels();
 
-	//matrixColorValue = getMatrixColorValue();
+//matrixColorValue = getMatrixColorValue();
 
 	highestColVal = getHighestColorValueFromLane();
 
@@ -1555,7 +1747,6 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 
 			}
 
-
 		}
 
 		highestColVal = getHighestColorValueFromMatrix();
@@ -1578,9 +1769,13 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	uint8_t value1, value2, value3, value4, value5, nPixels1, nPixels2,
 			nPixels3, nPixels4, nPixels5;
 
+	uint8_t nPixelArray[nDataPoints];
+
+#if 0		//Letter disabled
 	if (getLetterEnabled('A')) { /*check if enabled in Config.txt*/
 		displayLetter('A', COLOR_LETTER);
 	}
+#endif
 
 	if (excitation == 1) {
 		value1 = characteristicValues->amplitude_266_1;
@@ -1588,8 +1783,7 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		value3 = characteristicValues->amplitude_266_3;
 		value4 = characteristicValues->amplitude_266_4;
 		value5 = characteristicValues->amplitude_266_5;
-	}
-	else if (excitation == 2) {
+	} else if (excitation == 2) {
 		value1 = characteristicValues->amplitude_355_1;
 		value2 = characteristicValues->amplitude_355_2;
 		value3 = characteristicValues->amplitude_355_3;
@@ -1613,11 +1807,12 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		nPixels1 = 0;
 	} else {
 		n1 = (value1 / divisor);
-		nPixels1 = floor( n1);
+		nPixels1 = floor(n1);
 		if (nPixels1 >= 0x19) {
 			nPixels1 = 0x18;
 		}
 	}
+	nPixelArray[0] = nPixels1;
 
 	for (int i = 1; i <= nPixels1; i++) {
 		SetCoordinate(4, i, getSequenzColor(2, 1));
@@ -1629,11 +1824,13 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		nPixels2 = 0;
 	} else {
 		n2 = (value2 / divisor);
-		nPixels2 = floor (n2);
+		nPixels2 = floor(n2);
 		if (nPixels2 >= 0x19) {
 			nPixels2 = 0x18;
 		}
 	}
+
+	nPixelArray[1] = nPixels2;
 
 	for (int i = 1; i <= nPixels2; i++) {
 		SetCoordinate(8, i, getSequenzColor(2, 2));
@@ -1644,11 +1841,13 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		nPixels3 = 0;
 	} else {
 		n3 = (value3 / divisor);
-		nPixels3 = floor (n3);
+		nPixels3 = floor(n3);
 		if (nPixels3 >= 0x19) {
 			nPixels3 = 0x18;
 		}
 	}
+
+	nPixelArray[2] = nPixels3;
 
 	for (int i = 1; i <= nPixels3; i++) {
 		SetCoordinate(12, i, getSequenzColor(2, 3));
@@ -1659,12 +1858,13 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		nPixels4 = 0;
 	} else {
 		n4 = (value4 / divisor);
-		nPixels4 = floor (n4);
+		nPixels4 = floor(n4);
 		if (nPixels4 >= 0x19) {
 			nPixels4 = 0x18;
 		}
 	}
 
+	nPixelArray[3] = nPixels4;
 	for (int i = 1; i <= nPixels4; i++) {
 		SetCoordinate(16, i, getSequenzColor(2, 4));
 		SetCoordinate(17, i, getSequenzColor(2, 4));
@@ -1674,11 +1874,12 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 		nPixels5 = 0;
 	} else {
 		n5 = (value5 / divisor);
-		nPixels5 = floor (n5);
+		nPixels5 = floor(n5);
 		if (nPixels5 >= 0x19) {
 			nPixels5 = 0x18;
 		}
 	}
+	nPixelArray[4] = nPixels5;
 
 	for (int i = 1; i <= nPixels5; i++) {
 		SetCoordinate(20, i, getSequenzColor(2, 5));
@@ -1687,6 +1888,8 @@ static bool playSeq2(DATA_t * characteristicValues, uint8_t excitation) {
 	}
 
 	NEO_TransferPixels();
+
+	setPixelsWavelength(nPixelArray);
 
 }
 
@@ -1699,17 +1902,14 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 	DataMessage_t * pxRxDataMessage;
 	pxRxDataMessage = &xDataMessage;
 
-	uint32_t resolution = 0;
-	uint16_t decrementStep = 0;
-	uint8_t nPixels1 = 0;
-	uint8_t nPixels2 = 0;
-	uint8_t nPixels3 = 0;
-	uint8_t nPixels4 = 0;
+	uint8_t counter1, counter2, counter3, counter4, counter5;
+	uint8_t cnt1, cnt2, cnt3, cnt4, cnt5;
+	cnt1 = cnt2 = cnt3 = cnt4 = cnt5 = 0;
 
-	uint32_t color1 = getSequenzColor(3, 1);
-	uint32_t color2 = getSequenzColor(3, 2);
-	uint32_t color3 = getSequenzColor(3, 3);
-	uint32_t color4 = getSequenzColor(3, 4);
+	seq3 char_values_seq3 = calculateDecrementValues(characteristicValues,
+			excitation);
+
+#if 0	//Letter disabled
 
 	if (getLetterEnabled('T')) { /*Check if enabled in Config.txt*/
 		displayLetter('T', COLOR_LETTER);
@@ -1720,6 +1920,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 				characteristicValues->lifetime_266_2,
 				characteristicValues->lifetime_266_3,
 				characteristicValues->lifetime_266_4);
+
 		nPixels1 = ceil(
 				((float) (characteristicValues->lifetime_266_1)
 						/ ((float) (resolution))));
@@ -1731,6 +1932,9 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 						/ ((float) (resolution))));
 		nPixels4 = ceil(
 				((float) (characteristicValues->lifetime_266_4)
+						/ ((float) (resolution))));
+		nPixels5 = ceil(
+				((float) (characteristicValues->lifetime_266_5)
 						/ ((float) (resolution))));
 
 	} else if (excitation == 2) {
@@ -1749,6 +1953,9 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 						/ ((float) (resolution))));
 		nPixels4 = ceil(
 				((float) (characteristicValues->lifetime_355_4)
+						/ ((float) (resolution))));
+		nPixels5 = ceil(
+				((float) (characteristicValues->lifetime_355_5)
 						/ ((float) (resolution))));
 	}
 
@@ -1769,17 +1976,29 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 		nPixels4 = ceil(
 				((float) (characteristicValues->lifetime_405_4)
 						/ ((float) (resolution))));
+		nPixels5 = ceil(
+				((float) (characteristicValues->lifetime_405_5)
+						/ ((float) (resolution))));
 	}
 
-	decrementStep = round(((float) (DECR_DELAY_AT_DELAY_TIME))
-			/ ((float) (resolution)));
+	decrementStep = round(
+			((float) (DECR_DELAY_AT_DELAY_TIME)) / ((float) (resolution)));
 
 	setupMatrix(nPixels1, nPixels2, nPixels3, nPixels4);
 	vTaskDelay(pdMS_TO_TICKS(1000));
 
-	while (!((nPixels1 == 0) && (nPixels2 == 0) && (nPixels3 == 0)
-			&& (nPixels4 == 0))) {
+#endif
 
+
+	int index = 0;
+
+	while (!((char_values_seq3.nPixelsArray[0] == 0)
+			&& (char_values_seq3.nPixelsArray[1] == 0)
+			&& (char_values_seq3.nPixelsArray[2] == 0)
+			&& (char_values_seq3.nPixelsArray[3] == 0)
+			&& (char_values_seq3.nPixelsArray[4] == 0))) {
+
+		// falls eine Message empfangen wurde, zb pause, stop usw
 		if (TakeMessageFromDataQueue(queue_handler_data, pxRxDataMessage)
 				!= QUEUE_EMPTY) {
 			if (pxRxDataMessage->cmd == stop) {
@@ -1813,68 +2032,130 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 			}
 		}
 
-		if (nPixels1 != 0) {
-			color1 = decrementValue(color1, decrementStep);
-			if (color1 == 0) {
+		// Dekrementierung der Pixelwerte
 
-				ClearCoordinate(COORDINATE_X_PIXEL1, nPixels1);
-				ClearCoordinate(COORDINATE_X_PIXEL1 + 1, nPixels1);
-				nPixels1--;
-				color1 = getSequenzColor(3, 1);
-			} else {
-				SetCoordinate(COORDINATE_X_PIXEL1, nPixels1, color1);
-				SetCoordinate(COORDINATE_X_PIXEL1 + 1, nPixels1, color1);
+		if (char_values_seq3.nPixelsArray[index] != 0) {
+
+			if (cnt1 == char_values_seq3.counterArray[index]) {
+				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
+						char_values_seq3.decrementArray[index]);
+				cnt1 = 0;
+
+				if (char_values_seq3.colorArray[index] == 0) {
+
+					ClearCoordinate(COORDINATE_X_PIXEL1, char_values_seq3.nPixelsArray[index]);
+					ClearCoordinate(COORDINATE_X_PIXEL1 + 1, char_values_seq3.nPixelsArray[index]);
+					char_values_seq3.nPixelsArray[index]--;
+					char_values_seq3.colorArray[index] = getSequenzColor(2, 1);
+				} else {
+					SetCoordinate(COORDINATE_X_PIXEL1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+					SetCoordinate(COORDINATE_X_PIXEL1 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+				}
 			}
+			cnt1++;
 		}
 
-		if (nPixels2 != 0) {
-			color2 = decrementValue(color2, decrementStep);
-			if (color2 == 0) {
+		index++;
 
-				ClearCoordinate(COORDINATE_X_PIXEL2, nPixels2);
-				ClearCoordinate(COORDINATE_X_PIXEL2 + 1, nPixels2);
-				nPixels2--;
-				color2 = getSequenzColor(3, 2);
-			} else {
-				SetCoordinate(COORDINATE_X_PIXEL2, nPixels2, color2);
-				SetCoordinate(COORDINATE_X_PIXEL2 + 1, nPixels2, color2);
+		if (char_values_seq3.nPixelsArray[index] != 0) {
+
+			if (cnt2 == char_values_seq3.counterArray[index]) {
+				cnt2 = 0;
+				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
+						char_values_seq3.decrementArray[index]);
+				if (char_values_seq3.colorArray[index] == 0) {
+
+					ClearCoordinate(COORDINATE_X_PIXEL2, char_values_seq3.nPixelsArray[index]);
+					ClearCoordinate(COORDINATE_X_PIXEL2 + 1, char_values_seq3.nPixelsArray[index]);
+					char_values_seq3.nPixelsArray[index]--;
+					char_values_seq3.colorArray[index] = getSequenzColor(2, 2);
+				} else {
+					SetCoordinate(COORDINATE_X_PIXEL2, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+					SetCoordinate(COORDINATE_X_PIXEL2 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+				}
+
 			}
+			cnt2++;
+
 		}
 
-		if (nPixels3 != 0) {
-			color3 = decrementValue(color3, decrementStep);
-			if (color3 == 0) {
+		index++;
 
-				ClearCoordinate(COORDINATE_X_PIXEL3, nPixels3);
-				ClearCoordinate(COORDINATE_X_PIXEL3 + 1, nPixels3);
-				nPixels3--;
-				color3 = getSequenzColor(3, 3);
-			} else {
-				SetCoordinate(COORDINATE_X_PIXEL3, nPixels3, color3);
-				SetCoordinate(COORDINATE_X_PIXEL3 + 1, nPixels3, color3);
+		if (char_values_seq3.nPixelsArray[index] != 0) {
+
+			if (cnt3 == char_values_seq3.counterArray[index]) {
+				cnt3 = 0;
+				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
+						char_values_seq3.decrementArray[index]);
+				if (char_values_seq3.colorArray[index] == 0) {
+
+					ClearCoordinate(COORDINATE_X_PIXEL3, char_values_seq3.nPixelsArray[index]);
+					ClearCoordinate(COORDINATE_X_PIXEL3 + 1, char_values_seq3.nPixelsArray[index]);
+					char_values_seq3.nPixelsArray[index]--;
+					char_values_seq3.colorArray[index] = getSequenzColor(2, 3);
+				} else {
+					SetCoordinate(COORDINATE_X_PIXEL3, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+					SetCoordinate(COORDINATE_X_PIXEL3 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+				}
 			}
+			cnt3++;
 		}
 
-		if (nPixels4 != 0) {
-			color4 = decrementValue(color4, decrementStep);
-			if (color4 == 0) {
+		index++;
 
-				ClearCoordinate(COORDINATE_X_PIXEL4, nPixels4);
-				ClearCoordinate(COORDINATE_X_PIXEL4 + 1, nPixels4);
-				nPixels4--;
-				color4 = getSequenzColor(3, 4);
-			} else {
-				SetCoordinate(COORDINATE_X_PIXEL4, nPixels4, color4);
-				SetCoordinate(COORDINATE_X_PIXEL4 + 1, nPixels4, color4);
+		if (char_values_seq3.nPixelsArray[index] != 0) {
+
+			if (cnt4 == char_values_seq3.counterArray[index]) {
+				cnt4 = 0;
+				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
+						char_values_seq3.decrementArray[index]);
+				if (char_values_seq3.colorArray[index] == 0) {
+
+					ClearCoordinate(COORDINATE_X_PIXEL4, char_values_seq3.nPixelsArray[index]);
+					ClearCoordinate(COORDINATE_X_PIXEL4 + 1, char_values_seq3.nPixelsArray[index]);
+					char_values_seq3.nPixelsArray[index]--;
+					char_values_seq3.colorArray[index] = getSequenzColor(2, 4);
+				} else {
+					SetCoordinate(COORDINATE_X_PIXEL4, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+					SetCoordinate(COORDINATE_X_PIXEL4 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+				}
 			}
+			cnt4++;
 		}
 
-		if (getLetterEnabled('T')) {		/*only needs to be updatet when enabled*/
+		index++;
+
+		if (char_values_seq3.nPixelsArray[index] != 0) {
+
+			if (cnt5 == char_values_seq3.counterArray[index]) {
+				cnt5 = 0;
+				char_values_seq3.colorArray[index] = decrementValue(char_values_seq3.colorArray[index],
+						char_values_seq3.decrementArray[index]);
+				if (char_values_seq3.colorArray[index] == 0) {
+
+					ClearCoordinate(COORDINATE_X_PIXEL5, char_values_seq3.nPixelsArray[index]);
+					ClearCoordinate(COORDINATE_X_PIXEL5 + 1, char_values_seq3.nPixelsArray[index]);
+					char_values_seq3.nPixelsArray[index]--;
+					char_values_seq3.colorArray[index] = getSequenzColor(2, 5);
+				} else {
+					SetCoordinate(COORDINATE_X_PIXEL5, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+					SetCoordinate(COORDINATE_X_PIXEL5 + 1, char_values_seq3.nPixelsArray[index], char_values_seq3.colorArray[index]);
+				}
+			}
+			cnt5++;
+		}
+
+
+#if 0
+		if (getLetterEnabled('T')) { /*only needs to be updatet when enabled*/
 			updateLetterColor(nPixels1, nPixels2, nPixels3, nPixels4);
 		}
+#endif
 
 		NEO_TransferPixels();
-	//	vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
+
+		index = 0;
+		//	vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
 
 	}
 
@@ -1884,7 +2165,7 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 #define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
 static void NeoTask(void* pvParameters) {
 
-	//queue_handler = pvParameters;
+//queue_handler = pvParameters;
 	int value = -1;
 	QUEUE_RESULT res = QUEUE_OK;
 	uint8_t excitation = 0;
@@ -2078,8 +2359,6 @@ static void NeoTask(void* pvParameters) {
 
 		case PLAY_SEQ3:
 
-			NEO_ClearAllPixel();
-			NEO_TransferPixels();
 			vTaskDelay(pdMS_TO_TICKS(getTiming(2)));
 
 			ret_value = playSeq3(pxRxDataMessage->char_data, excitation);

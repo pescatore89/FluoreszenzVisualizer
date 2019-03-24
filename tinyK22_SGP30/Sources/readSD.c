@@ -233,19 +233,19 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength1", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_266_1 = getRealValue(buff8);
+		pxDATA->lifetime[0][0] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength2", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_266_2 = getRealValue(buff8);
+		pxDATA->lifetime[0][1] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength3", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_266_3 = getRealValue(buff8);
+		pxDATA->lifetime[0][2] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength4", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_266_4 = getRealValue(buff8);
+		pxDATA->lifetime[0][3] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength5", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_266_5 = getRealValue(buff8);
+		pxDATA->lifetime[0][4] = getRealValue(buff8);
 
 	}
 
@@ -277,19 +277,19 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength1", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_355_1 = getRealValue(buff8);
+		pxDATA->lifetime[1][0] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength2", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_355_2 = getRealValue(buff8);
+		pxDATA->lifetime[1][1] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength3", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_355_3 = getRealValue(buff8);
+		pxDATA->lifetime[1][2] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength4", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_355_4 = getRealValue(buff8);
+		pxDATA->lifetime[1][3] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "355wavelength5", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_355_5 = getRealValue(buff8);
+		pxDATA->lifetime[1][4] = getRealValue(buff8);
 
 	}
 
@@ -321,19 +321,19 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength1", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_405_1 = getRealValue(buff8);
+		pxDATA->lifetime[2][0] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength2", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_405_2 = getRealValue(buff8);
+		pxDATA->lifetime[2][1] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength3", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_405_3 = getRealValue(buff8);
+		pxDATA->lifetime[2][2] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength4", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_405_4 = getRealValue(buff8);
+		pxDATA->lifetime[2][3] = getRealValue(buff8);
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "405wavelength5", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
-		pxDATA->lifetime_405_5 = getRealValue(buff8);
+		pxDATA->lifetime[2][4] = getRealValue(buff8);
 	}
 }
 

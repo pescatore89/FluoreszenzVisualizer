@@ -48,6 +48,7 @@ uint8_t Config_ReadIni_Local(const CLS1_StdIOType *io);
 
 
 #define nDataPoints 5
+#define nOfExcitation 3
 
 
 /*

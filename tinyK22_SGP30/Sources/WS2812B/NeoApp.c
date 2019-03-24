@@ -361,55 +361,59 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 	 * calculating dectrementstep 1
 	 */
 
-	int u = 0;
+	for (int u = 0; u < nDataPoints; u++) {
 
-	if (result.nPixelsArray[u] != 0) {
-		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
-				* result.nPixelsArray[u])
-				> (characteristicValues->lifetime_266_1)) {
-			result.decrementArray[u] =
-					round(
-							(((float) highest_color_value_array[u]
-									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u])
-									/ (float) (characteristicValues->lifetime_266_1));
-			result.counterArray[u] = 1;
-		} else {
+		if (result.nPixelsArray[u] != 0) {
+			if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
+					* result.nPixelsArray[u])
+					> (characteristicValues->lifetime[excitation - 1][u])) {
+				result.decrementArray[u] =
+						round(
+								(((float) highest_color_value_array[u]
+										* NEO_PROCESSING_TIME)
+										* result.nPixelsArray[u])
+										/ (float) (characteristicValues->lifetime[excitation
+												- 1][u]));
+				result.counterArray[u] = 1;
+			} else {
 
-			result.counterArray[u] = round(
-					(float) (characteristicValues->lifetime_266_1)
-							/ ((float) (highest_color_value_array[u]
-									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u]));
-			result.decrementArray[u] = 1;
+				result.counterArray[u] =
+						round(
+								(float) (characteristicValues->lifetime[excitation
+										- 1][u])
+										/ ((float) (highest_color_value_array[u]
+												* NEO_PROCESSING_TIME)
+												* result.nPixelsArray[u]));
+				result.decrementArray[u] = 1;
 
+			}
 		}
 	}
 
-	u++;
-
+#if 0
 	/*
 	 * calculating dectrementstep 2
 	 */
 
 	if (result.nPixelsArray[u] != 0) {
 		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
-				* result.nPixelsArray[u])
-				> (characteristicValues->lifetime_266_2)) {
+						* result.nPixelsArray[u])
+				> (characteristicValues->lifetime[excitation - 1][u])) {
 			result.decrementArray[u] =
-					round(
-							((float) (highest_color_value_array[u]
+			round(
+					((float) (highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u])
-									/ (float) (characteristicValues->lifetime_266_2));
+							* result.nPixelsArray[u])
+					/ (float) (characteristicValues->lifetime[excitation
+							- 1][u]));
 			result.counterArray[u] = 1;
 		} else {
 
 			result.counterArray[u] = round(
-					(float) (characteristicValues->lifetime_266_2)
-							/ ((float) (highest_color_value_array[u]
+					(float) (characteristicValues->lifetime[excitation - 1][u])
+					/ ((float) (highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u]));
+							* result.nPixelsArray[u]));
 			result.decrementArray[u] = 1;
 		}
 	}
@@ -422,22 +426,23 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 
 	if (result.nPixelsArray[u] != 0) {
 		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
-				* result.nPixelsArray[u])
-				> (characteristicValues->lifetime_266_3)) {
+						* result.nPixelsArray[u])
+				> (characteristicValues->lifetime[excitation - 1][u])) {
 			result.decrementArray[u] =
-					round(
-							((float) (highest_color_value_array[u]
+			round(
+					((float) (highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u])
-									/ (float) (characteristicValues->lifetime_266_3));
+							* result.nPixelsArray[u])
+					/ (float) (characteristicValues->lifetime[excitation
+							- 1][u]));
 			result.counterArray[u] = 1;
 		} else {
 
 			result.counterArray[u] = round(
-					(float) (characteristicValues->lifetime_266_3)
-							/ ((float) (highest_color_value_array[u]
+					(float) (characteristicValues->lifetime[excitation - 1][u])
+					/ ((float) (highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u]));
+							* result.nPixelsArray[u]));
 			result.decrementArray[u] = 1;
 		}
 	}
@@ -450,22 +455,23 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 
 	if (result.nPixelsArray[u] != 0) {
 		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
-				* result.nPixelsArray[u])
-				> (characteristicValues->lifetime_266_4)) {
+						* result.nPixelsArray[u])
+				> (characteristicValues->lifetime[excitation - 1][u])) {
 			result.decrementArray[u] =
-					round(
-							(float) ((highest_color_value_array[u]
+			round(
+					(float) ((highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u])
-									/ (float) (characteristicValues->lifetime_266_4));
+							* result.nPixelsArray[u])
+					/ (float) (characteristicValues->lifetime[excitation
+							- 1][u]));
 			result.counterArray[u] = 1;
 		} else {
 
 			result.counterArray[u] = round(
-					(float) (characteristicValues->lifetime_266_4)
-							/ (float) ((highest_color_value_array[u]
+					(float) (characteristicValues->lifetime[excitation - 1][u])
+					/ (float) ((highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u]));
+							* result.nPixelsArray[u]));
 			result.decrementArray[u] = 1;
 
 		}
@@ -478,27 +484,28 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 	u++;
 	if (result.nPixelsArray[u] != 0) {
 		if (((highest_color_value_array[u] * NEO_PROCESSING_TIME)
-				* result.nPixelsArray[u])
-				> (characteristicValues->lifetime_266_5)) {
+						* result.nPixelsArray[u])
+				> (characteristicValues->lifetime[excitation - 1][u])) {
 			result.decrementArray[u] =
-					round(
-							(float) ((highest_color_value_array[u]
+			round(
+					(float) ((highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u])
-									/ (float) (characteristicValues->lifetime_266_5));
+							* result.nPixelsArray[u])
+					/ (float) (characteristicValues->lifetime[excitation
+							- 1][u]));
 			result.counterArray[u] = 1;
 		} else {
 
 			result.counterArray[u] = round(
-					(float) (characteristicValues->lifetime_266_5)
-							/ ((float) (highest_color_value_array[u]
+					(float) (characteristicValues->lifetime[excitation - 1][u])
+					/ ((float) (highest_color_value_array[u]
 									* NEO_PROCESSING_TIME)
-									* result.nPixelsArray[u]));
+							* result.nPixelsArray[u]));
 			result.decrementArray[u] = 1;
 
 		}
 	}
-
+#endif
 	return result;
 }
 
@@ -2013,7 +2020,6 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 #endif
 
 		NEO_TransferPixels();
-
 
 		//	vTaskDelay(pdMS_TO_TICKS(DELAY_TIME));
 

@@ -16,6 +16,7 @@
 #define QUEUE_ITEM_DATA_SIZE			(100)
 
 #include "FRTOS1.h"
+#include "config.h"
 
 extern xQueueHandle queue_handler;
 
@@ -109,6 +110,8 @@ struct DATA {
 	uint32_t fadeout_405; /*in ms*/
 
 	/*Data for seq. 2*/
+
+
 	uint8_t amplitude_266_1;
 	uint8_t amplitude_266_2;
 	uint8_t amplitude_266_3;
@@ -129,6 +132,10 @@ struct DATA {
 
 	/*Data for seq. 3*/
 
+	uint32_t lifetime[nOfExcitation][nDataPoints];
+
+
+#if 0
 	uint32_t lifetime_266_1;
 	uint32_t lifetime_266_2;
 	uint32_t lifetime_266_3;
@@ -146,6 +153,7 @@ struct DATA {
 	uint32_t lifetime_405_3;
 	uint32_t lifetime_405_4;
 	uint32_t lifetime_405_5;
+#endif
 }xDATA;
 
 

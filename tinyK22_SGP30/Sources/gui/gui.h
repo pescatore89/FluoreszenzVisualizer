@@ -9,6 +9,7 @@
 #define GUI_H_
 
 #include "Platform.h"
+#include "FRTOS1.h"
 
 #if PL_CONFIG_HAS_GUI_KEY_NAV
   #include "lvgl/lv_core/lv_group.h"
@@ -21,6 +22,7 @@
   void GUI_RemoveObjFromGroup(lv_obj_t *obj);
 #endif
 
+ TaskHandle_t getGUITaskHandle(void);
 void GUI_Init(void);
 
 #endif /* GUI_H_ */

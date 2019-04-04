@@ -20,8 +20,10 @@
 #include "gui_neopixel.h"
 #include "Message.h"
 #include "Images.h"
-
+#include "FDisp1.h"
+#include "GDisp1.h"
 #include "CS1.h"
+#include "GFont1.h"
 
 #if PL_CONFIG_HAS_GUI_KEY_NAV
 #define GUI_GROUP_NOF_IN_STACK   4
@@ -32,6 +34,7 @@ typedef struct {
 
 static GUI_Group_t groups;
 
+static TaskHandle_t  taskHandleGUI;
 xQueueHandle queue_handler_update;
 
 /* style modification callback for the focus of an element */
@@ -107,6 +110,9 @@ QUEUE_RESULT AddMessageToUpdateQueue(xQueueHandle handle, UpdateMessage_t *msg);
 QUEUE_RESULT TakeMessageFromUpdateQueue(xQueueHandle handle,
 		UpdateMessage_t *msg);
 
+
+#define TEXT_LEFT_BORDER 10
+#define TEXT_TOP_BORDER 5
 static void GuiTask(void *p) {
 	vTaskDelay(pdMS_TO_TICKS(1000)); /* give hardware time to power up */
 	LCD1_Init();
@@ -125,6 +131,8 @@ static void GuiTask(void *p) {
 	//GUI_CreateGroup();
 #endif
 	GUI_MainMenuCreate();
+
+
 
 
 
@@ -157,6 +165,34 @@ static void GuiTask(void *p) {
 
 		}
 
+		if(FRTOS1_ulTaskNotifyTake(pdTRUE,1)){
+
+
+			LCD1_DisplayOnOff(FALSE);	// turn off display
+
+
+
+
+
+
+			/*
+			 *
+
+			char* string = "The Andyman can";
+			GDisp1_PixelDim x, y;
+			FDisp1_Font *font;
+			GDisp1_DrawFilledBox(0,0,150,150,GDisp1_COLOR_BLACK);
+			GDisp1_UpdateFull();
+			font = GFont1_GetFont();
+			x = TEXT_LEFT_BORDER;
+			y = (FDisp1_PixelDim) (TEXT_TOP_BORDER);
+			FDisp1_WriteString((unsigned char*) string, GDisp1_COLOR_WHITE,
+					&x, &y, font);
+			GDisp1_UpdateFull();
+*/
+
+		}
+
 		if (getNavGuiIsActive()) {
 			updatePollenLabel(text);
 //			updatePlayBtn(isPlayingPollen);
@@ -169,6 +205,13 @@ static void GuiTask(void *p) {
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 }
+
+
+TaskHandle_t getGUITaskHandle(void){
+	return taskHandleGUI;
+}
+
+
 
 void GUI_Init(void) {
 	LV_Init(); /* initialize GUI library */
@@ -185,7 +228,10 @@ void GUI_Init(void) {
 	// lv_style_btn_rel.body.radius = LV_DPI / 15;
 	// lv_style_btn_rel.body.padding.hor = LV_DPI / 8;
 	// lv_style_btn_rel.body.padding.ver = LV_DPI / 12;
-	if (xTaskCreate(GuiTask, "Gui", 2000 / sizeof(StackType_t), NULL,
+
+
+
+	if (xTaskCreate(GuiTask, "Gui", 2000 / sizeof(StackType_t), taskHandleGUI,
 	tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
 		for (;;) {
 		} /* error */

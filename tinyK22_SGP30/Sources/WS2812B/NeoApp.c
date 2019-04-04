@@ -64,7 +64,7 @@ typedef enum {
 	PLAY_SEQ1, /*  */
 	PLAY_SEQ2, /* */
 	PLAY_SEQ3, /* */
-	ERROR_STATE, STOPPED, DISPLAY_IMAGE,
+	ERROR_STATE, STOPPED, DISPLAY_IMAGE, SCREENSAVER,
 
 } NEO_STATUS;
 
@@ -746,6 +746,182 @@ static uint32_t getHighestRingData(uint8_t ring) {
 	}
 
 	return color_val;
+}
+
+uint8_t clearRingData(uint8_t ring) {
+
+	uint8_t lenght_lane_0 = 0;
+	uint8_t lenght_lane_1 = 0;
+	uint8_t lenght_lane_2 = 0;
+	uint8_t res = ERR_OK;
+	uint8_t temp;
+	int i = 0;
+
+	if (ring < 1 || ring > 12) {
+		return ERR_FAILED; /*out of Range*/
+	}
+
+	switch (ring) {
+	case 1:
+		lenght_lane_1 = sizeof(ring_1) / sizeof(ring_1[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_1[i]);
+		}
+		break;
+
+	case 2:
+		lenght_lane_1 = sizeof(ring_2) / sizeof(ring_2[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_2[i]);
+		}
+		break;
+	case 3:
+		lenght_lane_1 = sizeof(ring_3) / sizeof(ring_3[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_3[i]);
+		}
+		break;
+	case 4:
+		lenght_lane_1 = sizeof(ring_4) / sizeof(ring_4[0]);
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_4[i]);
+		}
+		break;
+	case 5:
+		lenght_lane_0 = 10;
+		lenght_lane_1 = 16;
+		lenght_lane_2 = 10;
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_5[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_5[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_5[2][i]);
+		}
+		break;
+
+	case 6:
+
+		lenght_lane_0 = 14; //sizeof(ring_6[0]) / sizeof(ring_6[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = 14; //sizeof(ring_6[2]) / sizeof(ring_6[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			temp = ring_6[0][i];
+			NEO_ClearPixel(0, ring_6[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			temp = ring_6[1][i];
+			NEO_ClearPixel(1, ring_6[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			temp = ring_6[2][i];
+			NEO_ClearPixel(2, ring_6[2][i]);
+		}
+		break;
+
+	case 7:
+		lenght_lane_0 = sizeof(ring_7[0]) / sizeof(ring_7[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_7[2]) / sizeof(ring_7[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_7[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_7[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_7[2][i]);
+		}
+		break;
+
+	case 8:
+		lenght_lane_0 = sizeof(ring_8[0]) / sizeof(ring_8[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_8[2]) / sizeof(ring_8[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_8[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_8[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_8[2][i]);
+		}
+		break;
+
+	case 9:
+		lenght_lane_0 = sizeof(ring_9[0]) / sizeof(ring_9[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_9[2]) / sizeof(ring_9[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_9[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_9[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_9[2][i]);
+		}
+		break;
+
+	case 10:
+		lenght_lane_0 = sizeof(ring_10[0]) / sizeof(ring_10[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_10[2]) / sizeof(ring_10[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_10[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_10[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_10[2][i]);
+		}
+		break;
+
+	case 11:
+		lenght_lane_0 = sizeof(ring_11[0]) / sizeof(ring_11[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_11[2]) / sizeof(ring_11[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_11[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_11[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_11[2][i]);
+		}
+		break;
+
+	case 12:
+		lenght_lane_0 = sizeof(ring_12[0]) / sizeof(ring_12[0][0]);
+		lenght_lane_1 = 16;
+		lenght_lane_2 = sizeof(ring_12[2]) / sizeof(ring_12[0][0]);
+
+		for (i = 0; i < lenght_lane_0; i++) {
+			NEO_ClearPixel(0, ring_12[0][i]);
+		}
+		for (i = 0; i < lenght_lane_1; i++) {
+			NEO_ClearPixel(1, ring_12[1][i]);
+		}
+		for (i = 0; i < lenght_lane_2; i++) {
+			NEO_ClearPixel(2, ring_12[2][i]);
+		}
+		break;
+	}
+
+	return res;
+
 }
 
 uint8_t setRingData(uint8_t ring, uint32_t color) {
@@ -1555,7 +1731,6 @@ uint8_t NEOA_Display_Image(char* image, unsigned short farbtiefe) {
 				colorValue = (red << 16) + (green << 8) + (blue);
 				NEO_SetPixelColor(j, position, colorValue);
 				cnt = cnt + ((farbtiefe) / 8);
-
 			}
 		}
 
@@ -2028,6 +2203,103 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 	return aborted;
 }
 
+static void playScreensaver(void) {
+
+	NEO_ClearAllPixel();
+	NEO_TransferPixels();
+	uint8_t counterRed = 0xff;
+	uint8_t counterGreen = 0x0;
+	uint8_t counterBlue = 0x0;
+	uint32_t color = 0x0;
+	uint16_t cutoff = 128;
+	int z;
+
+	for (;;) {
+		if (FRTOS1_ulTaskNotifyTake(pdTRUE, 1)) {
+			NEO_ClearAllPixel();
+			NEO_TransferPixels();
+			return;
+		} else {
+			//set from inner to outer
+			for (int i = 1; i < 13; i++) {
+				if (FRTOS1_ulTaskNotifyTake(pdTRUE, 1)) {
+					NEO_ClearAllPixel();
+					NEO_TransferPixels();
+					return;
+				} else {
+					counterRed = 0xff;
+					counterGreen = 0x0;
+					counterBlue = 0x0;
+					for (z = 0; z < cutoff; z++) {
+						if (FRTOS1_ulTaskNotifyTake(pdTRUE, 1)) {
+							NEO_ClearAllPixel();
+							NEO_TransferPixels();
+							return;
+						} else {
+							if (i <= 2) {
+								counterRed = 0xff;
+								counterGreen = z;
+								counterBlue = 0x00;
+							} else if (i <= 4) {
+								counterRed = 0xff - z;
+								counterGreen = 0xff;
+								counterBlue = 0x00;
+							}
+							else if (i <= 6) {
+								counterRed = 0x00;
+								counterGreen = 0xff;
+								counterBlue = z;
+							} else if (i <= 8) {
+								counterRed = 0x00;
+								counterGreen = 0xff - z;
+								counterBlue = 0xff;
+							} else if (i <= 10) {
+								counterRed = z;
+								counterGreen = 0;
+								counterBlue = 0xff;
+							} else if (i <= 12) {
+								counterRed = 0xff;
+								counterGreen = 0;
+								counterBlue = 0xff - z;
+							}
+
+							color = (counterRed << 16) | (counterGreen << 8)
+									| counterBlue;
+							setRingData(i, color);
+							NEO_TransferPixels();
+							//vTaskDelay(pdMS_TO_TICKS(20));
+						}
+					}
+
+					if(z == 128){
+						cutoff = 256;
+					}
+					else{
+						cutoff = 128;
+						z = 0;
+					}
+
+				}
+
+			}
+			// clear from inner to outer
+			for (int k = 1; k < 13; k++) {
+				if (FRTOS1_ulTaskNotifyTake(pdTRUE, 1)) {
+					NEO_ClearAllPixel();
+					NEO_TransferPixels();
+					return;
+				} else {
+					clearRingData(k);
+					NEO_TransferPixels();
+					vTaskDelay(pdMS_TO_TICKS(200));
+				}
+			}
+
+		}
+	}
+
+}
+
 #define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
 static void NeoTask(void* pvParameters) {
 
@@ -2057,7 +2329,12 @@ static void NeoTask(void* pvParameters) {
 					== QUEUE_EMPTY) {
 				vTaskDelay(pdMS_TO_TICKS(100)); /*Queue is Empty*/
 
-				pxMessage->cmd = stop;
+				if (FRTOS1_ulTaskNotifyTake(pdTRUE, 1)) {
+					pxMessage->cmd = screensaver;
+					state = SCREENSAVER;
+				} else {
+					pxMessage->cmd = stop;
+				}
 				if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
 						!= QUEUE_OK) {
 					/*Queue is somehow full*/
@@ -2275,6 +2552,13 @@ static void NeoTask(void* pvParameters) {
 			for (;;) {
 				vTaskDelay(pdMS_TO_TICKS(50));
 			}
+			break;
+
+		case SCREENSAVER:
+
+			playScreensaver();
+			state = IDLE_STATE;
+
 		}
 
 #if 0

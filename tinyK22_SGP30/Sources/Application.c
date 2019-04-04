@@ -28,6 +28,11 @@
 #if PL_CONFIG_HAS_GUI
 #include "gui/lvgl/lvgl.h"
 #include "gui/gui.h"
+#include "FDisp1.h"
+#include "GDisp1.h"
+#include "GFont1.h"
+#include "FRTOS1.h"
+
 #endif
 
 #define APP_PERIODIC_TIMER_PERIOD_MS   10
@@ -67,6 +72,31 @@ static void vTimerCallbackExpired(xTimerHandle pxTimer) {
 	TRG1_AddTick();
 	TMOUT1_AddTick();
 	TmDt1_AddTick();
+}
+
+uint8_t getDisplayState(void) {
+
+	uint8_t temp = 1;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	temp = display_state;
+	CS1_ExitCritical()
+	;
+	return temp;
+}
+
+static void setDisplayState(uint8_t state) {
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	display_state = state;
+	CS1_ExitCritical()
+	;
+
 }
 
 static bool LCDisInit() {
@@ -119,6 +149,7 @@ static void setTimerLCD(void) {
 	;
 
 }
+
 static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 
 	int tempCnt = 0;
@@ -132,10 +163,18 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 		break;
 	case ON:
 
-		if (display_state) {
+		if (getDisplayState()) {
 			if (!decrementLCD_CNT()) {
-				LCD1_DisplayOnOff(FALSE);	// turn off display
-				display_state = FALSE;
+				// GUI Task wird benachrichtigt, dass er in den Screensaver mode gehen soll
+				TaskHandle_t xTaskToNotify = NULL;
+				xTaskToNotify = xTaskGetHandle("Gui");
+				//Notify GUI Task to turn off Display
+				FRTOS1_xTaskNotifyGive(xTaskToNotify);
+				//Notify NeoPixel task to run screensaver mode
+				xTaskToNotify = xTaskGetHandle("Neo");
+				FRTOS1_xTaskNotifyGive(xTaskToNotify);
+				setDisplayState(FALSE);
+
 			}
 		} else {
 			// do nothing
@@ -151,13 +190,7 @@ void resetLCD_Counter(void) {
 	LCD1_DisplayOnOff(TRUE);	// swich on Display
 	setTimerLCD();
 
-	CS1_CriticalVariable()
-	;
-	CS1_EnterCritical()
-	;
-	display_state = TRUE;
-	CS1_ExitCritical()
-	;
+	setDisplayState(TRUE);
 
 }
 
@@ -171,13 +204,9 @@ static void AppTask(void *pv) {
 #endif
 	setLCDinitState(FALSE);		//LCD ready;
 	bool val = TRUE;
-	//vTaskDelay(pdMS_TO_TICKS(5000));
-	//LCD1_DisplayOnOff(!val);
+
 	for (;;) {
-		//		LED1_Neg();
 		vTaskDelay(pdMS_TO_TICKS(500));
-		//LCD1_DisplayOnOff(!val);
-		//val = !val;
 	}
 }
 

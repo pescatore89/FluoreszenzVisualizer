@@ -12,5 +12,6 @@
 void APP_Run(void);
 uint8_t createQueues(void);
 void resetLCD_Counter(void);
+uint8_t getDisplayState(void);
 
 #endif /* SOURCES_APPLICATION_H_ */

@@ -55,6 +55,7 @@ typedef enum {
 	playImage,
 	clearImage,
 	readyForImage,
+	screensaver,
 }COMMAND;
 
 typedef enum {

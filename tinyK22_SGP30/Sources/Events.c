@@ -174,6 +174,12 @@ void SM1_OnBlockSent(LDD_TUserData *UserDataPtr) {
  ** ===================================================================
  */
 void KEY1_OnKeyPressed(uint8_t keys) {
+
+	if(!getDisplayState()){// Display was off (false --> off)
+		TaskHandle_t xTaskToNotify = NULL;
+		xTaskToNotify = xTaskGetHandle("Neo");
+		FRTOS1_xTaskNotifyGive(xTaskToNotify);
+	}
 	resetLCD_Counter();
 	LV_ButtonEvent(keys, LV_MASK_PRESSED);
 }

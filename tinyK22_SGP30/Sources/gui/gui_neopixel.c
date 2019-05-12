@@ -41,6 +41,9 @@ static lv_btn_state_t pause_buttonState = LV_BTN_STATE_INA;
 static lv_btn_state_t stop_buttonState = LV_BTN_STATE_INA;
 
 static lv_obj_t *polle_label;
+
+
+static lv_obj_t * placeholder;
 static char* pollenLabel;
 
 static uint8_t namesAvtiv[MAX_N_POLLS_STORED];
@@ -53,6 +56,31 @@ static void SetLabelValue(lv_obj_t *label, int32_t val) {
 	}
 }
 
+
+
+static uint8_t hasElement (uint8_t* list){
+	uint8_t hasElement = FALSE;
+
+		for(int i = 0; i<MAX_N_POLLS_STORED;i++){
+			if(namesActive[i]){
+				return TRUE;
+			}
+		}
+		return hasElement;
+}
+
+static void updatePlayButton(uint8_t* list){
+
+	if(hasElement(list)){
+		return;
+	}
+	else{
+		lv_btn_set_state(btn_play, LV_BTN_STATE_INA);
+	}
+
+
+
+}
 
 void setNavGuiIsActive(uint8_t val){
 
@@ -188,6 +216,9 @@ static lv_res_t btn_pause_click_action(lv_obj_t *btn) {
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
+
+
+
 static lv_res_t btn_stop_click_action(lv_obj_t *btn) {
 
 	uint8_t res;
@@ -206,7 +237,7 @@ static lv_res_t btn_stop_click_action(lv_obj_t *btn) {
 	pause_buttonState = LV_BTN_STATE_INA;
 	stop_buttonState = LV_BTN_STATE_INA;
 
-
+	updatePlayButton(namesActive);
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
@@ -226,6 +257,12 @@ void updatePollenLabel(char* text){
 	pollenLabel = text;
 	lv_label_set_text(polle_label, pollenLabel);
 }
+
+
+
+
+
+
 
 
 void updatePlayBtn(uint8_t val){
@@ -259,7 +296,7 @@ void GUI_NEO_Create(uint8_t * name) {
 
 	/* Create the window */
 	win = lv_win_create(lv_scr_act(), NULL);
-	lv_win_set_title(win, "Nav");
+	lv_win_set_title(win, "Control");
 	closeBtn = lv_win_add_btn(win, SYMBOL_CLOSE, win_close_action);
 	GUI_GroupPush();
 	GUI_AddObjToGroup(closeBtn);
@@ -270,6 +307,8 @@ void GUI_NEO_Create(uint8_t * name) {
 	/* Switch to turn on/off the auto light level */
 	/*-------------------------------------------------------*/
 	/* Create a label left to the light 'auto' switch */
+#if 0
+
 	lv_obj_t *switch1_label = lv_label_create(win, NULL);
 	lv_label_set_text(switch1_label, "Auto");
 	lv_obj_align(switch1_label, win, LV_ALIGN_IN_BOTTOM_LEFT, 5, 10);
@@ -293,11 +332,13 @@ void GUI_NEO_Create(uint8_t * name) {
 		lv_label_set_text(label_auto_light_level, "off");
 	}
 	lv_obj_align(label_auto_light_level, sw1, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
-
+#endif
 	/*-------------------------------------------------------*/
 	/* Slider to adjust the light level */
 	/*-------------------------------------------------------*/
 	/* Create a label left to the light level slider */
+#if 0
+
 	lv_obj_t *slider1_label = lv_label_create(win, NULL);
 	lv_label_set_text(slider1_label, "Level");
 	lv_obj_align(slider1_label, switch1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
@@ -345,7 +386,7 @@ void GUI_NEO_Create(uint8_t * name) {
 	style_knob.body.opa = LV_OPA_70;
 	style_knob.body.padding.ver = 10;
 
-
+#endif
 	/* previous button */
 
 
@@ -373,11 +414,27 @@ void GUI_NEO_Create(uint8_t * name) {
 
 #endif
 
+
+	/* Create a placeholderlabel */
+	placeholder = lv_label_create(win, NULL);
+	lv_label_set_text(placeholder, "");
+	//lv_obj_align(polle_label, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+	lv_obj_align(placeholder, win, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 10);
+	GUI_AddObjToGroup(placeholder);
+
+
+
+
 	/* Create a label with the name of the playing polle */
 	polle_label = lv_label_create(win, NULL);
 	lv_label_set_text(polle_label, "");
-	lv_obj_align(polle_label, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+	//lv_obj_align(polle_label, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+	lv_obj_align(polle_label, placeholder, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 20);
 	GUI_AddObjToGroup(polle_label);
+
+
+
+
 
 
 
@@ -390,7 +447,8 @@ void GUI_NEO_Create(uint8_t * name) {
 
 	/* play buttons */
 	btn_play = lv_btn_create(win, NULL);
-	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 40);
+//	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 40);
+	lv_obj_align(btn_play, polle_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
 	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
 	label = lv_label_create(btn_play, NULL);
 	lv_btn_set_state(btn_play,play_buttonState);
@@ -419,6 +477,7 @@ void GUI_NEO_Create(uint8_t * name) {
 
 
 
+	updatePlayButton(namesActive);
 
 
 

@@ -32,6 +32,10 @@ static lv_obj_t *btn_clear;
 
 static bool displaying = FALSE;
 
+static uint8_t isDisplaying = FALSE;
+
+
+
 static bool playingPollen = FALSE;
 
 void setPlayingPollen(uint8_t val) {
@@ -178,6 +182,34 @@ static void update(void) {
 
 }
 
+
+
+
+void setIsDisplayingImage(uint8_t value){
+
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	isDisplaying = value;
+
+	CS1_ExitCritical();
+
+}
+
+
+
+uint8_t getIsDisplayingImage(void){
+
+	uint8_t res = FALSE;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+	res = isDisplaying;
+
+	CS1_ExitCritical();
+
+	return res;
+}
+
+
 static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 
 	uint8_t res;
@@ -204,6 +236,22 @@ static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 		lv_label_set_text(label_play, SYMBOL_CLOSE);
 		displaying = TRUE;
 	}
+
+
+/*
+ * Flag setzen für Screensaver Modus
+ *
+ * - Wenn ein Bild angezeigt wird, darf nicht in den Screensaver gewechselt werden
+ *  -> displaying = TRUE -->  Bild wird dargestellt
+ *  -> displaying = FALSE --> Kein Bild dargestellt
+ *
+ * */
+
+
+	setIsDisplayingImage(displaying);
+
+
+
 
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }

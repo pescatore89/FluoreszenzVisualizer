@@ -32,6 +32,7 @@
 #include "GDisp1.h"
 #include "GFont1.h"
 #include "FRTOS1.h"
+#include "gui/Images.h"
 
 #endif
 
@@ -145,7 +146,7 @@ static void setTimerLCD(void) {
 	CS1_EnterCritical()
 	;
 	//counter_LCD = getLCDTurnOffTime() / LCD_PERIODIC_TIMER_MS;
-	counter_LCD = 10000 / LCD_PERIODIC_TIMER_MS;
+	counter_LCD = 120000 / LCD_PERIODIC_TIMER_MS;
 	CS1_ExitCritical()
 	;
 
@@ -166,7 +167,7 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 
 		if (getDisplayState()) {
 			if (!decrementLCD_CNT()) {
-				if(isStateIdle()){	//überprüfen ob im Idle Mode oder ob die Playlist läuft und deshalb kein Button mehr gedrückt wurde
+				if(isStateIdle()&!getIsDisplayingImage()){	//überprüfen ob im Idle Mode oder ob die Playlist läuft und deshalb kein Button mehr gedrückt wurde
 				// GUI Task wird benachrichtigt, dass er in den Screensaver mode gehen soll
 				TaskHandle_t xTaskToNotify = NULL;
 				xTaskToNotify = xTaskGetHandle("Gui");

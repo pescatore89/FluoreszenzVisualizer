@@ -14,4 +14,16 @@ void GUI_Images_Create(void);
 void setPlayingPollen(uint8_t val);
 uint8_t getImageGuiIsActive(void);
 
+
+
+void setIsDisplayingImage(uint8_t);
+
+uint8_t getIsDisplayingImage(void);
+
+
+
+
+
+
+
 #endif /* SOURCES_GUI_IMAGES_H_ */

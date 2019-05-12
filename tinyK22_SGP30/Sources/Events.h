@@ -96,6 +96,8 @@
 #include "MINI1.h"
 #include "SYS1.h"
 #include "WAIT2.h"
+#include "IRQ.h"
+#include "BitIoLdd15.h"
 
 #ifdef __cplusplus
 extern "C" {

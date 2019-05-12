@@ -92,6 +92,8 @@
 #include "MINI1.h"
 #include "SYS1.h"
 #include "WAIT2.h"
+#include "IRQ.h"
+#include "BitIoLdd15.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
@@ -119,28 +121,6 @@ void (*trg)(uint8_t);
 
 uint8_t n = 3;
 
-void test1(uint8_t* data) {
-
-	*(data) = *(data) - 1;
-
-	return;
-
-}
-void test(void *data) {
-
-	uint8_t duration = *((uint8_t*) data);
-
-	if (duration == 0) {
-
-		int z = 13;
-
-	} else {
-
-		*((uint8_t*) data) = 0;
-
-	}
-
-}
 
 typedef void (*TRG_Callback)(void*);
 

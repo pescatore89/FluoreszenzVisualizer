@@ -144,7 +144,8 @@ static void setTimerLCD(void) {
 	;
 	CS1_EnterCritical()
 	;
-	counter_LCD = getLCDTurnOffTime() / LCD_PERIODIC_TIMER_MS;
+	//counter_LCD = getLCDTurnOffTime() / LCD_PERIODIC_TIMER_MS;
+	counter_LCD = 10000 / LCD_PERIODIC_TIMER_MS;
 	CS1_ExitCritical()
 	;
 
@@ -165,6 +166,7 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 
 		if (getDisplayState()) {
 			if (!decrementLCD_CNT()) {
+				if(isStateIdle()){	//überprüfen ob im Idle Mode oder ob die Playlist läuft und deshalb kein Button mehr gedrückt wurde
 				// GUI Task wird benachrichtigt, dass er in den Screensaver mode gehen soll
 				TaskHandle_t xTaskToNotify = NULL;
 				xTaskToNotify = xTaskGetHandle("Gui");
@@ -174,7 +176,10 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 				xTaskToNotify = xTaskGetHandle("Neo");
 				FRTOS1_xTaskNotifyGive(xTaskToNotify);
 				setDisplayState(FALSE);
-
+				}
+				else{
+					resetLCD_Counter();
+				}
 			}
 		} else {
 			// do nothing
@@ -187,7 +192,7 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 
 void resetLCD_Counter(void) {
 
-	LCD1_DisplayOnOff(TRUE);	// swich on Display
+	LCD1_DisplayOnOff(TRUE);	// switch on Display
 	setTimerLCD();
 
 	setDisplayState(TRUE);

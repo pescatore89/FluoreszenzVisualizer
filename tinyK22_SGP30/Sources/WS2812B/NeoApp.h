@@ -28,6 +28,11 @@ uint8_t NEOA_GetLightLevel(void);
 bool NEOA_GetAutoLightLevelSetting(void);
 bool NEOA_SetAutoLightLevelSetting(bool set);
 
+void setStateIdle(uint8_t);
+uint8_t isStateIdle(void);
+
+
+
 struct CYRCLES {
 	uint8_t* C_1;
 	uint8_t* C_2;

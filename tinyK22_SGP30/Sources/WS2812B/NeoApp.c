@@ -48,6 +48,8 @@ static uint8_t NEOA_LightLevel = 1; /* default 1% */
 static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
 
+static uint8_t isIdleState;
+
 static uint8_t WL_pixels[nDataPoints];
 
 typedef struct {
@@ -2300,6 +2302,39 @@ static void playScreensaver(void) {
 
 }
 
+
+void setStateIdle(uint8_t value){
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+
+	isIdleState = value;
+
+	CS1_ExitCritical();
+
+}
+
+
+
+
+
+uint8_t isStateIdle(void){
+
+
+	uint8_t res = FALSE;
+	CS1_CriticalVariable();
+	CS1_EnterCritical();
+
+	res = isIdleState;
+
+	CS1_ExitCritical();
+
+	return res;
+
+
+}
+
+
+
 #define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
 static void NeoTask(void* pvParameters) {
 
@@ -2348,6 +2383,13 @@ static void NeoTask(void* pvParameters) {
 					state = READ_NEW_CMD;
 				}
 
+			}
+
+			if(state == IDLE_STATE){
+				setStateIdle(TRUE);
+			}
+			else{
+				setStateIdle(FALSE);
 			}
 
 			break;

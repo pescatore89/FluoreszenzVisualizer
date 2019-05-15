@@ -121,7 +121,6 @@ void (*trg)(uint8_t);
 
 uint8_t n = 3;
 
-
 typedef void (*TRG_Callback)(void*);
 
 int main(void)
@@ -136,18 +135,20 @@ int main(void)
 	/* Write your code here */
 
 
+
 	APP_Run();		// this is where it all begins...
 	/* For example: for(;;) { } */
 
 	/*** Don't write any code pass this line, or it will be deleted during code generation. ***/
-  /*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
-  #ifdef PEX_RTOS_START
-    PEX_RTOS_START();                  /* Startup of the selected RTOS. Macro is defined by the RTOS component. */
-  #endif
-  /*** End of RTOS startup code.  ***/
-  /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
-  for(;;){}
-  /*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
+	/*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
+#ifdef PEX_RTOS_START
+	PEX_RTOS_START(); /* Startup of the selected RTOS. Macro is defined by the RTOS component. */
+#endif
+	/*** End of RTOS startup code.  ***/
+	/*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
+	for (;;) {
+	}
+	/*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
 } /*** End of main routine. DO NOT MODIFY THIS TEXT!!! ***/
 
 /* END main */

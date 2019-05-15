@@ -146,7 +146,7 @@ static void setTimerLCD(void) {
 	CS1_EnterCritical()
 	;
 	//counter_LCD = getLCDTurnOffTime() / LCD_PERIODIC_TIMER_MS;
-	counter_LCD = 120000 / LCD_PERIODIC_TIMER_MS;
+	counter_LCD = 12000 / LCD_PERIODIC_TIMER_MS;
 	CS1_ExitCritical()
 	;
 

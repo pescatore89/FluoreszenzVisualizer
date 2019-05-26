@@ -52,6 +52,7 @@ typedef enum {
 	stop,
 	skipF,
 	skipR,
+	playAgain,
 	playImage,
 	clearImage,
 	readyForImage,

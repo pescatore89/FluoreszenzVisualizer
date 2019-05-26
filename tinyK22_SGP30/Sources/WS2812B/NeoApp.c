@@ -76,7 +76,12 @@ typedef enum {
 } NEO_STATUS;
 
 typedef enum {
-	notAborted, stopAborted, playImageAborted, skipNextAborted, skipPrevAborted
+	notAborted,
+	stopAborted,
+	playImageAborted,
+	skipNextAborted,
+	skipPrevAborted,
+	playAgainAborted
 } RETURN_STATUS;
 
 xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
@@ -2068,6 +2073,8 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 
 				} else if (pxRxDataMessage->cmd == skipF) {
 					return skipNextAborted; /*Session was aborted*/
+				} else if (pxRxDataMessage->cmd == playAgain) {
+					return playAgainAborted; /*Session was aborted*/
 				}
 
 				else if (pxRxDataMessage->cmd == pause) {
@@ -2082,6 +2089,8 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 								return playImageAborted;
 							} else if (pxRxDataMessage->cmd == skipF) {
 								return skipNextAborted; /*Session was aborted*/
+							} else if (pxRxDataMessage->cmd == playAgain) {
+								return playAgainAborted; /*Session was aborted*/
 							}
 						} else {
 							vTaskDelay(pdMS_TO_TICKS(20));
@@ -2272,9 +2281,10 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 			if (pxRxDataMessage->cmd == stop) {
 
 				return stopAborted; /*Session was aborted*/
-			}
-			else if(pxRxDataMessage->cmd == skipF){
+			} else if (pxRxDataMessage->cmd == skipF) {
 				return skipNextAborted;
+			} else if (pxRxDataMessage->cmd == playAgain) {
+				return playAgainAborted;
 			}
 
 			else if (pxRxDataMessage->cmd == playImage) {
@@ -2294,9 +2304,10 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 
 						else if (pxRxDataMessage->cmd == playImage) {
 							return playImageAborted;
-						}
-						else if(pxRxDataMessage->cmd == skipF){
+						} else if (pxRxDataMessage->cmd == skipF) {
 							return skipNextAborted;
+						} else if (pxRxDataMessage->cmd == playAgain) {
+							return playAgainAborted;
 						}
 
 					} else {
@@ -2647,7 +2658,7 @@ static void ScreensaverModeLogo(void) {
 
 static void playScreensaver(void) {
 
-	//ScreensaverModeColorRings();
+//ScreensaverModeColorRings();
 	ScreensaverModeLogo();
 	return;
 
@@ -2831,6 +2842,11 @@ static void NeoTask(void* pvParameters) {
 				NEO_ClearAllPixel();
 				NEO_TransferPixels();
 				state = STOPPED;
+			} else if (ret_value == playAgainAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+				state = PLAY_SEQ1;
+
 			} else if (ret_value == playImageAborted) {
 				state = DISPLAY_IMAGE;
 			} else if (ret_value == skipNextAborted) {
@@ -2866,6 +2882,9 @@ static void NeoTask(void* pvParameters) {
 						break;
 					} else if (pxRxDataMessage->cmd == skipF) {
 						break;
+					} else if (pxRxDataMessage->cmd == playAgain) {
+						state = PLAY_SEQ2;
+						break;
 					}
 
 					else if (pxRxDataMessage->cmd == pause) {
@@ -2885,6 +2904,10 @@ static void NeoTask(void* pvParameters) {
 									wasPaused = TRUE;
 								} else if (pxRxDataMessage->cmd == skipF) {
 									wasPaused = TRUE;
+									break;
+								} else if (pxRxDataMessage->cmd == playAgain) {
+									wasPaused = TRUE;
+									state = PLAY_SEQ2;
 									break;
 								}
 							} else {
@@ -2936,6 +2959,17 @@ static void NeoTask(void* pvParameters) {
 					state = IDLE_STATE;
 				}
 
+			}
+
+			else if (ret_value == playAgainAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+
+				/*Setup playground*/
+				playSeq2(pxRxDataMessage->char_data, excitation);
+
+
+				state = PLAY_SEQ3;
 			}
 
 			else if (ret_value == stopAborted) {

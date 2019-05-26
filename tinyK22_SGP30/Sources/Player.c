@@ -108,6 +108,7 @@ static void PlayerTask(void *pvParameters) {
 	char** playList = NULL;
 
 	bool wasSkippedForward = FALSE;
+	bool playAgainFlag = FALSE;
 
 	PLAYER_STATE state = IDLE;
 	uint8_t excitation = 1;
@@ -131,15 +132,7 @@ static void PlayerTask(void *pvParameters) {
 
 		case READ_NEW:
 			if ((pxPlaylistMessage->state) == newCMD) {
-				if ((pxPlaylistMessage->cmd) == pause) {
-					pxDataMessage->cmd = pause;
-					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
-							!= QUEUE_OK) {
-						/*Queue is full*/
-					} else {
-						state = PLAY_LIST;
-					}
-				} else if ((pxPlaylistMessage->cmd) == stop) {
+				if ((pxPlaylistMessage->cmd) == stop) {
 					pxDataMessage->cmd = stop;
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
 							!= QUEUE_OK) {
@@ -149,36 +142,13 @@ static void PlayerTask(void *pvParameters) {
 						state = IDLE;
 					}
 
-				} else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
-					pxDataMessage->cmd = play;
-					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
-							!= QUEUE_OK) {
-						/*Queue is full*/
-					} else {
-						state = PLAY_LIST;
-					}
-				} else if ((pxPlaylistMessage->cmd) == skipF) {
-					pxDataMessage->cmd = skipF;
-					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
-							!= QUEUE_OK) {
-						/*Queue is full*/
-					} else {
-						/*
-						 * Hier definieren Was zu tun ist wenn ein Skip Forward ausgelöst wurde TODO
-						 * */
-						//pxDataMessage->cmd = play;
-						wasSkippedForward = TRUE;
-						state = PLAY_LIST;
-					}
-
-				} else if ((pxPlaylistMessage->cmd) == skipR) {
+				}  else if ((pxPlaylistMessage->cmd) == skipR) {
 					pxDataMessage->cmd = skipR;
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
 							!= QUEUE_OK) {
 						/*Queue is full*/
 					} else {
 						/*
-						 *
 						 * Hier definieren Was zu tun ist wenn ein Skip Reverse ausgelöst wurde TODO
 						 * */
 						pxDataMessage->cmd = play;
@@ -264,8 +234,48 @@ static void PlayerTask(void *pvParameters) {
 
 					if (TakeMessageFromPlaylistQueue(queue_handler_playlist,
 							pxPlaylistMessage) != QUEUE_EMPTY) {
-						state = READ_NEW; /*new Element in the Playlist Queue*/
-						break;
+
+						if (pxPlaylistMessage->cmd == playAgain) {
+							pxDataMessage->cmd = playAgain;
+							if (AddMessageToDataQueue(queue_handler_data,
+									pxDataMessage) != QUEUE_OK) {
+								/*Queue is full*/
+							}
+						}
+
+						else if ((pxPlaylistMessage->cmd) == pause) {
+							pxDataMessage->cmd = pause;
+							if (AddMessageToDataQueue(queue_handler_data,
+									pxDataMessage) != QUEUE_OK) {
+								/*Queue is full*/
+							}
+						}
+
+						else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
+							pxDataMessage->cmd = play;
+							if (AddMessageToDataQueue(queue_handler_data,
+									pxDataMessage) != QUEUE_OK) {
+								/*Queue is full*/
+							}
+						} else if ((pxPlaylistMessage->cmd) == skipF) {
+							pxDataMessage->cmd = skipF;
+							if (AddMessageToDataQueue(queue_handler_data,
+									pxDataMessage) != QUEUE_OK) {
+								/*Queue is full*/
+							} else {
+								/*
+								 * Hier definieren Was zu tun ist wenn ein Skip Forward ausgelöst wurde TODO
+								 * */
+								//pxDataMessage->cmd = play;
+								wasSkippedForward = TRUE;
+							}
+
+						}
+
+						else {
+							state = READ_NEW; /*new Element in the Playlist Queue*/
+							break;
+						}
 					}
 
 					else {
@@ -294,12 +304,11 @@ static void PlayerTask(void *pvParameters) {
 											pxDataMessage);
 									pxDataMessage->excitation = excitation;
 
-
-									if(wasSkippedForward){
-										pxDataMessage->cmd = play;		// überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
-										wasSkippedForward = FALSE;		// Reset Skip Forward Flag
+									if (wasSkippedForward || playAgainFlag) {
+										pxDataMessage->cmd = play; // überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
+										wasSkippedForward = FALSE; // Reset Skip Forward Flag
+										playAgainFlag = FALSE;
 									}
-
 
 									if (AddMessageToDataQueue(
 											queue_handler_data, pxDataMessage)

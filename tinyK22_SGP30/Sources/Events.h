@@ -96,8 +96,8 @@
 #include "MINI1.h"
 #include "SYS1.h"
 #include "WAIT2.h"
-#include "IRQ.h"
-#include "BitIoLdd15.h"
+#include "RFID_IRQ.h"
+#include "CS2.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -347,6 +347,26 @@ void LCD1_OnGiveBus(void);
 */
 /* ===================================================================*/
 void Cpu_OnNMI(void);
+
+/*
+** ===================================================================
+**     Event       :  RFID_IRQ_OnPortEvent (module Events)
+**
+**     Component   :  RFID_IRQ [GPIO_LDD]
+*/
+/*!
+**     @brief
+**         Called if defined event on any pin of the port occured.
+**         OnPortEvent event and GPIO interrupt must be enabled. See
+**         SetEventMask() and GetEventMask() methods. This event is
+**         enabled if [Interrupt service/event] is Enabled and disabled
+**         if [Interrupt service/event] is Disabled.
+**     @param
+**         UserDataPtr     - Pointer to RTOS device
+**                           data structure pointer.
+*/
+/* ===================================================================*/
+void RFID_IRQ_OnPortEvent(LDD_TUserData *UserDataPtr);
 
 /* END Events */
 

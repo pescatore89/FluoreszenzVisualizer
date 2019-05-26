@@ -39,6 +39,8 @@ static lv_obj_t *btn_loop;
 static lv_btn_state_t play_buttonState = LV_BTN_STATE_REL;
 static lv_btn_state_t pause_buttonState = LV_BTN_STATE_INA;
 static lv_btn_state_t stop_buttonState = LV_BTN_STATE_INA;
+static lv_btn_state_t prev_buttonState = LV_BTN_STATE_INA;
+static lv_btn_state_t next_buttonState = LV_BTN_STATE_INA;
 
 static lv_obj_t *polle_label;
 
@@ -48,6 +50,10 @@ static char* pollenLabel;
 
 static uint8_t namesAvtiv[MAX_N_POLLS_STORED];
 static uint8_t* namesActive;
+
+
+
+
 static void SetLabelValue(lv_obj_t *label, int32_t val) {
 	uint8_t buf[16];
 	if (label != NULL) {
@@ -185,9 +191,13 @@ static lv_res_t btn_play_click_action(lv_obj_t *btn) {
 	lv_btn_set_state(btn, LV_BTN_STATE_INA);
 	lv_btn_set_state(btn_pause, LV_BTN_STATE_REL);
 	lv_btn_set_state(btn_stop, LV_BTN_STATE_REL);
+	lv_btn_set_state(btn_next, LV_BTN_STATE_REL);
+	lv_btn_set_state(btn_prev, LV_BTN_STATE_REL);
 	play_buttonState = LV_BTN_STATE_INA;
 	pause_buttonState = LV_BTN_STATE_REL;
 	stop_buttonState = LV_BTN_STATE_REL;
+	next_buttonState = LV_BTN_STATE_REL;
+	prev_buttonState = LV_BTN_STATE_REL;
 
 
 	return LV_RES_OK; /* Return OK if the button is not deleted */
@@ -231,21 +241,43 @@ static lv_res_t btn_stop_click_action(lv_obj_t *btn) {
 	lv_btn_set_state(btn_play, LV_BTN_STATE_REL);
 	lv_btn_set_state(btn_pause, LV_BTN_STATE_INA);
 	lv_btn_set_state(btn, LV_BTN_STATE_INA);
+	lv_btn_set_state(btn_prev, LV_BTN_STATE_INA);
+	lv_btn_set_state(btn_next, LV_BTN_STATE_INA);
 	isPaused = false;
 
 	play_buttonState = LV_BTN_STATE_REL;
 	pause_buttonState = LV_BTN_STATE_INA;
 	stop_buttonState = LV_BTN_STATE_INA;
+	prev_buttonState = LV_BTN_STATE_INA;
+	next_buttonState = LV_BTN_STATE_INA;
 
 	updatePlayButton(namesActive);
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
 static lv_res_t btn_prev_click_action(lv_obj_t *btn) {
+
+	uint8_t res;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
+	pxPlaylistMessage->cmd = skipR;
+	pxPlaylistMessage->state = newCMD;
+	res = AddMessageToPlaylistQueue(queue_handler_playlist, pxPlaylistMessage);
+
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
 static lv_res_t btn_next_click_action(lv_obj_t *btn) {
+
+
+	uint8_t res;
+	PlaylistMessage_t *pxPlaylistMessage;
+	pxPlaylistMessage = &xPlaylistMessage;
+	pxPlaylistMessage->cmd = skipF;
+	pxPlaylistMessage->state = newCMD;
+	res = AddMessageToPlaylistQueue(queue_handler_playlist, pxPlaylistMessage);
+
+
 	return LV_RES_OK; /* Return OK if the button is not deleted */
 }
 
@@ -387,23 +419,10 @@ void GUI_NEO_Create(uint8_t * name) {
 	style_knob.body.padding.ver = 10;
 
 #endif
-	/* previous button */
+
 
 
 #if 0
-	btn_prev = lv_btn_create(win, NULL);
-	lv_obj_align(btn_prev, btn_play, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
-	lv_btn_set_action(btn_prev, LV_BTN_ACTION_CLICK, btn_prev_click_action);
-	label = lv_label_create(btn_prev, NULL);
-	lv_label_set_text(label, SYMBOL_PREV);
-	GUI_AddObjToGroup(btn_prev);
-	/* next button */
-	btn_next = lv_btn_create(win, NULL);
-	lv_obj_align(btn_next, btn_prev, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
-	lv_btn_set_action(btn_next, LV_BTN_ACTION_CLICK, btn_next_click_action);
-	label = lv_label_create(btn_next, NULL);
-	lv_label_set_text(label, SYMBOL_NEXT);
-	GUI_AddObjToGroup(btn_next);
 	/* loop button */
 	btn_loop = lv_btn_create(win, NULL);
 	lv_obj_align(btn_loop, btn_next, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
@@ -414,14 +433,16 @@ void GUI_NEO_Create(uint8_t * name) {
 
 #endif
 
-
+#if 1
 	/* Create a placeholderlabel */
 	placeholder = lv_label_create(win, NULL);
 	lv_label_set_text(placeholder, "");
 	//lv_obj_align(polle_label, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
-	lv_obj_align(placeholder, win, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 10);
+
+	lv_obj_align(placeholder, win, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 5);
 	GUI_AddObjToGroup(placeholder);
 
+#endif
 
 
 
@@ -429,31 +450,29 @@ void GUI_NEO_Create(uint8_t * name) {
 	polle_label = lv_label_create(win, NULL);
 	lv_label_set_text(polle_label, "");
 	//lv_obj_align(polle_label, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
-	lv_obj_align(polle_label, placeholder, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 20);
+
+	lv_obj_set_pos(polle_label,10,10);
+	//lv_obj_align(polle_label, placeholder, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 20);
 	GUI_AddObjToGroup(polle_label);
-
-
-
-
-
-
 
 
 	/*-------------------------------------------------------*/
 	/* buttons for play, pause, stop, ... */
 	/*-------------------------------------------------------*/
-	lv_obj_t *label;
 
+	lv_obj_t *label;
 
 	/* play buttons */
 	btn_play = lv_btn_create(win, NULL);
 //	lv_obj_align(btn_play, slider1_label, LV_ALIGN_OUT_BOTTOM_LEFT, 7, 40);
-	lv_obj_align(btn_play, polle_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20);
+	lv_obj_align(btn_play, polle_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 30);
 	lv_btn_set_action(btn_play, LV_BTN_ACTION_CLICK, btn_play_click_action);
 	label = lv_label_create(btn_play, NULL);
 	lv_btn_set_state(btn_play,play_buttonState);
 	lv_label_set_text(label, SYMBOL_PLAY);
 	GUI_AddObjToGroup(btn_play);
+
+
 	/* pause button */
 	btn_pause = lv_btn_create(win, NULL);
 	lv_obj_align(btn_pause, btn_play, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
@@ -462,8 +481,9 @@ void GUI_NEO_Create(uint8_t * name) {
 	lv_btn_set_state(btn_pause,pause_buttonState);
 	lv_label_set_text(label, SYMBOL_PAUSE);
 	GUI_AddObjToGroup(btn_pause);
-	/* stop button */
 
+
+	/* stop button */
 	btn_stop = lv_btn_create(win, NULL);
 	lv_obj_align(btn_stop, btn_pause, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 	lv_btn_set_action(btn_stop, LV_BTN_ACTION_CLICK, btn_stop_click_action);
@@ -472,8 +492,24 @@ void GUI_NEO_Create(uint8_t * name) {
 	lv_label_set_text(label, SYMBOL_STOP);
 	GUI_AddObjToGroup(btn_stop);
 
+	/* previous button */
+	btn_prev = lv_btn_create(win, NULL);
+	lv_obj_align(btn_prev, btn_play, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5);
+	lv_btn_set_action(btn_prev, LV_BTN_ACTION_CLICK, btn_prev_click_action);
+	label = lv_label_create(btn_prev, NULL);
+	lv_btn_set_state(btn_prev,prev_buttonState);
+	lv_label_set_text(label, SYMBOL_PREV);
+	GUI_AddObjToGroup(btn_prev);
 
 
+	/* next button */
+	btn_next = lv_btn_create(win, NULL);
+	lv_obj_align(btn_next, btn_stop, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 5);
+	lv_btn_set_action(btn_next, LV_BTN_ACTION_CLICK, btn_next_click_action);
+	label = lv_label_create(btn_next, NULL);
+	lv_label_set_text(label, SYMBOL_NEXT);
+	lv_btn_set_state(btn_next,next_buttonState);
+	GUI_AddObjToGroup(btn_next);
 
 
 

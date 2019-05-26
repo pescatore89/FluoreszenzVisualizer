@@ -155,7 +155,33 @@ static void PlayerTask(void *pvParameters) {
 					} else {
 						state = PLAY_LIST;
 					}
+				} else if ((pxPlaylistMessage->cmd) == skipF) {
+					pxDataMessage->cmd = skipF;
+					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+							!= QUEUE_OK) {
+						/*Queue is full*/
+					} else {
+						/*
+						 * Hier definieren Was zu tun ist wenn ein Skip Forward ausgelöst wurde TODO
+						 * */
+						state = PLAY_LIST;
+					}
+
+				} else if ((pxPlaylistMessage->cmd) == skipR) {
+					pxDataMessage->cmd = skipR;
+					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
+							!= QUEUE_OK) {
+						/*Queue is full*/
+					} else {
+						/*
+						 *
+						 * Hier definieren Was zu tun ist wenn ein Skip Reverse ausgelöst wurde TODO
+						 * */
+						state = PLAY_LIST;
+					}
+
 				}
+
 				/*Do something*/
 			} else if ((pxPlaylistMessage->state) == newData) {
 				pxDataMessage->cmd = play;

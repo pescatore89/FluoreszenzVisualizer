@@ -377,6 +377,34 @@ void Cpu_OnNMI(void) {
 	/* Write your code here ... */
 }
 
+/*
+** ===================================================================
+**     Event       :  RFID_IRQ_OnPortEvent (module Events)
+**
+**     Component   :  RFID_IRQ [GPIO_LDD]
+*/
+/*!
+**     @brief
+**         Called if defined event on any pin of the port occured.
+**         OnPortEvent event and GPIO interrupt must be enabled. See
+**         SetEventMask() and GetEventMask() methods. This event is
+**         enabled if [Interrupt service/event] is Enabled and disabled
+**         if [Interrupt service/event] is Disabled.
+**     @param
+**         UserDataPtr     - Pointer to RTOS device
+**                           data structure pointer.
+*/
+/* ===================================================================*/
+
+void RFID_IRQ_OnPortEvent(LDD_TUserData *UserDataPtr)
+{
+  int m = 013;
+  if (m != 1){
+	  int k = 12;
+  }
+
+}
+
 /* END Events */
 
 #ifdef __cplusplus

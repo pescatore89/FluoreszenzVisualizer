@@ -180,6 +180,12 @@ static void SensorTask(void *pv) {
 static void SensorTask(void *pv) {
 	uint8_t res;
 	vTaskDelay(pdMS_TO_TICKS(500)); /* give sensors time to power up */
+
+
+
+
+
+
 #if 0
 
 	uint16_t tvoc, co2;
@@ -189,28 +195,36 @@ static void SensorTask(void *pv) {
 	CLS1_SendStr((uint8_t*)"Enabling RFID sensor.\r\n", CLS1_GetStdio()->stdOut);
 	//TSL1_Init();
 
+uint8_t cmdlen;
+
+cmdlen++;
+
+	res = GI2C1_WriteByte(0x48>>1,0x00);
+
+	res = GI2C1_WriteByte(0x48>>1,0x00);
+
+	res = GI2C1_WriteByte(0x48>>1,0xff);
 
 
+	res = GI2C1_WriteByte(0x48>>1,cmdlen);
+	res = GI2C1_WriteByte(0x48>>1,~cmdlen + 1);
 
+	res = GI2C1_WriteByte(0x48>>1,0xD4);
 
-	res = GI2C1_WriteByte(0x48>>1,0x04);
-	vTaskDelay(pdMS_TO_TICKS(5));
-	if (res!=ERR_OK) {
-		for(;;) {}
-	}
+	// write command
 
 
 	res = GI2C1_WriteByte(0x48>>1,0x06);
-	vTaskDelay(pdMS_TO_TICKS(5));
-	if (res!=ERR_OK) {
-		for(;;) {}
-	}
 
-	res = GI2C1_WriteByte(0x48>>1,0x16);
-	vTaskDelay(pdMS_TO_TICKS(5));
-	if (res!=ERR_OK) {
-		for(;;) {}
-	}
+	//checksum
+	res = GI2C1_WriteByte(0x48>>1,0x00);
+
+
+	// Postamble
+	res = GI2C1_WriteByte(0x48>>1,0x00);
+
+
+
 
 #endif
 

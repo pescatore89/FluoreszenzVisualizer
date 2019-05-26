@@ -228,7 +228,7 @@ void GUI_MainMenuCreate(void) {
 
 #endif
 
-#if PL_CONFIG_HAS_TSL2561
+#if PL_CONFIG_HAS_TSL2561 && 0
 	obj = lv_list_add(list1, NULL, "Ambient", Btn_Ambient_click_action);
 
 	GUI_AddObjToGroup(obj);

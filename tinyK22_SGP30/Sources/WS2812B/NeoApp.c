@@ -66,12 +66,17 @@ typedef enum {
 	PLAY_SEQ1, /*  */
 	PLAY_SEQ2, /* */
 	PLAY_SEQ3, /* */
-	ERROR_STATE, STOPPED, DISPLAY_IMAGE, SCREENSAVER,
+	ERROR_STATE,
+	STOPPED,
+	DISPLAY_IMAGE,
+	SCREENSAVER,
+	SKIP_FORWARD,
+	SKIP_BACKWARD
 
 } NEO_STATUS;
 
 typedef enum {
-	notAborted, stopAborted, playImageAborted,
+	notAborted, stopAborted, playImageAborted, skipNextAborted, skipPrevAborted
 } RETURN_STATUS;
 
 xQueueHandle queue_handler_data; /*Queue handler for data Queue*/
@@ -2060,6 +2065,9 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 					return stopAborted;
 				} else if (pxRxDataMessage->cmd == playImage) {
 					return playImageAborted; /*Session was aborted*/
+
+				} else if (pxRxDataMessage->cmd == skipF) {
+					return skipNextAborted; /*Session was aborted*/
 				}
 
 				else if (pxRxDataMessage->cmd == pause) {
@@ -2072,6 +2080,8 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 								return stopAborted;
 							} else if (pxRxDataMessage->cmd == playImage) {
 								return playImageAborted;
+							} else if (pxRxDataMessage->cmd == skipF) {
+								return skipNextAborted; /*Session was aborted*/
 							}
 						} else {
 							vTaskDelay(pdMS_TO_TICKS(20));
@@ -2263,6 +2273,9 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 
 				return stopAborted; /*Session was aborted*/
 			}
+			else if(pxRxDataMessage->cmd == skipF){
+				return skipNextAborted;
+			}
 
 			else if (pxRxDataMessage->cmd == playImage) {
 				return playImageAborted; /*Session was aborted*/
@@ -2281,6 +2294,9 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 
 						else if (pxRxDataMessage->cmd == playImage) {
 							return playImageAborted;
+						}
+						else if(pxRxDataMessage->cmd == skipF){
+							return skipNextAborted;
 						}
 
 					} else {
@@ -2753,7 +2769,6 @@ static void NeoTask(void* pvParameters) {
 				} else {
 					state = STOPPED;
 				}
-
 			}
 			/*Commandos for Images*/
 			else if (pxRxDataMessage->cmd == playImage) {
@@ -2818,6 +2833,14 @@ static void NeoTask(void* pvParameters) {
 				state = STOPPED;
 			} else if (ret_value == playImageAborted) {
 				state = DISPLAY_IMAGE;
+			} else if (ret_value == skipNextAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+				state = PLAY_SEQ2;
+			}
+
+			else if (ret_value == skipPrevAborted) {
+
 			}
 
 			break;
@@ -2841,6 +2864,8 @@ static void NeoTask(void* pvParameters) {
 					else if (pxRxDataMessage->cmd == playImage) {
 						state = DISPLAY_IMAGE;
 						break;
+					} else if (pxRxDataMessage->cmd == skipF) {
+						break;
 					}
 
 					else if (pxRxDataMessage->cmd == pause) {
@@ -2858,6 +2883,9 @@ static void NeoTask(void* pvParameters) {
 								else if (pxRxDataMessage->cmd == playImage) {
 									state = DISPLAY_IMAGE;
 									wasPaused = TRUE;
+								} else if (pxRxDataMessage->cmd == skipF) {
+									wasPaused = TRUE;
+									break;
 								}
 							} else {
 								vTaskDelay(pdMS_TO_TICKS(20));
@@ -2891,7 +2919,26 @@ static void NeoTask(void* pvParameters) {
 					vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
 					state = IDLE_STATE;
 				}
-			} else if (ret_value == stopAborted) {
+
+			} else if (ret_value == skipNextAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+
+				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+					state = ERROR_STATE;
+				} else {
+					pxMessage->cmd = stop;
+					if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+							!= QUEUE_OK) {
+						/*Queue is somehow full*/
+					}
+					vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
+					state = IDLE_STATE;
+				}
+
+			}
+
+			else if (ret_value == stopAborted) {
 				NEO_ClearAllPixel();
 				NEO_TransferPixels();
 				state = STOPPED;
@@ -2920,7 +2967,10 @@ static void NeoTask(void* pvParameters) {
 			}
 			state = IDLE_STATE;
 			break;
-
+		case SKIP_BACKWARD:
+			break;
+		case SKIP_FORWARD:
+			break;
 		case ERROR_STATE:
 			for (;;) {
 				vTaskDelay(pdMS_TO_TICKS(50));

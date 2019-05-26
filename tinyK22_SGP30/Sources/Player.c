@@ -107,6 +107,8 @@ static void PlayerTask(void *pvParameters) {
 
 	char** playList = NULL;
 
+	bool wasSkippedForward = FALSE;
+
 	PLAYER_STATE state = IDLE;
 	uint8_t excitation = 1;
 	uint8_t res;
@@ -164,6 +166,8 @@ static void PlayerTask(void *pvParameters) {
 						/*
 						 * Hier definieren Was zu tun ist wenn ein Skip Forward ausgelöst wurde TODO
 						 * */
+						//pxDataMessage->cmd = play;
+						wasSkippedForward = TRUE;
 						state = PLAY_LIST;
 					}
 
@@ -177,6 +181,7 @@ static void PlayerTask(void *pvParameters) {
 						 *
 						 * Hier definieren Was zu tun ist wenn ein Skip Reverse ausgelöst wurde TODO
 						 * */
+						pxDataMessage->cmd = play;
 						state = PLAY_LIST;
 					}
 
@@ -288,6 +293,13 @@ static void PlayerTask(void *pvParameters) {
 									res = readDataFromSD(excitation,
 											pxDataMessage);
 									pxDataMessage->excitation = excitation;
+
+
+									if(wasSkippedForward){
+										pxDataMessage->cmd = play;		// überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
+										wasSkippedForward = FALSE;		// Reset Skip Forward Flag
+									}
+
 
 									if (AddMessageToDataQueue(
 											queue_handler_data, pxDataMessage)

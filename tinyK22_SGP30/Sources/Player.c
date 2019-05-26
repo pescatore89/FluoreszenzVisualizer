@@ -108,6 +108,7 @@ static void PlayerTask(void *pvParameters) {
 	char** playList = NULL;
 
 	bool wasSkippedForward = FALSE;
+	bool wasSkippedBackward = FALSE;
 	bool playAgainFlag = FALSE;
 
 	PLAYER_STATE state = IDLE;
@@ -142,7 +143,7 @@ static void PlayerTask(void *pvParameters) {
 						state = IDLE;
 					}
 
-				}  else if ((pxPlaylistMessage->cmd) == skipR) {
+				} else if ((pxPlaylistMessage->cmd) == skipR) {
 					pxDataMessage->cmd = skipR;
 					if (AddMessageToDataQueue(queue_handler_data, pxDataMessage)
 							!= QUEUE_OK) {
@@ -270,8 +271,20 @@ static void PlayerTask(void *pvParameters) {
 								wasSkippedForward = TRUE;
 							}
 
+						} else if ((pxPlaylistMessage->cmd) == skipR) {
+							pxDataMessage->cmd = skipR;
+							if (AddMessageToDataQueue(queue_handler_data,
+									pxDataMessage) != QUEUE_OK) {
+								/*Queue is full*/
+							} else {
+								/*
+								 * Hier definieren Was zu tun ist wenn ein Skip Forward ausgelöst wurde TODO
+								 * */
+								wasSkippedBackward = TRUE;
+								//excitation = 1;
+								//nameCNT--;
+							}
 						}
-
 						else {
 							state = READ_NEW; /*new Element in the Playlist Queue*/
 							break;

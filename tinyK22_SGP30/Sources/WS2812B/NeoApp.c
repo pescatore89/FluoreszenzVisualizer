@@ -2073,6 +2073,8 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 
 				} else if (pxRxDataMessage->cmd == skipF) {
 					return skipNextAborted; /*Session was aborted*/
+				} else if (pxRxDataMessage->cmd == skipR) {
+					return skipPrevAborted; /*Session was aborted*/
 				} else if (pxRxDataMessage->cmd == playAgain) {
 					return playAgainAborted; /*Session was aborted*/
 				}
@@ -2089,6 +2091,8 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 								return playImageAborted;
 							} else if (pxRxDataMessage->cmd == skipF) {
 								return skipNextAborted; /*Session was aborted*/
+							} else if (pxRxDataMessage->cmd == skipR) {
+								return skipPrevAborted; /*Session was aborted*/
 							} else if (pxRxDataMessage->cmd == playAgain) {
 								return playAgainAborted; /*Session was aborted*/
 							}
@@ -2283,6 +2287,8 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 				return stopAborted; /*Session was aborted*/
 			} else if (pxRxDataMessage->cmd == skipF) {
 				return skipNextAborted;
+			} else if (pxRxDataMessage->cmd == skipR) {
+				return skipPrevAborted;
 			} else if (pxRxDataMessage->cmd == playAgain) {
 				return playAgainAborted;
 			}
@@ -2306,6 +2312,8 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 							return playImageAborted;
 						} else if (pxRxDataMessage->cmd == skipF) {
 							return skipNextAborted;
+						} else if (pxRxDataMessage->cmd == skipR) {
+							return skipPrevAborted;
 						} else if (pxRxDataMessage->cmd == playAgain) {
 							return playAgainAborted;
 						}
@@ -2856,7 +2864,9 @@ static void NeoTask(void* pvParameters) {
 			}
 
 			else if (ret_value == skipPrevAborted) {
-
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+				state = PLAY_SEQ1;
 			}
 
 			break;
@@ -2882,7 +2892,12 @@ static void NeoTask(void* pvParameters) {
 						break;
 					} else if (pxRxDataMessage->cmd == skipF) {
 						break;
-					} else if (pxRxDataMessage->cmd == playAgain) {
+					} else if (pxRxDataMessage->cmd == skipR) {
+						state = PLAY_SEQ1;
+						break;
+					}
+
+					else if (pxRxDataMessage->cmd == playAgain) {
 						state = PLAY_SEQ2;
 						break;
 					}
@@ -2903,6 +2918,10 @@ static void NeoTask(void* pvParameters) {
 									state = DISPLAY_IMAGE;
 									wasPaused = TRUE;
 								} else if (pxRxDataMessage->cmd == skipF) {
+									wasPaused = TRUE;
+									break;
+								} else if (pxRxDataMessage->cmd == skipR) {
+									state = PLAY_SEQ1;
 									wasPaused = TRUE;
 									break;
 								} else if (pxRxDataMessage->cmd == playAgain) {
@@ -2968,8 +2987,11 @@ static void NeoTask(void* pvParameters) {
 				/*Setup playground*/
 				playSeq2(pxRxDataMessage->char_data, excitation);
 
-
 				state = PLAY_SEQ3;
+			} else if (ret_value == skipPrevAborted) {
+				NEO_ClearAllPixel();
+				NEO_TransferPixels();
+				state = PLAY_SEQ1;
 			}
 
 			else if (ret_value == stopAborted) {

@@ -2810,6 +2810,20 @@ static void NeoTask(void* pvParameters) {
 
 			}
 
+			// die folgenden drei else if dienen nur dazu abzufangen, falls während dem IDLE State versehentlich ein skip next, skip reverse oder playagain gedrückt wurde
+			else if ((pxRxDataMessage->cmd == skipR)||(pxRxDataMessage->cmd == playAgain)||(pxRxDataMessage->cmd == skipF)) {
+
+				state = IDLE_STATE;		// and give back the mutex
+				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+					/*could not give back the semaphore, maybe because its already given back*/
+					for (;;) {
+
+					}
+				}
+
+			}
+
+
 			break;
 
 		case DISPLAY_IMAGE:

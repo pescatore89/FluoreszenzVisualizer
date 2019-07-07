@@ -185,7 +185,7 @@ static void ShellTask(void *pvParameters) {
 
 void SHELL_Init(void) {
 	CLS1_SetStdio(ios[0].stdio); /* using the first one as the default channel */
-	if (xTaskCreate(ShellTask, "Shell", 6000 / sizeof(StackType_t), NULL,
+	if (xTaskCreate(ShellTask, "Shell", 2000 / sizeof(StackType_t), NULL,
 			tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
 		for (;;) {
 		} /* error */

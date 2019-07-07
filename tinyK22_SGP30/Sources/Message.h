@@ -16,7 +16,7 @@
 #define QUEUE_ITEM_DATA_SIZE			(100)
 
 #include "FRTOS1.h"
-#include "config.h"
+//#include "config.h"
 
 extern xQueueHandle queue_handler;
 
@@ -134,8 +134,8 @@ struct DATA {
 
 	/*Data for seq. 3*/
 
-	uint32_t lifetime[nOfExcitation][nDataPoints];
-
+	uint32_t lifetime[3][5];
+	//uint32_t lifetime[nOfExcitation][nDataPoints];
 
 #if 0
 	uint32_t lifetime_266_1;
@@ -175,6 +175,8 @@ struct DataMessage {
 
 typedef struct DataMessage DataMessage_t;
 
+
+extern DataMessage_t * DataPtr;
 
 
 QUEUE_RESULT AddMessageToDataQueue(xQueueHandle handle,DataMessage_t *msg);

@@ -21,6 +21,8 @@ static uint8_t listEnabled[100];
 static uint8_t nPollenEnabled;
 static uint8_t nameCNT;
 
+DataMessage_t *DataPtr = NULL;
+
 typedef enum {
 	IDLE = 0, /* */
 	READ_NEW, /* read new Message from playlistQueue  */
@@ -69,7 +71,49 @@ static char* getName() {
 static uint8_t getMemory(DataMessage_t* px) {
 
 	uint8_t res = 0x01;
-	px->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2500); /*MAGIC NUMBER*/
+
+	//Config_StorePollen(px);
+
+	DataPtr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * getQuantity());
+
+	if (DataPtr == NULL) {
+		/*problem allocating memory*/
+		return ERR_FAILED;
+	}
+
+	for (int i = 0; i < 2; i++) {
+		(DataPtr + i)->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2500);
+		if (((DataPtr + i)->color_data) == NULL) {
+			res = ERR_FAILED;
+			/*malloc failed*/
+		}
+
+	}
+
+//	px = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * getQuantity());
+
+#if 0
+
+	px = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * getQuantity());
+	for (int i = 0; i < 2; i++) {
+		(px + i)->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2000);
+		if (((px + i)->color_data) == NULL) {
+			res = ERR_FAILED;
+			/*malloc failed*/
+		}
+
+	}
+
+#endif
+
+#if 0
+
+	//px = FRTOS1_pvPortMalloc(sizeof(DataMessage_t));
+	//if(px == NULL){
+	/*problem allocating memory*/
+	//	return ERR_FAILED;
+//	}
+	(px + 0)->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2500); /*MAGIC NUMBER*/
 	if ((px->color_data) == NULL) {
 
 		return 0x00;
@@ -84,6 +128,8 @@ static uint8_t getMemory(DataMessage_t* px) {
 		}
 #endif
 	}
+
+#endif
 	return res;
 }
 
@@ -95,11 +141,16 @@ static void freeMemory(DataMessage_t* px) {
 }
 
 static void PlayerTask(void *pvParameters) {
+
 	PlaylistMessage_t *pxPlaylistMessage;
 	pxPlaylistMessage = &xPlaylistMessage;
 
 	DataMessage_t * pxDataMessage;
 	pxDataMessage = &xDataMessage;
+
+	vTaskDelay(pdMS_TO_TICKS(2000));		// wait until all setup
+
+	getMemory(pxDataMessage);
 
 //int nOfPollen = getQuantity();
 
@@ -160,7 +211,8 @@ static void PlayerTask(void *pvParameters) {
 
 				/*Do something*/
 			} else if ((pxPlaylistMessage->state) == newData) {
-				pxDataMessage->cmd = play;
+				//pxDataMessage->cmd = play;
+				(DataPtr + 1)->cmd = play;
 				state = UPDATE_PLAYLIST;
 			} else if ((pxPlaylistMessage->state) == newImage) {
 				state = DISPLAY_IMAGE;
@@ -175,6 +227,7 @@ static void PlayerTask(void *pvParameters) {
 			excitation = 1;
 
 			if (!getMemory(pxDataMessage)) {
+
 				/*problem allocating memory*/
 			} else {
 
@@ -227,7 +280,8 @@ static void PlayerTask(void *pvParameters) {
 
 		case PLAY_LIST:
 
-			if (!getMemory(pxDataMessage)) {
+			//	if (!getMemory(pxDataMessage)) {
+			if (0) {
 				/*problem allocating memory*/
 			} else {
 
@@ -238,6 +292,7 @@ static void PlayerTask(void *pvParameters) {
 
 						if (pxPlaylistMessage->cmd == playAgain) {
 							pxDataMessage->cmd = playAgain;
+
 							if (AddMessageToDataQueue(queue_handler_data,
 									pxDataMessage) != QUEUE_OK) {
 								/*Queue is full*/
@@ -253,9 +308,10 @@ static void PlayerTask(void *pvParameters) {
 						}
 
 						else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
-							pxDataMessage->cmd = play;
+							//(pxDataMessage)->cmd = play;
+							(DataPtr+1) -> cmd = play;
 							if (AddMessageToDataQueue(queue_handler_data,
-									pxDataMessage) != QUEUE_OK) {
+									((DataPtr+1) )) != QUEUE_OK) {
 								/*Queue is full*/
 							}
 						} else if ((pxPlaylistMessage->cmd) == skipF) {
@@ -284,8 +340,7 @@ static void PlayerTask(void *pvParameters) {
 								//excitation = 1;
 								//nameCNT--;
 							}
-						}
-						else {
+						} else {
 							state = READ_NEW; /*new Element in the Playlist Queue*/
 							break;
 						}
@@ -293,7 +348,7 @@ static void PlayerTask(void *pvParameters) {
 
 					else {
 
-						if ((PeekDataQueue(queue_handler_data, pxDataMessage)
+						if ((PeekDataQueue(queue_handler_data, (DataPtr+1))
 								!= QUEUE_EMPTY)) { /*Has Element in the Data Queue, Neo Task hasnt taken it out yet*/
 							vTaskDelay(pdMS_TO_TICKS(10));
 
@@ -310,21 +365,21 @@ static void PlayerTask(void *pvParameters) {
 								} else {
 
 									if (excitation == 1) {
-										pxDataMessage->name = getName();
+										((DataPtr+1))->name = getName();
 									}
 
 									res = readDataFromSD(excitation,
-											pxDataMessage);
-									pxDataMessage->excitation = excitation;
+											((DataPtr+1)));
+									(DataPtr+1)->excitation = excitation;
 
 									if (wasSkippedForward || playAgainFlag) {
-										pxDataMessage->cmd = play; // überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
+										(pxDataMessage)->cmd = play; // überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
 										wasSkippedForward = FALSE; // Reset Skip Forward Flag
 										playAgainFlag = FALSE;
 									}
 
 									if (AddMessageToDataQueue(
-											queue_handler_data, pxDataMessage)
+											queue_handler_data, (DataPtr+1))
 											!= QUEUE_OK) {
 										/*Queue is full*/
 									}

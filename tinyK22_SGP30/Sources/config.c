@@ -575,10 +575,15 @@ uint8_t Config_ReadIni(const CLS1_StdIOType *io) {
 
 void initConfigData(void) {
 
+
 	Config_Setup();			// sets up all the Configurations
 	Config_ReadPollen();	// reads/stores all the names of the pollen
 	Config_ReadImages();	// reads/stores all the names of the Images
+//	Config_StorePollen(pxDataMessage);
 }
+
+
+
 
 uint8_t getPowerConnected(void) {
 
@@ -889,6 +894,37 @@ uint8_t Config_ReadImages(void) {
 	}
 
 	return ERR_OK;
+
+}
+
+
+
+uint8_t Config_StorePollen(struct DataMessage * ptr) {
+
+
+	uint8_t res = ERR_OK;
+
+
+
+	ptr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * quantity);
+
+	if ((ptr) == NULL) {
+		res = ERR_FAILED;
+		return res;
+		/*malloc failed*/
+	}
+
+	for (int i = 0; i < 1; i++) {
+		(ptr + i)->color_data = FRTOS1_pvPortMalloc(
+				sizeof(char) * 2500);
+		if (((ptr + i)->color_data) == NULL) {
+			res = ERR_FAILED;
+			/*malloc failed*/
+		}
+
+	}
+
+	return res;
 
 }
 

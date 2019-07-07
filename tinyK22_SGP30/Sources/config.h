@@ -13,6 +13,7 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 #include "CLS1.h"
+#include "Message.h"
 
 uint8_t Config_ReadIni(const CLS1_StdIOType *io);
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
@@ -62,6 +63,8 @@ uint8_t Config_ReadIni_Local(const CLS1_StdIOType *io);
  *
  * */
 uint32_t getTiming(uint8_t pos);
+
+uint8_t Config_StorePollen(struct DataMessage * ptr);
 
 
 #endif /* SOURCES_CONFIG_H_ */

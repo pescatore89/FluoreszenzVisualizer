@@ -2851,9 +2851,16 @@ static void NeoTask(void* pvParameters) {
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 
-			ret_value = playSeq1(pxRxDataMessage->char_data,
-					pxRxDataMessage->color_data,
-					pxRxDataMessage->image->biBitCount, excitation);
+			uint8_t ex = (DataPtr+1)->excitation;
+
+
+		//	ret_value = playSeq1(pxRxDataMessage->char_data,
+		//			pxRxDataMessage->color_data,
+		//			pxRxDataMessage->image->biBitCount, excitation);
+
+			ret_value = playSeq1((DataPtr+1)->char_data,
+					(DataPtr+1)->color_data,
+					(DataPtr+1)->image->biBitCount, (DataPtr+1)->excitation);
 
 			if (ret_value == notAborted) {
 				NEO_ClearAllPixel();

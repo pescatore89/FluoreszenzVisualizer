@@ -3,7 +3,7 @@
   <Header>
     <Name>tinyK22_SGP30</Name>
     <SavedBy>Erich Styger Local</SavedBy>
-    <ModificationStamp>168</ModificationStamp>
+    <ModificationStamp>177</ModificationStamp>
     <Date>2018-09-30</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -3506,7 +3506,7 @@
           <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
           <Value>0</Value>
           <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
-          <Base>HEX</Base>
+          <Base>DEC</Base>
         </ItemState>
         <ItemState>
           <ItemSymbol>DefaultMemAreas</ItemSymbol>
@@ -16528,8 +16528,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>36864</Value>
-        <Base>DEC</Base>
+        <Value>65536</Value>
+        <Base>HEX</Base>
       </ItemState>
       <ItemState>
         <ItemSymbol>LinkerHeapBaseSymbolName</ItemSymbol>
@@ -16554,8 +16554,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>3</Index>
-        <EnumSymbVal>Scheme4</EnumSymbVal>
+        <Index>1</Index>
+        <EnumSymbVal>Scheme2</EnumSymbVal>
       </ItemState>
       <ItemState>
         <ItemSymbol>StaticAllocation</ItemSymbol>

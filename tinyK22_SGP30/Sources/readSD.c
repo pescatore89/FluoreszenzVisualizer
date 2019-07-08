@@ -675,7 +675,7 @@ uint8_t BMPImageLoadData(const TCHAR *filename, BMPImage* image, char* data) {
 
 		res = FAT1_lseek(file, image->bfOffBits); // filepointer wird an den Ort verschoben wo die Bilddaten beginnen
 		if (res == FR_OK) {
-			res = FAT1_read(file, data, sizeof(data) * 2500 - 1, &nof); //
+			res = FAT1_read(file, data, sizeof(data) * 2000 - 1, &nof); //
 			if (res == FR_OK) {
 				res = FAT1_close(file);
 			} else {

@@ -3108,7 +3108,7 @@ void NEOA_Init(void* queue_handler) {
 	PIXDMA_Init();
 	if (xTaskCreate(NeoTask, /* pointer to the task */
 	"Neo", /* task name for kernel awareness debugging */
-	2000 / sizeof(StackType_t), /* task stack size */
+	800 / sizeof(StackType_t), /* task stack size */
 	(void*) queue_handler, /* optional task startup argument */
 	tskIDLE_PRIORITY + 3, /* initial priority */
 	(xTaskHandle*) NULL /* optional task handle to create */

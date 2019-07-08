@@ -224,6 +224,7 @@ uint8_t createQueues(void) {
 	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
 			sizeof(struct PlaylistMessage*));
 
+
 	if (queue_handler_playlist == NULL) {
 		return ERR_FAILED;
 	} else {

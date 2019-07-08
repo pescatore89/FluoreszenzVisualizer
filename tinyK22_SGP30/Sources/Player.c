@@ -74,15 +74,16 @@ static uint8_t getMemory(DataMessage_t* px) {
 
 	//Config_StorePollen(px);
 
-	DataPtr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * getQuantity());
+	uint8_t quantity = getQuantity();
+	DataPtr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * quantity);
 
 	if (DataPtr == NULL) {
 		/*problem allocating memory*/
 		return ERR_FAILED;
 	}
 
-	for (int i = 0; i < 2; i++) {
-		(DataPtr + i)->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2500);
+	for (int i = 0; i < (quantity * 3); i++) {
+		(DataPtr + i)->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2000);
 		if (((DataPtr + i)->color_data) == NULL) {
 			res = ERR_FAILED;
 			/*malloc failed*/
@@ -151,6 +152,8 @@ static void PlayerTask(void *pvParameters) {
 	vTaskDelay(pdMS_TO_TICKS(2000));		// wait until all setup
 
 	getMemory(pxDataMessage);
+
+	//loadData(void);
 
 //int nOfPollen = getQuantity();
 
@@ -309,9 +312,9 @@ static void PlayerTask(void *pvParameters) {
 
 						else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
 							//(pxDataMessage)->cmd = play;
-							(DataPtr+1) -> cmd = play;
+							(DataPtr + 1)->cmd = play;
 							if (AddMessageToDataQueue(queue_handler_data,
-									((DataPtr+1) )) != QUEUE_OK) {
+									((DataPtr + 1))) != QUEUE_OK) {
 								/*Queue is full*/
 							}
 						} else if ((pxPlaylistMessage->cmd) == skipF) {
@@ -348,7 +351,7 @@ static void PlayerTask(void *pvParameters) {
 
 					else {
 
-						if ((PeekDataQueue(queue_handler_data, (DataPtr+1))
+						if ((PeekDataQueue(queue_handler_data, (DataPtr + 1))
 								!= QUEUE_EMPTY)) { /*Has Element in the Data Queue, Neo Task hasnt taken it out yet*/
 							vTaskDelay(pdMS_TO_TICKS(10));
 
@@ -365,12 +368,12 @@ static void PlayerTask(void *pvParameters) {
 								} else {
 
 									if (excitation == 1) {
-										((DataPtr+1))->name = getName();
+										((DataPtr + 1))->name = getName();
 									}
 
 									res = readDataFromSD(excitation,
-											((DataPtr+1)));
-									(DataPtr+1)->excitation = excitation;
+											((DataPtr + 1)));
+									(DataPtr + 1)->excitation = excitation;
 
 									if (wasSkippedForward || playAgainFlag) {
 										(pxDataMessage)->cmd = play; // überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
@@ -379,7 +382,7 @@ static void PlayerTask(void *pvParameters) {
 									}
 
 									if (AddMessageToDataQueue(
-											queue_handler_data, (DataPtr+1))
+											queue_handler_data, (DataPtr + 1))
 											!= QUEUE_OK) {
 										/*Queue is full*/
 									}
@@ -397,15 +400,35 @@ static void PlayerTask(void *pvParameters) {
 
 				}
 			}
-			freeMemory(pxDataMessage);
 			break;
 		}
 	}
 }
 
+
+
+
+uint8_t loadData(void){
+
+	uint8_t res = ERR_OK;
+
+	uint8_t excitation = 1;
+	uint8_t quantity = getQuantity();
+	for(int i =0; i< quantity; i++){
+		res = readDataFromSD(excitation,
+					((DataPtr + i)));
+		excitation ++;
+	}
+
+
+}
+
+
+
+
 void PLAYER_Init(void) {
 //	CLS1_SetStdio(ios[0].stdio); /* using the first one as the default channel */
-	if (xTaskCreate(PlayerTask, "Player", 6000 / sizeof(StackType_t),
+	if (xTaskCreate(PlayerTask, "Player", 2000 / sizeof(StackType_t),
 	NULL,
 	tskIDLE_PRIORITY + 2, NULL) != pdPASS) {
 		for (;;) {

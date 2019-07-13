@@ -120,11 +120,14 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 	}
 
 	removeSuffixBMP(nameArray, excitation);
+
+#if 0
+
 	result = readCharacteristicValues(nameArray, pointerData, excitation);
 	pxData->char_data = pointerData;
 
 	//FRTOS1_vPortFree(polle);
-
+#endif
 	if (FAT1_ChangeDirectory(cd_back, io) != ERR_OK) {
 		/*something wnet wrong*/
 	}

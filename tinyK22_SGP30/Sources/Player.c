@@ -222,9 +222,7 @@ static uint8_t loadData(void) {
 
 static uint8_t getPosition(char* name){
 
-
 	char** nameList = getNameList();
-
 
 	uint8_t cnt;
 	uint8_t quantity = getQuantity();

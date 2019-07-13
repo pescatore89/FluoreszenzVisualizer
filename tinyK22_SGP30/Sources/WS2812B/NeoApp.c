@@ -2740,6 +2740,10 @@ static void NeoTask(void* pvParameters) {
 	pxMessage = &xUpdateMessage;
 	bool wasPaused = FALSE;
 
+	uint8_t ex;
+	uint8_t indexImage = 0;
+	uint8_t indexChar = 0;
+
 	uint32_t delayCNT = 0;
 
 	RETURN_STATUS ret_value;
@@ -2874,9 +2878,8 @@ static void NeoTask(void* pvParameters) {
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 
-			uint8_t ex = pxRxDataMessage->excitation;
-			uint8_t indexImage = 0;
-			uint8_t indexChar = 0;
+			ex = pxRxDataMessage->excitation;
+
 
 		//	ret_value = playSeq1(pxRxDataMessage->char_data,
 		//			pxRxDataMessage->color_data,
@@ -2921,8 +2924,9 @@ static void NeoTask(void* pvParameters) {
 
 		case PLAY_SEQ2:
 
-			playSeq2(pxRxDataMessage->char_data, excitation);
+			//playSeq2(pxRxDataMessage->char_data, excitation);
 
+			playSeq2(charDataPtr+(indexChar),ex);
 			delayCNT = rint((float) getTiming(1) / (DELAY_PER_TICK_SEQ_2));
 
 			state = PLAY_SEQ3;
@@ -2995,8 +2999,8 @@ static void NeoTask(void* pvParameters) {
 
 			vTaskDelay(pdMS_TO_TICKS(getTiming(2)));
 
-			ret_value = playSeq3(pxRxDataMessage->char_data, excitation);
-
+			//ret_value = playSeq3(pxRxDataMessage->char_data, excitation);
+			ret_value = playSeq3(charDataPtr+(indexChar),ex);
 			if (ret_value == notAborted) {
 				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 					state = ERROR_STATE;

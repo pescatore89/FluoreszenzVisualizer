@@ -68,6 +68,18 @@ static char* getName() {
 
 }
 
+static char** getNameList() {
+
+	char** pollenNamelist;
+
+	pollenNamelist = getNamelist();
+
+	return pollenNamelist;
+
+	//strcpy(polle, pollenNamelist);
+
+}
+
 static uint8_t getMemory(DataMessage_t* px) {
 
 	uint8_t res = 0x01;
@@ -75,7 +87,7 @@ static uint8_t getMemory(DataMessage_t* px) {
 	//Config_StorePollen(px);
 
 	uint8_t quantity = getQuantity();
-	DataPtr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * quantity);
+	DataPtr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * quantity * 3);
 
 	if (DataPtr == NULL) {
 		/*problem allocating memory*/
@@ -141,8 +153,41 @@ static void freeMemory(DataMessage_t* px) {
 
 }
 
+static uint8_t loadData(void) {
+
+	char ** nameList = getNameList();
+
+	uint8_t excitation = 1;
+	uint8_t nameCnt = 0;
+
+	uint8_t res = ERR_OK;
+
+	uint8_t quantity = getQuantity();
+
+	for (int i = 1; i <= (quantity * 3); i++) {
+		// now, load the Data
+		((DataPtr + i - 1))->name = nameList[nameCnt];
+		if (!(i % 3)) {
+			res = readDataFromSD(excitation, ((DataPtr + i - 1)));
+			excitation = 1;
+			nameCnt++;
+		} else {
+			res = readDataFromSD(excitation, ((DataPtr + i - 1)));
+			excitation++;
+		}
+		if (res != ERR_OK) {
+			break;
+		}
+	}
+
+	//**************************************************
+
+	return res;
+}
+
 static void PlayerTask(void *pvParameters) {
 
+	uint8_t res;
 	PlaylistMessage_t *pxPlaylistMessage;
 	pxPlaylistMessage = &xPlaylistMessage;
 
@@ -153,7 +198,7 @@ static void PlayerTask(void *pvParameters) {
 
 	getMemory(pxDataMessage);
 
-	//loadData(void);
+	res = loadData();
 
 //int nOfPollen = getQuantity();
 
@@ -167,7 +212,6 @@ static void PlayerTask(void *pvParameters) {
 
 	PLAYER_STATE state = IDLE;
 	uint8_t excitation = 1;
-	uint8_t res;
 
 	int k = 12;
 	for (;;) {
@@ -405,30 +449,9 @@ static void PlayerTask(void *pvParameters) {
 	}
 }
 
-
-
-
-uint8_t loadData(void){
-
-	uint8_t res = ERR_OK;
-
-	uint8_t excitation = 1;
-	uint8_t quantity = getQuantity();
-	for(int i =0; i< quantity; i++){
-		res = readDataFromSD(excitation,
-					((DataPtr + i)));
-		excitation ++;
-	}
-
-
-}
-
-
-
-
 void PLAYER_Init(void) {
 //	CLS1_SetStdio(ios[0].stdio); /* using the first one as the default channel */
-	if (xTaskCreate(PlayerTask, "Player", 2000 / sizeof(StackType_t),
+	if (xTaskCreate(PlayerTask, "Player", 3000 / sizeof(StackType_t),
 	NULL,
 	tskIDLE_PRIORITY + 2, NULL) != pdPASS) {
 		for (;;) {

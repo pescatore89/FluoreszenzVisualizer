@@ -22,6 +22,7 @@ static uint8_t nPollenEnabled;
 static uint8_t nameCNT;
 
 DataMessage_t *DataPtr = NULL;
+DATA_t * charDataPtr = NULL;
 
 typedef enum {
 	IDLE = 0, /* */
@@ -86,7 +87,11 @@ static uint8_t getMemory(DataMessage_t* px) {
 
 	//Config_StorePollen(px);
 
+
 	uint8_t quantity = getQuantity();
+
+	//get Memory for Image Data********************************************************
+
 	DataPtr = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * quantity * 3);
 
 	if (DataPtr == NULL) {
@@ -102,6 +107,31 @@ static uint8_t getMemory(DataMessage_t* px) {
 		}
 
 	}
+
+	// get Memory for characteristic Value Data*****************************************
+
+
+	charDataPtr = FRTOS1_pvPortMalloc(sizeof(DATA_t) * quantity);
+
+
+	if (charDataPtr == NULL) {
+		/*problem allocating memory*/
+		return ERR_FAILED;
+	}
+
+#if 0
+	for (int i = 0; i < (quantity * 3); i++) {
+		(charDataPtr + i)->color_data = FRTOS1_pvPortMalloc(sizeof(char) * 2000);
+		if (((DataPtr + i)->color_data) == NULL) {
+			res = ERR_FAILED;
+			/*malloc failed*/
+		}
+
+	}
+
+#endif
+
+
 
 //	px = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * getQuantity());
 
@@ -164,15 +194,17 @@ static uint8_t loadData(void) {
 
 	uint8_t quantity = getQuantity();
 
+
+	/* load Data for Images*/
 	for (int i = 1; i <= (quantity * 3); i++) {
 		// now, load the Data
 		((DataPtr + i - 1))->name = nameList[nameCnt];
 		if (!(i % 3)) {
-			res = readDataFromSD(excitation, ((DataPtr + i - 1)));
+			res = readDataFromSD(excitation, ((DataPtr + i - 1)),(charDataPtr+ nameCnt));
 			excitation = 1;
 			nameCnt++;
 		} else {
-			res = readDataFromSD(excitation, ((DataPtr + i - 1)));
+			res = readDataFromSD(excitation, ((DataPtr + i - 1)),(charDataPtr+ nameCnt));
 			excitation++;
 		}
 		if (res != ERR_OK) {
@@ -180,7 +212,8 @@ static uint8_t loadData(void) {
 		}
 	}
 
-	//**************************************************
+
+
 
 	return res;
 }
@@ -415,8 +448,8 @@ static void PlayerTask(void *pvParameters) {
 										((DataPtr + 1))->name = getName();
 									}
 
-									res = readDataFromSD(excitation,
-											((DataPtr + 1)));
+							//		res = readDataFromSD(excitation,
+							//				((DataPtr + 1)));
 									(DataPtr + 1)->excitation = excitation;
 
 									if (wasSkippedForward || playAgainFlag) {

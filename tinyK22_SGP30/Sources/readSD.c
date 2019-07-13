@@ -77,11 +77,12 @@ uint8_t getDataArray(uint8_t* px) {
 
 }
 
-uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
+uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData,
+		DATA_t * charData) {
 
 	//BMPImage* image;
 	pxData->image = &xBMPImage;
-	DATA_t* charData = NULL;
+	//DATA_t* charData = NULL;
 	char* filename = pxData->name;
 	char* polle = NULL;
 	DATA_t * pointerData;
@@ -121,10 +122,65 @@ uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData) {
 
 	removeSuffixBMP(nameArray, excitation);
 
-#if 0
+#if 1
 
 	result = readCharacteristicValues(nameArray, pointerData, excitation);
-	pxData->char_data = pointerData;
+
+	charData->amplitude_266_1 = pointerData->amplitude_266_1;
+	charData->amplitude_266_2 = pointerData->amplitude_266_2;
+	charData->amplitude_266_3 = pointerData->amplitude_266_3;
+	charData->amplitude_266_4 = pointerData->amplitude_266_4;
+	charData->amplitude_266_5 = pointerData->amplitude_266_5;
+
+	charData->fadeout_266 = pointerData->fadeout_266;
+
+	charData->color_266 = pointerData->color_266;
+
+	charData->lifetime[0][0] = pointerData->lifetime[0][0];
+	charData->lifetime[0][1] = pointerData->lifetime[0][1];
+	charData->lifetime[0][2] = pointerData->lifetime[0][2];
+	charData->lifetime[0][3] = pointerData->lifetime[0][3];
+	charData->lifetime[0][4] = pointerData->lifetime[0][4];
+
+	//
+
+	charData->amplitude_355_1 = pointerData->amplitude_355_1;
+	charData->amplitude_355_2 = pointerData->amplitude_355_2;
+	charData->amplitude_355_3 = pointerData->amplitude_355_3;
+	charData->amplitude_355_4 = pointerData->amplitude_355_4;
+	charData->amplitude_355_5 = pointerData->amplitude_355_5;
+
+	charData->fadeout_355 = pointerData->fadeout_355;
+
+	charData->color_355 = pointerData->color_355;
+
+	charData->lifetime[1][0] = pointerData->lifetime[1][0];
+	charData->lifetime[1][1] = pointerData->lifetime[1][1];
+	charData->lifetime[1][2] = pointerData->lifetime[1][2];
+	charData->lifetime[1][3] = pointerData->lifetime[1][3];
+	charData->lifetime[1][4] = pointerData->lifetime[1][4];
+
+	//
+
+	charData->amplitude_405_1 = pointerData->amplitude_405_1;
+	charData->amplitude_405_2 = pointerData->amplitude_405_2;
+	charData->amplitude_405_3 = pointerData->amplitude_405_3;
+	charData->amplitude_405_4 = pointerData->amplitude_405_4;
+	charData->amplitude_405_5 = pointerData->amplitude_405_5;
+
+	charData->fadeout_405 = pointerData->fadeout_405;
+
+	charData->color_405 = pointerData->color_405;
+
+	charData->lifetime[2][0] = pointerData->lifetime[2][0];
+	charData->lifetime[2][1] = pointerData->lifetime[2][1];
+	charData->lifetime[2][2] = pointerData->lifetime[2][2];
+	charData->lifetime[2][3] = pointerData->lifetime[2][3];
+	charData->lifetime[2][4] = pointerData->lifetime[2][4];
+
+	for (int j = 0; j < 5; j++) {
+		charData->lifetime[excitation - 1][j] = pointerData->lifetime[excitation-1][j];
+	}
 
 	//FRTOS1_vPortFree(polle);
 #endif
@@ -169,7 +225,6 @@ uint8_t readImageFromSD(DataMessage_t * pxData) {
 		char * suffix = ".bmp";
 		char * temp = ret;
 		strcat(temp, suffix);
-
 
 		res = BMPImageLoadData(temp, pxData->image, pxData->color_data);
 		if (res != FR_OK) {
@@ -249,6 +304,25 @@ uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t* pxDATA,
 		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength5", "0",
 				(char* ) buff8, sizeof(buff8), fileName);
 		pxDATA->lifetime[0][4] = getRealValue(buff8);
+
+#if 0
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength1", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime[0][0] = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength2", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime[0][1] = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength3", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime[0][2] = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength4", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime[0][3] = getRealValue(buff8);
+		val = MINI1_ini_gets(SECTION_NAME_MODE_3, "266wavelength5", "0",
+				(char* ) buff8, sizeof(buff8), fileName);
+		pxDATA->lifetime[0][4] = getRealValue(buff8);
+
+#endif
 
 	}
 
@@ -346,12 +420,6 @@ int getRawInt(char c) {
 	}
 	return c - '0';
 }
-
-
-
-
-
-
 
 uint32_t getRealValue(const char *value) {
 	uint32_t result = 0;

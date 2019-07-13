@@ -134,8 +134,8 @@ struct DATA {
 
 	/*Data for seq. 3*/
 
-	uint32_t lifetime[3][5];
 	//uint32_t lifetime[nOfExcitation][nDataPoints];
+	uint32_t lifetime[3][5];
 
 #if 0
 	uint32_t lifetime_266_1;
@@ -177,6 +177,7 @@ typedef struct DataMessage DataMessage_t;
 
 
 extern DataMessage_t * DataPtr;
+extern DATA_t * charDataPtr;
 
 
 QUEUE_RESULT AddMessageToDataQueue(xQueueHandle handle,DataMessage_t *msg);

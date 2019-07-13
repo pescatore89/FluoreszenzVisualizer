@@ -22,7 +22,7 @@ uint8_t Read_readBMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t Display_BMP(const TCHAR *fileName, const CLS1_StdIOType *io);
 uint8_t BMP_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io);
-uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData);
+uint8_t readDataFromSD(uint8_t excitation, DataMessage_t * pxData,DATA_t * charData);
 uint8_t readImageFromSD(DataMessage_t * pxData);
 uint8_t readCharacteristicValues(TCHAR *fileName, DATA_t *pxDATA, uint8_t excitation);
 //uint8_t readCharacteristicValues(TCHAR *fileName, Message_t *pxDATA);

@@ -81,7 +81,7 @@ static char** getNameList() {
 
 }
 
-static uint8_t getMemory(DataMessage_t* px) {
+static uint8_t getMemory(void) {
 
 	uint8_t res = 0x01;
 
@@ -218,6 +218,27 @@ static uint8_t loadData(void) {
 	return res;
 }
 
+
+
+static uint8_t getPosition(char* name){
+
+
+	char** nameList = getNameList();
+
+
+	uint8_t cnt;
+	uint8_t quantity = getQuantity();
+
+	for(cnt = 1; cnt <=quantity; cnt++){
+		if(!(strcmp(*(nameList+cnt -1),name))){
+			return cnt;
+		}
+	}
+
+	return cnt;
+
+}
+
 static void PlayerTask(void *pvParameters) {
 
 	uint8_t res;
@@ -229,7 +250,7 @@ static void PlayerTask(void *pvParameters) {
 
 	vTaskDelay(pdMS_TO_TICKS(2000));		// wait until all setup
 
-	getMemory(pxDataMessage);
+	getMemory();
 
 	res = loadData();
 
@@ -291,8 +312,7 @@ static void PlayerTask(void *pvParameters) {
 
 				/*Do something*/
 			} else if ((pxPlaylistMessage->state) == newData) {
-				//pxDataMessage->cmd = play;
-				(DataPtr + 1)->cmd = play;
+				pxDataMessage->cmd = play;
 				state = UPDATE_PLAYLIST;
 			} else if ((pxPlaylistMessage->state) == newImage) {
 				state = DISPLAY_IMAGE;
@@ -306,7 +326,7 @@ static void PlayerTask(void *pvParameters) {
 
 			excitation = 1;
 
-			if (!getMemory(pxDataMessage)) {
+			if (!getMemory()) {
 
 				/*problem allocating memory*/
 			} else {
@@ -350,9 +370,7 @@ static void PlayerTask(void *pvParameters) {
 				state = IDLE;
 			} else {
 				/*Update the playlist*/
-
 				state = PLAY_LIST;
-
 			}
 			nameCNT = 0;
 			excitation = 1;
@@ -388,10 +406,9 @@ static void PlayerTask(void *pvParameters) {
 						}
 
 						else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
-							//(pxDataMessage)->cmd = play;
-							(DataPtr + 1)->cmd = play;
+							(pxDataMessage)->cmd = play;
 							if (AddMessageToDataQueue(queue_handler_data,
-									((DataPtr + 1))) != QUEUE_OK) {
+									pxDataMessage )!= QUEUE_OK) {
 								/*Queue is full*/
 							}
 						} else if ((pxPlaylistMessage->cmd) == skipF) {
@@ -428,7 +445,7 @@ static void PlayerTask(void *pvParameters) {
 
 					else {
 
-						if ((PeekDataQueue(queue_handler_data, (DataPtr + 1))
+						if ((PeekDataQueue(queue_handler_data, (pxDataMessage))
 								!= QUEUE_EMPTY)) { /*Has Element in the Data Queue, Neo Task hasnt taken it out yet*/
 							vTaskDelay(pdMS_TO_TICKS(10));
 
@@ -445,12 +462,13 @@ static void PlayerTask(void *pvParameters) {
 								} else {
 
 									if (excitation == 1) {
-										((DataPtr + 1))->name = getName();
+										pxDataMessage->name = getName();
 									}
 
 							//		res = readDataFromSD(excitation,
 							//				((DataPtr + 1)));
-									(DataPtr + 1)->excitation = excitation;
+									pxDataMessage->excitation = excitation;
+									pxDataMessage->position = getPosition(pxDataMessage->name);
 
 									if (wasSkippedForward || playAgainFlag) {
 										(pxDataMessage)->cmd = play; // überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann
@@ -459,7 +477,7 @@ static void PlayerTask(void *pvParameters) {
 									}
 
 									if (AddMessageToDataQueue(
-											queue_handler_data, (DataPtr + 1))
+											queue_handler_data, (pxDataMessage))
 											!= QUEUE_OK) {
 										/*Queue is full*/
 									}

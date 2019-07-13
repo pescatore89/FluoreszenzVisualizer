@@ -167,6 +167,7 @@ struct DataMessage {
 	DATA_t* char_data;
 	char* color_data;
 	char* name;
+	uint8_t position;
 	uint8_t farbtiefe;
 	COMMAND cmd;
 	BMPImage* image;

@@ -2702,6 +2702,29 @@ uint8_t isStateIdle(void) {
 
 }
 
+
+
+
+static uint8_t* getDataStoredIndex(DataMessage_t* px){
+
+	//uint8_t nameindex = getPollenIndex(px->name);
+	static uint8_t result[2];
+
+
+
+
+
+
+	result[0] = 1;
+	result[1] = 1;
+
+	return result;
+
+}
+
+
+
+
 #define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
 static void NeoTask(void* pvParameters) {
 
@@ -2851,16 +2874,20 @@ static void NeoTask(void* pvParameters) {
 			NEO_ClearAllPixel();
 			NEO_TransferPixels();
 
-			uint8_t ex = (DataPtr+1)->excitation;
-
+			uint8_t ex = pxRxDataMessage->excitation;
+			uint8_t indexImage = 0;
+			uint8_t indexChar = 0;
 
 		//	ret_value = playSeq1(pxRxDataMessage->char_data,
 		//			pxRxDataMessage->color_data,
 		//			pxRxDataMessage->image->biBitCount, excitation);
 
-			ret_value = playSeq1((DataPtr+1)->char_data,
-					(DataPtr+1)->color_data,
-					(DataPtr+1)->image->biBitCount, (DataPtr+1)->excitation);
+			indexImage = ((pxRxDataMessage->position)-1) * 3 + ex -1;
+			indexChar =  (pxRxDataMessage->position)-1;
+
+			ret_value = playSeq1((charDataPtr+(indexChar)),
+					(DataPtr+(indexImage))->color_data,
+					(DataPtr+(indexImage))->image->biBitCount, ex);
 
 			if (ret_value == notAborted) {
 				NEO_ClearAllPixel();

@@ -116,6 +116,11 @@ void GUI_POLLEN_Create(void) {
 	/*Create check boxes*/
 	int x = 0;
 	int nOFnames = getQuantity();	//  get number of pollen to initialize
+	if(nOFnames > getMaxNoOfPollen()){
+		nOFnames = getMaxNoOfPollen();
+	}
+
+
 	char ** name = getNamelist();	//  get names of the pollen
 	lv_obj_t * cb;
 	uint8_t counter = 0;

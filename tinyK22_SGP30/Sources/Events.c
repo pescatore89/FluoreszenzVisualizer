@@ -42,6 +42,7 @@ extern "C" {
 #if PL_CONFIG_HAS_SPI
 #include "SPI.h"
 #include "Application.h"
+#include "WS2812B\NeoApp.h"
 #endif
 
 /*
@@ -115,7 +116,6 @@ void FRTOS1_vApplicationIdleHook(void) {
 	/* Write your code here ... */
 	LED1_Neg();
 
-
 }
 
 /*
@@ -175,12 +175,13 @@ void SM1_OnBlockSent(LDD_TUserData *UserDataPtr) {
  */
 void KEY1_OnKeyPressed(uint8_t keys) {
 
-	if(!getDisplayState()){// Display was off (false --> off)
-		TaskHandle_t xTaskToNotify = NULL;
-		xTaskToNotify = xTaskGetHandle("Neo");
-		FRTOS1_xTaskNotifyGive(xTaskToNotify);
+	if ((!getDisplayState())&&(isStateIdle())) { // Display war aus und man befindet sich NICHT im Abspielmodus
+			TaskHandle_t xTaskToNotify = NULL;
+			xTaskToNotify = xTaskGetHandle("Neo");
+			FRTOS1_xTaskNotifyGive(xTaskToNotify);
 	}
 	resetLCD_Counter();
+	resetScreensaver_Counter();
 	LV_ButtonEvent(keys, LV_MASK_PRESSED);
 }
 
@@ -378,30 +379,29 @@ void Cpu_OnNMI(void) {
 }
 
 /*
-** ===================================================================
-**     Event       :  RFID_IRQ_OnPortEvent (module Events)
-**
-**     Component   :  RFID_IRQ [GPIO_LDD]
-*/
+ ** ===================================================================
+ **     Event       :  RFID_IRQ_OnPortEvent (module Events)
+ **
+ **     Component   :  RFID_IRQ [GPIO_LDD]
+ */
 /*!
-**     @brief
-**         Called if defined event on any pin of the port occured.
-**         OnPortEvent event and GPIO interrupt must be enabled. See
-**         SetEventMask() and GetEventMask() methods. This event is
-**         enabled if [Interrupt service/event] is Enabled and disabled
-**         if [Interrupt service/event] is Disabled.
-**     @param
-**         UserDataPtr     - Pointer to RTOS device
-**                           data structure pointer.
-*/
+ **     @brief
+ **         Called if defined event on any pin of the port occured.
+ **         OnPortEvent event and GPIO interrupt must be enabled. See
+ **         SetEventMask() and GetEventMask() methods. This event is
+ **         enabled if [Interrupt service/event] is Enabled and disabled
+ **         if [Interrupt service/event] is Disabled.
+ **     @param
+ **         UserDataPtr     - Pointer to RTOS device
+ **                           data structure pointer.
+ */
 /* ===================================================================*/
 
-void RFID_IRQ_OnPortEvent(LDD_TUserData *UserDataPtr)
-{
-  int m = 013;
-  if (m != 1){
-	  int k = 12;
-  }
+void RFID_IRQ_OnPortEvent(LDD_TUserData *UserDataPtr) {
+	int m = 013;
+	if (m != 1) {
+		int k = 12;
+	}
 
 }
 

@@ -3086,7 +3086,7 @@ static void NeoTask(void* pvParameters) {
 			break;
 
 		case SCREENSAVER:
-
+			setStateIdle(TRUE);
 			playScreensaver();
 			state = IDLE_STATE;
 

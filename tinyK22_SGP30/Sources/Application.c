@@ -50,6 +50,7 @@
 static xTimerHandle timerHndl_LCD;
 static xTimerHandle timerHndl;
 static int counter_LCD;
+static int counter_ScreensaverPlaylist;
 static bool display_state = TRUE;
 static bool LCD_Init = TRUE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
@@ -139,6 +140,21 @@ static bool decrementLCD_CNT() {
 
 }
 
+static bool decrementScreensaver_CNT() {
+	bool res = TRUE;	//not reached 0 yet
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	counter_ScreensaverPlaylist--;
+	res = counter_ScreensaverPlaylist;
+	CS1_ExitCritical()
+	;
+	return res;
+
+}
+
 static void setTimerLCD(void) {
 
 	CS1_CriticalVariable()
@@ -152,6 +168,18 @@ static void setTimerLCD(void) {
 
 }
 
+static void setTimerScreensaverPlaylist(void) {
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	//counter_ScreensaverPlaylist = getScreensaverTime() / LCD_PERIODIC_TIMER_MS;
+	counter_ScreensaverPlaylist = 12000 / LCD_PERIODIC_TIMER_MS;
+	CS1_ExitCritical()
+	;
+
+}
+
 static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 
 	int tempCnt = 0;
@@ -160,25 +188,40 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 	case INIT:
 		if (!LCDisInit()) {
 			setTimerLCD();
+			setTimerScreensaverPlaylist();
 			state = ON;
 		}
 		break;
 	case ON:
 
-		if (getDisplayState()) {
-			if (!decrementLCD_CNT()) {
-				if(isStateIdle()&!getIsDisplayingImage()){	//überprüfen ob im Idle Mode oder ob die Playlist läuft und deshalb kein Button mehr gedrückt wurde
-				// GUI Task wird benachrichtigt, dass er in den Screensaver mode gehen soll
+
+		/*PLAYING MODE*/
+		if (!isStateIdle() & getDisplayState()) {//man befindet sich im Playmodus und Display ist noch nicht ausgeschalten
+			if (!decrementScreensaver_CNT()) {// True falls timer 0 erreicht hat
+				// GUI Task wird benachrichtigt, dass er den Bildschirm abstellen soll
 				TaskHandle_t xTaskToNotify = NULL;
 				xTaskToNotify = xTaskGetHandle("Gui");
 				//Notify GUI Task to turn off Display
 				FRTOS1_xTaskNotifyGive(xTaskToNotify);
-				//Notify NeoPixel task to run screensaver mode
-				xTaskToNotify = xTaskGetHandle("Neo");
-				FRTOS1_xTaskNotifyGive(xTaskToNotify);
 				setDisplayState(FALSE);
-				}
-				else{
+			}
+		}
+
+
+		/*IDLE MODE*/
+		else if (getDisplayState()) {		//true if LCD is turned on
+			if (!decrementLCD_CNT()) {// decrement counter, true if has reached 0
+				if (isStateIdle() & !getIsDisplayingImage()) {//überprüfen ob im Idle Mode oder ob die Playlist läuft und deshalb kein Button mehr gedrückt wurde
+						// GUI Task wird benachrichtigt, dass er in den Screensaver mode gehen soll
+					TaskHandle_t xTaskToNotify = NULL;
+					xTaskToNotify = xTaskGetHandle("Gui");
+					//Notify GUI Task to turn off Display
+					FRTOS1_xTaskNotifyGive(xTaskToNotify);
+					//Notify NeoPixel task to run screensaver mode
+					xTaskToNotify = xTaskGetHandle("Neo");
+					FRTOS1_xTaskNotifyGive(xTaskToNotify);
+					setDisplayState(FALSE);
+				} else {
 					resetLCD_Counter();
 				}
 			}
@@ -189,6 +232,14 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 		break;
 
 	}
+}
+
+void resetScreensaver_Counter(void) {
+	LCD1_DisplayOnOff(TRUE);	// switch on Display
+	setTimerScreensaverPlaylist();
+
+	setDisplayState(TRUE);
+
 }
 
 void resetLCD_Counter(void) {
@@ -223,7 +274,6 @@ uint8_t createQueues(void) {
 	/*Initialize Playlist Queue*/
 	queue_handler_playlist = FRTOS1_xQueueCreate(QUEUE_PLAYLIST_LENGTH,
 			sizeof(struct PlaylistMessage*));
-
 
 	if (queue_handler_playlist == NULL) {
 		return ERR_FAILED;

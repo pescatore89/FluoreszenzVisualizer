@@ -169,28 +169,6 @@ static void GuiTask(void *p) {
 
 
 			LCD1_DisplayOnOff(FALSE);	// turn off display
-
-
-
-
-
-
-			/*
-			 *
-
-			char* string = "The Andyman can";
-			GDisp1_PixelDim x, y;
-			FDisp1_Font *font;
-			GDisp1_DrawFilledBox(0,0,150,150,GDisp1_COLOR_BLACK);
-			GDisp1_UpdateFull();
-			font = GFont1_GetFont();
-			x = TEXT_LEFT_BORDER;
-			y = (FDisp1_PixelDim) (TEXT_TOP_BORDER);
-			FDisp1_WriteString((unsigned char*) string, GDisp1_COLOR_WHITE,
-					&x, &y, font);
-			GDisp1_UpdateFull();
-*/
-
 		}
 
 		if (getNavGuiIsActive()) {

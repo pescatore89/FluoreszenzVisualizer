@@ -114,7 +114,10 @@ QUEUE_RESULT TakeMessageFromUpdateQueue(xQueueHandle handle,
 #define TEXT_LEFT_BORDER 10
 #define TEXT_TOP_BORDER 5
 static void GuiTask(void *p) {
+
+
 	vTaskDelay(pdMS_TO_TICKS(1000)); /* give hardware time to power up */
+	LCD1_DisplayOnOff(TRUE);	// turn off display
 	LCD1_Init();
 	uint8_t isActive = false;
 	UpdateMessage_t* rxMessage;
@@ -208,7 +211,7 @@ void GUI_Init(void) {
 	// lv_style_btn_rel.body.padding.ver = LV_DPI / 12;
 
 
-
+	LCD1_DisplayOnOff(FALSE);	// turn off display for reading Data Pollen
 	if (xTaskCreate(GuiTask, "Gui", 2000 / sizeof(StackType_t), taskHandleGUI,
 	tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
 		for (;;) {

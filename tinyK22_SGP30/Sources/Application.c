@@ -285,7 +285,6 @@ void resetLCD_Counter(void) {
 
 static void AppTask(void *pv) {
 	(void) pv;
-
 	vTaskDelay(pdMS_TO_TICKS(500));
 	initConfigData();
 #if PL_CONFIG_HAS_GUI

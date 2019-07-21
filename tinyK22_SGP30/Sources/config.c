@@ -25,10 +25,12 @@
 #define INI_SECTION_NAME		"names"
 #define INI_SECTION_NAME_LED	"LED"
 #define INI_SECTION_NAME_LCD	"turnOffTime"
+#define INI_SECTION_NAME_NO_POLLEN "CONFIG"
 #define MAX_NAME_LENGTH			 100
 
 //#endif
 static uint8_t powerEnabled;
+static uint8_t maxNoOfPollen;
 static uint8_t letter_A;
 static uint8_t letter_T;
 static uint32_t trailSpeed;
@@ -114,6 +116,17 @@ void setLCDturnOffTime(uint32_t val){
 	CS1_EnterCritical()
 	;
 	LCD_turn_off_time = val;
+	CS1_ExitCritical()
+	;
+}
+
+
+void setMaxNoOfPollen(uint8_t val){
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	maxNoOfPollen = val;
 	CS1_ExitCritical()
 	;
 }
@@ -314,6 +327,14 @@ uint32_t getTiming(uint8_t pos) {
 	return timing[pos];
 
 }
+
+
+
+
+
+
+
+
 
 uint8_t CONFIG_ParseCommand(const unsigned char *cmd, bool *handled,
 		const CLS1_StdIOType *io) {
@@ -594,7 +615,18 @@ void initConfigData(void) {
 //	Config_StorePollen(pxDataMessage);
 }
 
+uint8_t getMaxNoOfPollen(void){
+	uint8_t res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = maxNoOfPollen;
+	CS1_ExitCritical()
+	;
 
+	return res;
+}
 
 
 uint8_t getPowerConnected(void) {
@@ -732,6 +764,11 @@ uint8_t Config_Setup(void) {
 	} else {
 		lightSensor = FALSE;
 	}
+
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_NO_POLLEN, "maxNoOfPollen", "5",
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	setMaxNoOfPollen(getRealValue(buf));
 
 
 	val = MINI1_ini_gets(INI_SECTION_NAME_LCD, "LCD_turn_off_time", "1D4C0",		// default wert bei 2 min

@@ -87,8 +87,11 @@ static uint8_t getMemory(void) {
 
 	//Config_StorePollen(px);
 
-
 	uint8_t quantity = getQuantity();
+
+	if (quantity > getMaxNoOfPollen()) {
+		quantity = getMaxNoOfPollen();
+	}
 
 	//get Memory for Image Data********************************************************
 
@@ -110,9 +113,7 @@ static uint8_t getMemory(void) {
 
 	// get Memory for characteristic Value Data*****************************************
 
-
 	charDataPtr = FRTOS1_pvPortMalloc(sizeof(DATA_t) * quantity);
-
 
 	if (charDataPtr == NULL) {
 		/*problem allocating memory*/
@@ -130,8 +131,6 @@ static uint8_t getMemory(void) {
 	}
 
 #endif
-
-
 
 //	px = FRTOS1_pvPortMalloc(sizeof(DataMessage_t) * getQuantity());
 
@@ -194,17 +193,23 @@ static uint8_t loadData(void) {
 
 	uint8_t quantity = getQuantity();
 
+	uint8_t foo = getMaxNoOfPollen();
+	if (quantity > getMaxNoOfPollen()) {
+		quantity = getMaxNoOfPollen();
+	}
 
 	/* load Data for Images*/
 	for (int i = 1; i <= (quantity * 3); i++) {
 		// now, load the Data
 		((DataPtr + i - 1))->name = nameList[nameCnt];
 		if (!(i % 3)) {
-			res = readDataFromSD(excitation, ((DataPtr + i - 1)),(charDataPtr+ nameCnt));
+			res = readDataFromSD(excitation, ((DataPtr + i - 1)),
+					(charDataPtr + nameCnt));
 			excitation = 1;
 			nameCnt++;
 		} else {
-			res = readDataFromSD(excitation, ((DataPtr + i - 1)),(charDataPtr+ nameCnt));
+			res = readDataFromSD(excitation, ((DataPtr + i - 1)),
+					(charDataPtr + nameCnt));
 			excitation++;
 		}
 		if (res != ERR_OK) {
@@ -212,23 +217,18 @@ static uint8_t loadData(void) {
 		}
 	}
 
-
-
-
 	return res;
 }
 
-
-
-static uint8_t getPosition(char* name){
+static uint8_t getPosition(char* name) {
 
 	char** nameList = getNameList();
 
 	uint8_t cnt;
 	uint8_t quantity = getQuantity();
 
-	for(cnt = 1; cnt <=quantity; cnt++){
-		if(!(strcmp(*(nameList+cnt -1),name))){
+	for (cnt = 1; cnt <= quantity; cnt++) {
+		if (!(strcmp(*(nameList + cnt - 1), name))) {
 			return cnt;
 		}
 	}
@@ -406,7 +406,7 @@ static void PlayerTask(void *pvParameters) {
 						else if ((pxPlaylistMessage->cmd) == play) { /*the play CMD after an pause occured*/
 							(pxDataMessage)->cmd = play;
 							if (AddMessageToDataQueue(queue_handler_data,
-									pxDataMessage )!= QUEUE_OK) {
+									pxDataMessage) != QUEUE_OK) {
 								/*Queue is full*/
 							}
 						} else if ((pxPlaylistMessage->cmd) == skipF) {
@@ -463,10 +463,11 @@ static void PlayerTask(void *pvParameters) {
 										pxDataMessage->name = getName();
 									}
 
-							//		res = readDataFromSD(excitation,
-							//				((DataPtr + 1)));
+									//		res = readDataFromSD(excitation,
+									//				((DataPtr + 1)));
 									pxDataMessage->excitation = excitation;
-									pxDataMessage->position = getPosition(pxDataMessage->name);
+									pxDataMessage->position = getPosition(
+											pxDataMessage->name);
 
 									if (wasSkippedForward || playAgainFlag) {
 										(pxDataMessage)->cmd = play; // überschreibt das skipF Kommando und stellt so sicher dass die nächste Excitation starten kann

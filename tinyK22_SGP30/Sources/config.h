@@ -30,10 +30,13 @@ void setPowerSupplyCurrent(uint32_t val);
 uint8_t getCurrentPerPixel(void);
 uint32_t getPowerSupplyCurrent(void);
 uint32_t getLCDTurnOffTime(void);
+uint32_t getScreensaverTime(void);
 int getQuantity(void);
 void initConfigData(void);
 bool getSensorEnabled(void);
 void setSensorEnabled(bool enabled);
+
+uint8_t getMaxNoOfPollen(void);
 
 uint32_t getSequenzColor(uint8_t sequenz, uint8_t pos);
 

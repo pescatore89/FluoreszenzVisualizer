@@ -33,6 +33,7 @@
 #include "readSD.h"
 #include <math.h>
 
+#include "../Application.h"
 #endif
 
 #define DELAY_MS 1
@@ -49,6 +50,8 @@ static bool NEOA_isAutoLightLevel = TRUE;
 static bool NEOA_useGammaCorrection = TRUE;
 
 static uint8_t isIdleState;
+
+static uint8_t statePaused = FALSE;
 
 static uint8_t WL_pixels[nDataPoints];
 
@@ -70,6 +73,7 @@ typedef enum {
 	STOPPED,
 	DISPLAY_IMAGE,
 	SCREENSAVER,
+	SCREENSAVER_MODE_PLAYING,
 	SKIP_FORWARD,
 	SKIP_BACKWARD
 
@@ -655,6 +659,32 @@ static seq3 calculateDecrementValues(DATA_t * characteristicValues,
 	}
 #endif
 	return result;
+}
+
+static uint8_t isPaused(void) {
+
+	uint8_t temp = ERR_BUSY;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	temp = statePaused;
+	CS1_ExitCritical()
+	;
+
+	return temp;
+}
+
+static void setIsPaused(uint8_t state) {
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	statePaused = state;
+	CS1_ExitCritical()
+	;
+
 }
 
 static void updateLetterColor(uint8_t nPixels1, uint8_t nPixels2,
@@ -2080,20 +2110,27 @@ static RETURN_STATUS playSeq1(DATA_t * characteristicValues, char* colorData,
 				}
 
 				else if (pxRxDataMessage->cmd == pause) {
+					setIsPaused(TRUE);
 					for (;;) {
 						if (TakeMessageFromDataQueue(queue_handler_data,
 								pxRxDataMessage) != QUEUE_EMPTY) {
 							if (pxRxDataMessage->cmd == play) {
+								setIsPaused(FALSE);
 								break;
 							} else if (pxRxDataMessage->cmd == stop) {
+								setIsPaused(FALSE);
 								return stopAborted;
 							} else if (pxRxDataMessage->cmd == playImage) {
+								setIsPaused(FALSE);
 								return playImageAborted;
 							} else if (pxRxDataMessage->cmd == skipF) {
+								setIsPaused(FALSE);
 								return skipNextAborted; /*Session was aborted*/
 							} else if (pxRxDataMessage->cmd == skipR) {
+								setIsPaused(FALSE);
 								return skipPrevAborted; /*Session was aborted*/
 							} else if (pxRxDataMessage->cmd == playAgain) {
+								setIsPaused(FALSE);
 								return playAgainAborted; /*Session was aborted*/
 							}
 						} else {
@@ -2298,23 +2335,29 @@ static RETURN_STATUS playSeq3(DATA_t * characteristicValues, uint8_t excitation)
 			}
 
 			else if (pxRxDataMessage->cmd == pause) {
+				setIsPaused(TRUE);
 				for (;;) {
 					if (TakeMessageFromDataQueue(queue_handler_data,
 							pxRxDataMessage) != QUEUE_EMPTY) {
 						if (pxRxDataMessage->cmd == play) {
+							setIsPaused(FALSE);
 							break;
 						} else if (pxRxDataMessage->cmd == stop) {
-
+							setIsPaused(FALSE);
 							return stopAborted; /*Session was aborted*/
 						}
 
 						else if (pxRxDataMessage->cmd == playImage) {
+							setIsPaused(FALSE);
 							return playImageAborted;
 						} else if (pxRxDataMessage->cmd == skipF) {
+							setIsPaused(FALSE);
 							return skipNextAborted;
 						} else if (pxRxDataMessage->cmd == skipR) {
+							setIsPaused(FALSE);
 							return skipPrevAborted;
 						} else if (pxRxDataMessage->cmd == playAgain) {
+							setIsPaused(FALSE);
 							return playAgainAborted;
 						}
 
@@ -2702,18 +2745,10 @@ uint8_t isStateIdle(void) {
 
 }
 
-
-
-
-static uint8_t* getDataStoredIndex(DataMessage_t* px){
+static uint8_t* getDataStoredIndex(DataMessage_t* px) {
 
 	//uint8_t nameindex = getPollenIndex(px->name);
 	static uint8_t result[2];
-
-
-
-
-
 
 	result[0] = 1;
 	result[1] = 1;
@@ -2721,9 +2756,6 @@ static uint8_t* getDataStoredIndex(DataMessage_t* px){
 	return result;
 
 }
-
-
-
 
 #define DELAY_PER_TICK_SEQ_2		10	/*10ms*/
 static void NeoTask(void* pvParameters) {
@@ -2838,7 +2870,9 @@ static void NeoTask(void* pvParameters) {
 			}
 
 			// die folgenden drei else if dienen nur dazu abzufangen, falls während dem IDLE State versehentlich ein skip next, skip reverse oder playagain gedrückt wurde
-			else if ((pxRxDataMessage->cmd == skipR)||(pxRxDataMessage->cmd == playAgain)||(pxRxDataMessage->cmd == skipF)) {
+			else if ((pxRxDataMessage->cmd == skipR)
+					|| (pxRxDataMessage->cmd == playAgain)
+					|| (pxRxDataMessage->cmd == skipF)) {
 
 				state = IDLE_STATE;		// and give back the mutex
 				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
@@ -2849,7 +2883,6 @@ static void NeoTask(void* pvParameters) {
 				}
 
 			}
-
 
 			break;
 
@@ -2880,17 +2913,16 @@ static void NeoTask(void* pvParameters) {
 
 			ex = pxRxDataMessage->excitation;
 
+			//	ret_value = playSeq1(pxRxDataMessage->char_data,
+			//			pxRxDataMessage->color_data,
+			//			pxRxDataMessage->image->biBitCount, excitation);
 
-		//	ret_value = playSeq1(pxRxDataMessage->char_data,
-		//			pxRxDataMessage->color_data,
-		//			pxRxDataMessage->image->biBitCount, excitation);
+			indexImage = ((pxRxDataMessage->position) - 1) * 3 + ex - 1;
+			indexChar = (pxRxDataMessage->position) - 1;
 
-			indexImage = ((pxRxDataMessage->position)-1) * 3 + ex -1;
-			indexChar =  (pxRxDataMessage->position)-1;
-
-			ret_value = playSeq1((charDataPtr+(indexChar)),
-					(DataPtr+(indexImage))->color_data,
-					(DataPtr+(indexImage))->image->biBitCount, ex);
+			ret_value = playSeq1((charDataPtr + (indexChar)),
+					(DataPtr + (indexImage))->color_data,
+					(DataPtr + (indexImage))->image->biBitCount, ex);
 
 			if (ret_value == notAborted) {
 				NEO_ClearAllPixel();
@@ -2926,7 +2958,12 @@ static void NeoTask(void* pvParameters) {
 
 			//playSeq2(pxRxDataMessage->char_data, excitation);
 
-			playSeq2(charDataPtr+(indexChar),ex);
+			if (isScreensaverTimeExpired()) {
+				state = PLAY_SEQ3;
+				break;
+			}
+
+			playSeq2(charDataPtr + (indexChar), ex);
 			delayCNT = rint((float) getTiming(1) / (DELAY_PER_TICK_SEQ_2));
 
 			state = PLAY_SEQ3;
@@ -2955,18 +2992,19 @@ static void NeoTask(void* pvParameters) {
 					}
 
 					else if (pxRxDataMessage->cmd == pause) {
+						setIsPaused(TRUE);
 						for (;;) {
 							if (TakeMessageFromDataQueue(queue_handler_data,
 									pxRxDataMessage) != QUEUE_EMPTY) {
 								if (pxRxDataMessage->cmd == play) {
+									setIsPaused(FALSE);
 									break;
 								} else if (pxRxDataMessage->cmd == stop) {
 									state = STOPPED;
 									wasPaused = TRUE;
+									setIsPaused(FALSE);
 									break;
-								}
-
-								else if (pxRxDataMessage->cmd == playImage) {
+								} else if (pxRxDataMessage->cmd == playImage) {
 									state = DISPLAY_IMAGE;
 									wasPaused = TRUE;
 								} else if (pxRxDataMessage->cmd == skipF) {
@@ -2988,6 +3026,7 @@ static void NeoTask(void* pvParameters) {
 					}
 				}
 				if (wasPaused) {
+					setIsPaused(FALSE);
 					break;
 				}
 				vTaskDelay(pdMS_TO_TICKS(DELAY_PER_TICK_SEQ_2));
@@ -2997,10 +3036,25 @@ static void NeoTask(void* pvParameters) {
 
 		case PLAY_SEQ3:
 
+			if (isScreensaverTimeExpired()) {
+				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
+					state = ERROR_STATE;
+				} else {
+					pxMessage->cmd = stop;
+					if (AddMessageToUpdateQueue(queue_handler_update, pxMessage)
+							!= QUEUE_OK) {
+						/*Queue is somehow full*/
+					}
+					//vTaskDelay(pdMS_TO_TICKS(getTiming(3)));
+					state = IDLE_STATE;
+					break;
+				}
+			}
+
 			vTaskDelay(pdMS_TO_TICKS(getTiming(2)));
 
 			//ret_value = playSeq3(pxRxDataMessage->char_data, excitation);
-			ret_value = playSeq3(charDataPtr+(indexChar),ex);
+			ret_value = playSeq3(charDataPtr + (indexChar), ex);
 			if (ret_value == notAborted) {
 				if (FRTOS1_xSemaphoreGive(mutex) != pdTRUE) {
 					state = ERROR_STATE;
@@ -3089,7 +3143,13 @@ static void NeoTask(void* pvParameters) {
 			setStateIdle(TRUE);
 			playScreensaver();
 			state = IDLE_STATE;
+			break;
 
+		case SCREENSAVER_MODE_PLAYING:
+
+			// if : returend from Screensaver Mode --> reload Data and continue
+			// state = PLAY_SEQ3 or PLAY_SEQ2 or PLAY_SEQ1
+			break;
 		}
 
 #if 0

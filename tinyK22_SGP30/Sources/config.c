@@ -34,6 +34,7 @@ static uint8_t letter_T;
 static uint32_t trailSpeed;
 static uint32_t currentPowerSupply;
 static uint32_t LCD_turn_off_time;
+static uint32_t Screensaver_time;
 static uint8_t maxCurrentPerLEDPixel;
 static uint32_t seq2_color[10]; /*Color for the sequence 2*/
 static uint32_t seq3_color[10]; /*Color for the sequence 3*/
@@ -113,6 +114,17 @@ void setLCDturnOffTime(uint32_t val){
 	CS1_EnterCritical()
 	;
 	LCD_turn_off_time = val;
+	CS1_ExitCritical()
+	;
+}
+
+
+void setScreensaverTime(uint32_t val){
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	Screensaver_time = val;
 	CS1_ExitCritical()
 	;
 }
@@ -627,6 +639,21 @@ uint32_t getLCDTurnOffTime(void) {
 }
 
 
+uint32_t getScreensaverTime(void){
+	uint32_t res;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	res = Screensaver_time;
+	CS1_ExitCritical()
+	;
+
+	return res;
+
+}
+
+
 uint8_t getCurrentPerPixel(void) {
 	uint8_t res;
 	CS1_CriticalVariable()
@@ -711,6 +738,10 @@ uint8_t Config_Setup(void) {
 			(char* ) buf, sizeof(buf), INI_FILE_NAME);
 	setLCDturnOffTime(getRealValue(buf));
 
+
+	val = MINI1_ini_gets(INI_SECTION_NAME_LCD, "Screensaver_time", "1D4C0",		// default wert bei 2 min
+			(char* ) buf, sizeof(buf), INI_FILE_NAME);
+	setScreensaverTime(getRealValue(buf));
 
 
 

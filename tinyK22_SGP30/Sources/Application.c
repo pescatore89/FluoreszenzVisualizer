@@ -53,6 +53,8 @@ static int counter_LCD;
 static int counter_ScreensaverPlaylist;
 static bool display_state = TRUE;
 static bool LCD_Init = TRUE;
+
+static uint8_t ScreensaverExpiredState = FALSE;
 xQueueHandle queue_handler; /*QueueHandler declared in Message.h*/
 xQueueHandle queue_handler_Navigation; /*QueueHandler declared in Message.h*/
 
@@ -87,6 +89,35 @@ uint8_t getDisplayState(void) {
 	CS1_ExitCritical()
 	;
 	return temp;
+}
+
+
+
+uint8_t isScreensaverTimeExpired (void){
+
+	uint8_t temp = ERR_BUSY;
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	temp = ScreensaverExpiredState;
+	CS1_ExitCritical()
+	;
+
+	return temp;
+}
+
+
+
+void setScreensaverTimeExpired (uint8_t state){
+
+	CS1_CriticalVariable()
+	;
+	CS1_EnterCritical()
+	;
+	ScreensaverExpiredState = state;
+	CS1_ExitCritical()
+	;
 }
 
 static void setDisplayState(uint8_t state) {
@@ -173,8 +204,8 @@ static void setTimerScreensaverPlaylist(void) {
 	;
 	CS1_EnterCritical()
 	;
-	//counter_ScreensaverPlaylist = getScreensaverTime() / LCD_PERIODIC_TIMER_MS;
-	counter_ScreensaverPlaylist = 12000 / LCD_PERIODIC_TIMER_MS;
+	counter_ScreensaverPlaylist = getScreensaverTime() / LCD_PERIODIC_TIMER_MS;
+	//counter_ScreensaverPlaylist = 12000 / LCD_PERIODIC_TIMER_MS;
 	CS1_ExitCritical()
 	;
 
@@ -204,6 +235,7 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 				//Notify GUI Task to turn off Display
 				FRTOS1_xTaskNotifyGive(xTaskToNotify);
 				setDisplayState(FALSE);
+				setScreensaverTimeExpired(TRUE);
 			}
 		}
 
@@ -237,7 +269,7 @@ static void vTimerCallbackExpired_LCD(xTimerHandle pxTimer) {
 void resetScreensaver_Counter(void) {
 	LCD1_DisplayOnOff(TRUE);	// switch on Display
 	setTimerScreensaverPlaylist();
-
+	setScreensaverTimeExpired(FALSE);
 	setDisplayState(TRUE);
 
 }

@@ -15,4 +15,7 @@ void resetLCD_Counter(void);
 void resetScreensaver_Counter(void);
 uint8_t getDisplayState(void);
 
+uint8_t isScreensaverTimeExpired(void);
+void setScreensaverTimeExpired(uint8_t);
+
 #endif /* SOURCES_APPLICATION_H_ */
